@@ -22,19 +22,20 @@
   register: goshimmer_image_stat
   failed_when: "goshimmer_image_stat.rc > 1"
 
-- name: docker build goshimmer image
-  block:
-
-    - name: build goshimmer image
-      docker_image:
-        build:
-          path: "{{ goshimmer_git_dest }}"
-        name: "{{ goshimmer_image }}"
-        tag: "{{ goshimmer_tag }}"
-        source: build
-      notify:
-        - restart goshimmer
-
+- name: build goshimmer image
+  docker_image:
+    build:
+      path: "{{ goshimmer_git_dest }}"
+    name: "{{ goshimmer_image }}"
+    tag: "{{ goshimmer_tag }}"
+    source: build
+  notify:
+    - restart goshimmer
+  tags: goshimmer_image_build
+  register: build_image_status
+  until: build_image_status is succeeded
+  retries: 3
+  delay: 2
   when: >
         goshimmer_image_stat.rc == 1 and
         (images_from_master is not defined or
