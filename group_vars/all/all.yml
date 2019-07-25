@@ -2,7 +2,7 @@
 ignore_assert_errors: false
 
 # Minimum required memory on node
-min_required_memtotal_mb: 2048
+min_required_memtotal_mb: 1536
 
 # Supported distributions
 supported_distributions:
