@@ -2,4 +2,4 @@
   tags:
     - nginx_role
   when:
-    - install_nginx|defalt(False)|bool
+    - install_nginx|default(False)|bool
