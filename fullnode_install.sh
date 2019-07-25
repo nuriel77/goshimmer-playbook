@@ -315,19 +315,20 @@ EOF
     fi
 
     # Calling set_primary_ip
-    set_primary_ip
+    #set_primary_ip
 
-     # Get configured username if missing.
-     # This could happen on script re-run
-     # due to reboot, therefore the variable is empty
-     if [ -z "$ADMIN_USER" ]; then
-         ADMIN_USER=$(grep ^admin_user /opt/goshimmer-playbook/group_vars/all/z-installer-override.yml | awk {'print $2'})
-     fi
+    # Get configured username if missing.
+    # This could happen on script re-run
+    # due to reboot, therefore the variable is empty
+    #if [ -z "$ADMIN_USER" ]; then
+    #    ADMIN_USER=$(grep ^admin_user /opt/goshimmer-playbook/group_vars/all/z-installer-override.yml | awk {'print $2'})
+    #fi
 
     OUTPUT=$(cat <<EOF
+
 * A log of this installation has been saved to: $LOGFILE
-* Log in with username ${ADMIN_USER} and the password you have entered during the installation.
 Thank you for installing a goshimmer node with the goshimmer-playbook!
+
 EOF
 )
 
