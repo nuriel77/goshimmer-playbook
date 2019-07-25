@@ -37,6 +37,7 @@
       - wget
       - lsof
       - curl
+      - screen
       - pv
       - rsync
       - uuid-runtime
