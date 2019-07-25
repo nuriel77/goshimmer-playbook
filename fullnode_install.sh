@@ -230,62 +230,6 @@ function set_admin_username() {
 
 }
 
-# Installation selection menu
-function set_selections()
-{
-    local RC RESULTS RESULTS_ARRAY CHOICE SKIP_TAGS
-    SKIP_TAGS="--skip-tags=_"
-
-    RESULTS=$(whiptail --title "Installation Options" --checklist \
-        --cancel-button "Exit" \
-        "\nPlease choose additional installation options.\n(Its perfectly okay to leave this as is).\n\
-Select/unselect options using space and click Enter to proceed.\n" 24 78 4 \
-        "ENABLE_NELSON"       "Enable Nelson auto-peering" OFF \
-        "ENABLE_HAPROXY"      "Enable HAProxy"             OFF \
-        "DISABLE_MONITORING"  "Disable node monitoring"    OFF \
-        "DISABLE_ZMQ_METRICS" "Disable ZMQ metrics"        OFF \
-        3>&1 1>&2 2>&3)
-
-    RC=$?
-    if [[ $RC -ne 0 ]]; then
-        echo "Installation cancelled"
-        exit 1
-    fi
-
-    read -a RESULTS_ARRAY <<< "$RESULTS"
-    for CHOICE in "${RESULTS_ARRAY[@]}"
-    do
-        case $CHOICE in
-            '"DISABLE_MONITORING"')
-                SKIP_TAGS+=",monitoring_role"
-                echo "disable_monitoring: true" >>/opt/iri-playbook/group_vars/all/z-installer-override.yml
-                ;;
-            '"DISABLE_ZMQ_METRICS"')
-                echo "iri_zmq_enabled: false" >>/opt/iri-playbook/group_vars/all/z-installer-override.yml
-                ;;
-            '"ENABLE_NELSON"')
-                echo "nelson_enabled: true" >>/opt/iri-playbook/group_vars/all/z-installer-override.yml
-                ;;
-            '"ENABLE_HAPROXY"')
-                echo "lb_bind_addresses: ['0.0.0.0']" >>/opt/iri-playbook/group_vars/all/z-installer-override.yml
-                ;;
-            *)
-                ;;
-        esac
-    done
-
-    if [[ -n "$RESULTS" ]]; then
-        RESULTS_MSG=$(echo "$RESULTS"|sed 's/ /\n/g')
-        if ! (whiptail --title "Confirmation" \
-                 --yesno "You chose:\n\n$RESULTS_MSG\n\nPlease confirm you want to proceed with the installation?" \
-                 --defaultno \
-                 16 78); then
-            exit 1
-        fi
-    fi
-    INSTALL_OPTIONS+=" $SKIP_TAGS"
-}
-
 # Get primary IP from ICanHazIP, if it does not validate, fallback to local hostname
 function set_primary_ip()
 {
@@ -453,7 +397,7 @@ fi
 echo "Git cloning goshimmer-playbook repository..."
 cd /opt
 
-# Backup any existing iri-playbook directory
+# Backup any existing goshimmer-playbook directory
 if [ -d goshimmer-playbook ]; then
     echo "Backing up older goshimmer-playbook directory..."
     rm -rf goshimmer-playbook.backup
@@ -465,7 +409,7 @@ git clone $GIT_OPTIONS https://github.com/nuriel77/goshimmer-playbook.git
 cd goshimmer-playbook
 
 # Let user choose installation add-ons
-set_selections
+#set_selections
 
 # Get the administrators username
 set_admin_username
