@@ -74,7 +74,7 @@ This is possible, until goshimmer has a webgui or API:
 
 2. Run the following:
 ```sh
-docker rm goshimmer ; source /etc/default/goshimmer && docker run --rm -it --name goshimmer --net=host --user=1000 --cap-drop=ALL -v /etc/localtime:/etc/localtime:ro,Z -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z ${SHIMMER_IMAGE}:${TAG}
+docker rm -f goshimmer ; source /etc/default/goshimmer && docker run --rm -it --name goshimmer --net=host --user=1000 --cap-drop=ALL -v /etc/localtime:/etc/localtime:ro,Z -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z ${SHIMMER_IMAGE}:${TAG}
 ```
 
 *Okay* a few notes about this:
