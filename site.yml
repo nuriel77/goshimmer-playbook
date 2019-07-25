@@ -28,4 +28,4 @@
   roles:
     - docker
     - nginx
-    - cleanup
+    - goshimmer

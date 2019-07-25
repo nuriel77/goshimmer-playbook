@@ -1,5 +1,0 @@
-- name: destroy iri network
-  docker_network:
-    name: "{{ iri_net_name }}"
-    state: absent
-    force: yes

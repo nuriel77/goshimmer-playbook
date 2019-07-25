@@ -1,0 +1,25 @@
+[Unit]
+Description=Go Shimmer
+After=docker.service
+Requires=docker.service
+
+[Service]
+TimeoutStartSec=0
+Restart=always
+EnvironmentFile=-/etc/sysconfig/goshimmer
+ExecStartPre=-/usr/bin/docker rm %p
+ExecStart=/usr/bin/docker run \
+  --name %p \
+  --net=host \
+  --user={{ goshimmer_uid.stdout }} \
+  --cap-drop=ALL \
+  -v /etc/localtime:/etc/localtime:ro,Z \
+  -v {{ goshimmber_db_path }}:/app/mainnetdb:rw,Z \
+  $DOCKER_OPTS \
+  ${SHIMMER_IMAGE}:${TAG} \
+  $OPTIONS
+ExecStop=/usr/bin/docker stop %p
+ExecReload=/usr/bin/docker restart %p
+
+[Install]
+WantedBy=multi-user.target

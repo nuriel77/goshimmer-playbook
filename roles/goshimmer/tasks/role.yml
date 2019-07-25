@@ -16,10 +16,6 @@
   tags:
     - py_docker
 
-- import_tasks: logging.yml
-  tags:
-    - logging_config
-
 - name: set ip variable if not set
   set_fact:
     ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
@@ -42,13 +38,3 @@
 - import_tasks: goshimmer.yml
   tags:
     - goshimmer_config
-
-- import_tasks: ssl.yml
-  tags:
-    - goshimmer_ssl
-
-- import_tasks: uninstall.yml
-  tags:
-    - uninstall
-    - uninstall_goshimmer
-  when: uninstall_playbook is defined and uninstall_playbook|bool == True
