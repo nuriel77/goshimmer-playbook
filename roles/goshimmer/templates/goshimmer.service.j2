@@ -6,7 +6,7 @@ Requires=docker.service
 [Service]
 TimeoutStartSec=0
 Restart=always
-EnvironmentFile=-/etc/sysconfig/goshimmer
+EnvironmentFile=-{{ config_dir }}/goshimmer
 ExecStartPre=-/usr/bin/docker rm %p
 ExecStart=/usr/bin/docker run \
   --name %p \
