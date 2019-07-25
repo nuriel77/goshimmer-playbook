@@ -20,6 +20,11 @@
     state: present
     reload: yes
 
+- name: clone goshimmer repository
+  git:
+    repo: '{{ goshimmer_git_url }}'
+    dest: '{{ goshimmer_git_dest }}'
+
 # Clone goshimmer
 - name: get latest goshimmer git commit
   shell: "cd {{ goshimmer_git_dest }} && git rev-parse --short HEAD"
@@ -79,10 +84,5 @@
     - restart goshimmer
 
 # Image
-- name: clone goshimmer repository
-  git:
-    repo: '{{ goshimmer_git_url }}'
-    dest: '{{ goshimmer_git_dest }}'
-
 - name: build goshimmer image task
   import_tasks: image-goshimmer.yml 
