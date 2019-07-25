@@ -65,3 +65,21 @@ journalctl -u goshimmer -e -f
 ## Goshimmer DB
 The database is located in `/var/lib/goshimmer/mainnetdb`
 
+
+## I just want to run it so that I see the statusscreen!
+
+This is possible, until goshimmer has a webgui or API:
+
+1. Stop any running goshimmer: `systemctl stop goshimmer`
+
+2. Run the following:
+```sh
+docker rm goshimmer && source /etc/default/goshimmer && docker run --rm -it --name goshimmer --net=host --user=1000 --cap-drop=ALL -v /etc/localtime:/etc/localtime:ro,Z -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z ${SHIMMER_IMAGE}:${TAG}
+```
+
+Okay, a few notes about this:
+
+* 1) `/etc/default/goshimmer` is for ubuntu/debian, use `/etc/sysconfig/goshimmer` for CentOS.
+* 2) The `--user=1000` is the uid if user shimmer, you can get it via `id shimmer`.
+* 3) You might need to add the entry nodes yourself (if differ from default). This can be found in the file mentioned in point 1.
+
