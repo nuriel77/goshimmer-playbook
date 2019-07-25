@@ -205,7 +205,7 @@ function get_admin_password() {
     # Ensure we escape single quotes (using single quotes) because we need to
     # encapsulate the password with single quotes for the Ansible variable file
     PASSWORD_A=$(echo "${PASSWORD_A}" | sed "s/'/''/g")
-    echo "admin_password: '${PASSWORD_A}'" >> group_vars/all/z-installer-override.yml
+    echo "admin_user_password: '${PASSWORD_A}'" >> group_vars/all/z-installer-override.yml
     chmod 400 group_vars/all/z-installer-override.yml
 }
 

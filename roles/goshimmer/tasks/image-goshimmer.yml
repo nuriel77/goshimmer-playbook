@@ -1,0 +1,144 @@
+- name: remove goshimmer image
+  block:
+
+    - name: "stopping goshimmer service, this might take a moment..."
+      systemd:
+        name: goshimmer.service
+        state: stopped
+      ignore_errors: yes
+
+    - name: delete goshimmer image
+      docker_image:
+        name: "{{ goshimmer_image }}"
+        tag: "{{ goshimmer_tag }}"
+        state: absent
+        force_absent: yes
+
+  when:
+    - remove_goshimmer_image is defined
+    - remove_goshimmer_image|bool
+
+- name: check goshimmer image exists
+  shell: "/usr/bin/docker images {{ goshimmer_image }}:{{ goshimmer_tag }} | grep -q ^goshimmer"
+  changed_when: False
+  register: goshimmer_image_stat
+  failed_when: "goshimmer_image_stat.rc > 1"
+
+- name: docker build goshimmer image (on master)
+  block:
+
+    - name: create temporary build directory
+      tempfile:
+        state: directory
+      register: tempdir
+
+    - name: copy Dockerfile
+      template:
+        src: templates/Dockerfile.j2
+        dest: "{{ tempdir.path }}/Dockerfile"
+
+    - name: build goshimmer image
+      docker_image:
+        path: "{{ tempdir.path }}"
+        name: "{{ goshimmer_image }}"
+        tag: "{{ goshimmer_tag }}"
+        source: build
+      notify:
+        - restart goshimmer
+
+    - name: remove temporary build dir
+      file:
+        state: absent
+        path: "{{ tempdir.path }}"
+
+  run_once: yes
+  delegate_to: "{{ groups['fullnode']|first }}"
+  when:
+    - goshimmer_image_stat.rc == 1
+    - images_from_master is defined
+    - images_from_master|bool == True
+
+- name: docker build goshimmer image
+  block:
+
+    - name: create temporary build directory
+      tempfile:
+        state: directory
+      register: tempdir
+
+    - name: copy Dockerfile
+      template:
+        src: templates/Dockerfile.j2
+        dest: "{{ tempdir.path }}/Dockerfile"
+
+    - name: build goshimmer image
+      docker_image:
+        path: "{{ tempdir.path }}"
+        name: "{{ goshimmer_image }}"
+        tag: "{{ goshimmer_tag }}"
+        source: build
+      notify:
+        - restart goshimmer
+
+    - name: remove temporary build dir
+      file:
+        state: absent
+        path: "{{ tempdir.path }}"
+
+  when: >
+        goshimmer_image_stat.rc == 1 and
+        (images_from_master is not defined or
+         images_from_master|bool == False)
+
+- name: set image name and tag
+  set_fact:
+    this_tag: "{{ goshimmer_tag }}"
+    this_image: "{{ goshimmer_image }}"
+
+- name: set temporary image file name
+  set_fact:
+    this_file: "/tmp/image-goshimmer-{{ this_tag }}.tar"
+
+- name: image export and load block
+  block:
+
+    - name: check image exists
+      shell: "/usr/bin/docker images {{ this_image }}:{{ this_tag }} | grep -q '^{{ this_image }}'"
+      changed_when: False
+      register: image_stat
+      failed_when: "image_stat.rc > 1"
+
+    - name: export the image to a file
+      delegate_to: "{{ groups['fullnode']|first }}"
+      docker_image:
+        name: "{{ this_image }}"
+        tag: "{{ this_tag }}"
+        archive_path: "{{ this_file }}"
+      when: "image_stat.rc == 1"
+
+    - name: copy the docker image from the first node
+      synchronize:
+        src: "{{ this_file }}"
+        dest: "{{ this_file }}"
+      when: image_stat.rc == 1
+      register: image_copied
+
+    - name: load the image into docker
+      docker_image:
+        name: "{{ this_image }}"
+        tag: "{{ this_tag }}"
+        load_path: "{{ this_file }}"
+        source: load
+      when:
+        - image_copied.changed
+      notify:
+        - restart goshimmer
+
+  when:
+    - groups['fullnode'] | length > 1
+    - inventory_hostname != groups['fullnode']|first
+
+- name: remove image from temporary location
+  file:
+    path: "{{ this_file }}"
+    state: absent
