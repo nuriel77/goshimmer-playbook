@@ -1,0 +1,2 @@
+[fullnode]
+localhost ansible_connection=local

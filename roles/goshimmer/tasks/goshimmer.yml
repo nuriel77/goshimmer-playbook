@@ -1,0 +1,88 @@
+- name: set variables centos
+  set_fact:
+    systemd_dir: /usr/lib/systemd/system
+    config_dir: /etc/sysconfig
+  when: ansible_distribution == 'CentOS'
+  tags: always
+
+- name: set variables ubuntu
+  set_fact:
+    systemd_dir: /etc/systemd/system
+    config_dir: /etc/default
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  tags: always
+
+- name: allow IPv4 forwarding in kernel
+  sysctl:
+    name: net.ipv4.ip_forward
+    value: "1"
+    sysctl_set: yes
+    state: present
+    reload: yes
+
+# Clone goshimmer
+- name: get latest goshimmer git commit
+  shell: "cd {{ goshimmer_git_dest }} && git rev-parse --short HEAD"
+  register: shimmer_commit_hash
+  changed_when: false
+
+- name: set goshimmer image tag
+  set_fact:
+    goshimmer_tag: "{{ shimmer_commit_hash.stdout }}"
+
+# User
+- name: add user to run goshimmer as
+  user:
+    name: "{{ goshimmer_user }}"
+    shell: /sbin/nologin
+    createhome: no
+    home: "{{ goshimmer_home_path }}"
+  tags:
+    - goshimmer_user
+
+- name: get goshimmer user uid
+  shell: "echo -n $(id -u {{ goshimmer_user }})"
+  changed_when: false
+  register: goshimmer_uid
+  tags:
+    - goshimmer_create_container
+    - get_goshimmer_uid
+
+- name: goshimmer paths
+  file:
+    state: directory
+    mode: 0700
+    owner: "{{ goshimmer_user }}"
+    group: "{{ goshimmer_group }}"
+    path: "{{ item }}"
+  with_items:
+    - "{{ goshimmer_home_path }}"
+    - "{{ goshimmber_db_path }}"
+
+# Goshimmer system config
+- name: copy goshimmer environment config file
+  template:
+    src: templates/goshimmer.sysconfig.j2
+    dest: "{{ config_dir }}/goshimmer"
+    force: "{{ overwrite | default('no') }}"
+    backup: yes
+  notify:
+    - restart goshimmer
+
+- name: copy goshimmer systemd file
+  template:
+    src: templates/goshimmer.service.j2
+    dest: "{{ systemd_dir }}/goshimmer.service"
+  tags:
+    - goshimmer_service_file
+  notify:
+    - restart goshimmer
+
+# Image
+- name: clone goshimmer repository
+  git:
+    repo: '{{ goshimmer_git_url }}'
+    dest: '{{ goshimmer_git_dest }}'
+
+- name: build goshimmer image task
+  import_tasks: image-goshimmer.yml 

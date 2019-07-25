@@ -1,0 +1,45 @@
+- name: remove goshimmer image
+  block:
+
+    - name: "stopping goshimmer service, this might take a moment..."
+      systemd:
+        name: goshimmer.service
+        state: stopped
+      ignore_errors: yes
+
+    - name: delete goshimmer image
+      docker_image:
+        name: "{{ goshimmer_image }}"
+        tag: "{{ goshimmer_tag }}"
+        state: absent
+        force_absent: yes
+
+  when: remove_goshimmer_image|default(False)|bool
+
+- name: check goshimmer image exists
+  shell: "/usr/bin/docker images {{ goshimmer_image }}:{{ goshimmer_tag }} | grep -q ^goshimmer"
+  changed_when: False
+  register: goshimmer_image_stat
+  failed_when: "goshimmer_image_stat.rc > 1"
+
+- name: docker build goshimmer image
+  block:
+
+    - name: build goshimmer image
+      docker_image:
+        build:
+          path: "{{ goshimmer_git_dest }}"
+        name: "{{ goshimmer_image }}"
+        tag: "{{ goshimmer_tag }}"
+        source: build
+      notify:
+        - restart goshimmer
+
+  when: >
+        goshimmer_image_stat.rc == 1 and
+        (images_from_master is not defined or
+         images_from_master|bool == False)
+
+- name: clean dangling images msg
+  debug:
+    msg: 'To clean un-used docker buidl images use: docker rmi -f $(docker images -f "dangling=true" -q)'

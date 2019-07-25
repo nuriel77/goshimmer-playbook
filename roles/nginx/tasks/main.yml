@@ -1,0 +1,5 @@
+- import_tasks: role.yml
+  tags:
+    - nginx_role
+  when:
+    - install_nginx|defalt(False)|bool

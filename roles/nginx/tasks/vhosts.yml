@@ -1,0 +1,8 @@
+# TODO: Add vhost for 8080
+#- name: copy iotapm nginx config
+#  template:
+#    src: ../shared-files/iotapm.conf.j2
+#    dest: /etc/nginx/conf.d/iotapm.conf
+#    validate: "/usr/local/bin/validate_nginx_config.sh -t %s -d iotapm.conf"
+#  notify:
+#    - reload nginx

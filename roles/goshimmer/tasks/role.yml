@@ -1,0 +1,40 @@
+- import_tasks: deps_apt.yml
+  tags:
+    - goshimmer_deps_apt
+  when:
+    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - install_system_deps|default(False)|bool
+
+- import_tasks: deps_yum.yml
+  tags:
+    - goshimmer_deps_yum
+  when:
+    - ansible_distribution == 'CentOS'
+    - install_system_deps|default(False)|bool
+
+- import_tasks: pip.yml
+  tags:
+    - py_docker
+
+- name: set ip variable if not set
+  set_fact:
+    ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+  when: ip is not defined
+
+- import_tasks: firewalld.yml
+  tags:
+    - goshimmer_firewalld
+  when:
+    - ansible_distribution == 'CentOS'
+    - configure_firewall|default(False)|bool
+
+- import_tasks: ufw.yml
+  tags:
+    - goshimmer_ufw
+  when:
+    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - configure_firewall|default(False)|bool
+
+- import_tasks: goshimmer.yml
+  tags:
+    - goshimmer_config

@@ -1,0 +1,13 @@
+goshimmer_git_url: https://github.com/iotaledger/goshimmer.git
+goshimmer_git_dest: /opt/goshimmer
+goshimmer_ports:
+  - {port: 14666, proto: tcp}
+  - {port: 14626, proto: udp}
+  - {port: 14626, proto: tcp}
+
+goshimmer_image: iotaledger/goshimmer
+goshimmer_tag: latest
+goshimmer_user: shimmer
+goshimmer_group: shimmer
+goshimmer_home_path: /var/lib/goshimmer
+goshimmber_db_path: "{{ goshimmer_home_path }}/mainnetdb"
