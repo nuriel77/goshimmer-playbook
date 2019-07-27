@@ -66,20 +66,38 @@ journalctl -u goshimmer -e -f
 The database is located in `/var/lib/goshimmer/mainnetdb`
 
 
-## I just want to run it so that I see the statusscreen!
+## Spam Test
 
-This is possible, until goshimmer has a webgui or API:
-
-1. Stop any running goshimmer: `systemctl stop goshimmer`
-
-2. Run the following:
+No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
-docker rm -f goshimmer ; source /etc/default/goshimmer && docker run --rm -it --name goshimmer --net=host --user=1000 --cap-drop=ALL -v /etc/localtime:/etc/localtime:ro,Z -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z ${SHIMMER_IMAGE}:${TAG}
+curl http://localhost:8080/spammer?cmd=start
 ```
 
-*Okay* a few notes about this:
+or to stop:
+```sh
+curl http://localhost:8080/spammer?cmd=stop
+```
 
-* 1) `/etc/default/goshimmer` is for ubuntu/debian, use `/etc/sysconfig/goshimmer` for CentOS.
-* 2) The `--user=1000` is the uid if user shimmer, you can get it via `id shimmer`. It might be different on your system so adapt to the above command accordingly.
-* 3) You might need to add the entry nodes yourself (if differ from default). This can be found in the file mentioned in point 1.
+Although it is not recommeneded to open port 8080 on the server, should you choose to do so in order to be able to initiate spam remotely, you can run:
+```sh
+sudo ufw allow 8080
+```
+or, on CentOS:
+```sh
+firewall-cmd --allow-port=8080/tcp --permanent && firewall-cmd --reload
+```
 
+In the future this playbook might include a user/password lock (via nginx) on this port so that it is more protected. This really depends on the next steps with goshimmer, as it would be a shame to add this functionality now if things are to change completely.
+
+## I just want to run it so that I see the statusscreen!
+
+Since Saturday, July 27 a new script has been added to help run goshimmer with the status screen:
+```sh
+sudo run-screen
+```
+
+Use CTRL-c to exit.
+
+If you want to leave the server running with this screen you need to run it within what is called a `screen` session.
+
+Please refer to this article on how to use `screen` (you might need to install it): https://linuxize.com/post/how-to-use-linux-screen/

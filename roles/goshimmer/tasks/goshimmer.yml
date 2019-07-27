@@ -85,4 +85,11 @@
 
 # Image
 - name: build goshimmer image task
-  import_tasks: image-goshimmer.yml 
+  import_tasks: image-goshimmer.yml
+
+# Script
+- name: copy status screen run script
+  copy:
+    src: files/run-screen.sh
+    dest: /usr/bin/run-screen
+    mode: 0755
