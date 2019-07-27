@@ -91,7 +91,9 @@ In the future this playbook might include a user/password lock (via nginx) on th
 
 ## I just want to run it so that I see the statusscreen!
 
-Since Saturday, July 27 a new script has been added to help run goshimmer with the status screen:
+Since Saturday, July 27 a new script has been added to help run goshimmer with the status screen. If you already have the playbook installed, don't worry, you can run the initial installation command to get the script ready!
+
+To activate the screen run:
 ```sh
 sudo run-screen
 ```
