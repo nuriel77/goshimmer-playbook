@@ -101,3 +101,10 @@ Use CTRL-c to exit.
 If you want to leave the server running with this screen you need to run it within what is called a `screen` session.
 
 Please refer to this article on how to use `screen` (you might need to install it): https://linuxize.com/post/how-to-use-linux-screen/
+
+# Donations
+
+If you liked this playbook, and would like to leave a donation you can use this IOTA address:
+```
+JFYIHZQOPCRSLKIYHTWRSIR9RZELTZKHNZFHGWXAPCQIEBNJSZFIWMSBGAPDKZZGFNTAHBLGNPRRQIZHDFNPQPPWGC
+```
