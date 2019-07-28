@@ -72,8 +72,13 @@ No need to open ports, forward ports etc, no need for browser. You can run on th
 ```sh
 curl http://localhost:8080/spammer?cmd=start
 ```
+You can add the parameter "tps=<number>" to specify how many TPS to spam with, for example:
+```sh
+curl http://localhost:8080/spammer?cmd=start&tps=100
+```
 
-or to stop:
+
+To stop:
 ```sh
 curl http://localhost:8080/spammer?cmd=stop
 ```
