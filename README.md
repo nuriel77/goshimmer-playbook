@@ -70,17 +70,17 @@ The database is located in `/var/lib/goshimmer/mainnetdb`
 
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
-curl http://localhost:8080/spammer?cmd=start
+curl "http://localhost:8080/spammer?cmd=start"
 ```
 You can add the parameter "tps=<number>" to specify how many TPS to spam with, for example:
 ```sh
-curl http://localhost:8080/spammer?cmd=start&tps=100
+curl "http://localhost:8080/spammer?cmd=start&tps=100"
 ```
 
 
 To stop:
 ```sh
-curl http://localhost:8080/spammer?cmd=stop
+curl "http://localhost:8080/spammer?cmd=stop"
 ```
 
 Although it is not recommeneded to open port 8080 on the server, should you choose to do so in order to be able to initiate spam remotely, you can run:
