@@ -156,11 +156,11 @@ function init_raspbian(){
         [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
     fi
 
-    #echo "Installing Ansible and git..."
-    #local ANSIBLE_SOURCE="deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main"
-    #grep -q "$ANSIBLE_SOURCE" /etc/apt/sources.list || echo "$ANSIBLE_SOURCE" >> /etc/apt/sources.list
-    #apt-get install dirmngr --install-recommends -y
-    #apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+    echo "Installing Ansible and git..."
+    local ANSIBLE_SOURCE="deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main"
+    grep -q "$ANSIBLE_SOURCE" /etc/apt/sources.list || echo "$ANSIBLE_SOURCE" >> /etc/apt/sources.list
+    apt-get install dirmngr --install-recommends -y
+    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
     apt-get update -y
     apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail -y
 }

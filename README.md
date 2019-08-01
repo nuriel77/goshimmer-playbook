@@ -7,6 +7,7 @@ Supported operating systems:
 * CentOS 7
 * Ubuntu 16/18.04LTS
 * Debian 9.5
+* Raspbian 9.9
 
 ## Recommendations
 
