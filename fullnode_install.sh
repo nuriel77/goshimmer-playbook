@@ -144,6 +144,27 @@ function init_debian(){
     apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail -y
 }
 
+function init_raspbian(){
+    echo "Updating system packages..."
+    apt update -qqy --fix-missing
+    apt-get upgrade -y
+    apt-get clean
+    apt-get autoremove -y --purge
+
+    echo "Check reboot required..."
+    if [ -f /var/run/reboot-required ]; then
+        [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
+    fi
+
+    #echo "Installing Ansible and git..."
+    #local ANSIBLE_SOURCE="deb http://ppa.launchpad.net/ansible/ansible/ubuntu trusty main"
+    #grep -q "$ANSIBLE_SOURCE" /etc/apt/sources.list || echo "$ANSIBLE_SOURCE" >> /etc/apt/sources.list
+    #apt-get install dirmngr --install-recommends -y
+    #apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
+    apt-get update -y
+    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail -y
+}
+
 function inform_reboot() {
     cat <<EOF >/etc/motd
 ======================== GoShimmer PLAYBOOK ========================
@@ -266,13 +287,13 @@ function set_primary_ip()
 }
 
 function display_requirements_url() {
-    echo "Only Debian, Ubuntu 18.04LTS and CentOS 7 are supported."
+    echo "Only Debian, Ubuntu 18.04LTS, Raspbian and CentOS 7 are supported."
 }
 
 function check_arch() {
     # Check architecture
     ARCH=$(uname -m)
-    if [ "$ARCH" != "x86_64" ]; then
+    if [ "$ARCH" != "x86_64" ] || [ "$ARCH" != "armv7l" ]; then
         echo "ERROR: $ARCH architecture not supported"
         display_requirements_url
         exit 1
@@ -396,6 +417,14 @@ elif [[ "$OS" =~ ^Debian ]]; then
     fi
     check_arch
     init_debian
+elif [[ "$OS" =~ ^Raspbian ]]; then
+    if [[ ! "$VER" =~ ^9 ]]; then
+        echo "ERROR: $OS version $VER not supported"
+        display_requirements_url
+        exit 1
+    fi
+    check_arch
+    init_raspbian
 else
     echo "$OS not supported"
     exit 1
