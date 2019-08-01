@@ -466,7 +466,7 @@ fi
 # Clone the repository (optional branch)
 # git clone $GIT_OPTIONS https://github.com/nuriel77/goshimmer-playbook.git
 # Antonio Nardella for testing purpose
-git clone $GIT_OPTIONS https://github.com/ioiobzit/goshimmer-playbook.git
+git clone -b rpidev https://github.com/ioiobzit/goshimmer-playbook.git
 cd goshimmer-playbook
 
 # Let user choose installation add-ons
