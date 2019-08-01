@@ -293,7 +293,7 @@ function display_requirements_url() {
 function check_arch() {
     # Check architecture
     ARCH=$(uname -m)
-    if [ "$ARCH" != "x86_64" ] || [ "$ARCH" != "armv7l" ]; then
+    if [ "$ARCH" != @(x86_64|armv7l) ]; then
         echo "ERROR: $ARCH architecture not supported"
         display_requirements_url
         exit 1
