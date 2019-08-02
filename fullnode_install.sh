@@ -442,10 +442,10 @@ cd goshimmer-playbook
 #set_selections
 
 # Get the administrators username
-#set_admin_username
+set_admin_username
 
 # web access (ipm, haproxy and grafana)
-#get_admin_password
+get_admin_password
 
 echo -e "\nRunning playbook..."
 run_playbook

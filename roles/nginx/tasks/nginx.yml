@@ -82,8 +82,8 @@
 - name: configure nginx access password
   htpasswd:
     path: /etc/nginx/.htpasswd
-    name: '{{ fullnode_user }}'
-    password: '{{ fullnode_user_password }}'
+    name: '{{ admin_user }}'
+    password: '{{ admin_user_password }}'
     owner: root
     group: 101
     mode: 0640
