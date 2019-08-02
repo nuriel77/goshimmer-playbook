@@ -351,7 +351,7 @@ EOF
 
 * You should be able to connect to the dashboard on (and skip the browser's warning):
 
-https://${PRIMARY_IP}:18081
+https://${PRIMARY_IP}:18081/dashboard
 
 * Note that your IP might be different as this one has been auto-detected in best-effort.
 
