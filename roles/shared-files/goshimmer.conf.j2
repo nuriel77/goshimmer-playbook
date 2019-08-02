@@ -1,0 +1,64 @@
+# Rate limit requests
+limit_req_zone $binary_remote_addr zone=goshimmer:{{ nginx_shared_mem_rate_limit | default('2m') }} rate={{ nginx_req_per_sec | default('10') }}r/s;
+
+#
+# goshimmer spammer
+#
+upstream goshimmer_spammer {
+    server {{ goshimmer_bind_address }}:{{ goshimmer_internal_spammer_port }};
+}
+
+server {
+    limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('20') }};
+    listen {{ goshimmer_external_spammer_port }} default_server ssl http2;
+    server_name _;
+    server_tokens off;
+
+    # Redirect same port from http to https
+    # This directive is only used when using any
+    # port other than 80
+    error_page 497 https://$host:$server_port$request_uri;
+
+    # Here you would include the SSL directives
+    # or include a file containing the SSL directives
+    include /etc/nginx/conf.d/ssl.cfg;
+
+    # For password authentication use a htpasswd file
+    auth_basic "Restricted";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+        proxy_pass http://goshimmer_spammer;
+    }
+}
+
+#
+# goshimmer dashboard
+#
+upstream goshimmer_dashboard {
+    server {{ goshimmer_bind_address }}:{{ goshimmer_internal_dashboard_port }};
+}
+
+server {
+    limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('20') }};
+    listen {{ goshimmer_external_spammer_port }} default_server ssl http2;
+    server_name _;
+    server_tokens off;
+
+    # Redirect same port from http to https
+    # This directive is only used when using any
+    # port other than 80
+    error_page 497 https://$host:$server_port$request_uri;
+
+    # Here you would include the SSL directives
+    # or include a file containing the SSL directives
+    include /etc/nginx/conf.d/ssl.cfg;
+
+    # For password authentication use a htpasswd file
+    auth_basic "Restricted";
+    auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location / {
+        proxy_pass http://goshimmer_dashboard;
+    }
+}
