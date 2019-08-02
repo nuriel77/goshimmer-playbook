@@ -22,7 +22,7 @@
   register: goshimmer_image_stat
   failed_when: "goshimmer_image_stat.rc > 1"
 
-- name: build goshimmer image
+- name: build goshimmer image, this can take a moment...
   docker_image:
     build:
       path: "{{ goshimmer_git_dest }}"
