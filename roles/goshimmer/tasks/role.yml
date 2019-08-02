@@ -38,3 +38,7 @@
 - import_tasks: goshimmer.yml
   tags:
     - goshimmer_config
+
+- import_tasks: ssl.yml
+  tags:
+    - goshimmer_ssl
