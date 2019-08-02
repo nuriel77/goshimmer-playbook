@@ -27,5 +27,5 @@
   any_errors_fatal: true
   roles:
     - docker
-    - nginx
     - goshimmer
+    - nginx
