@@ -39,7 +39,7 @@
   set_fact:
     docker_apt_release_channel: edge
   when:
-    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' or ansible_distribution == 'Raspbian'
     - ansible_distribution_release == 'bionic'
 
 - name: Add Docker repository.

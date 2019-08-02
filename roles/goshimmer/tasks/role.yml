@@ -2,7 +2,7 @@
   tags:
     - goshimmer_deps_apt
   when:
-    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' or ansible_distribution == 'Raspbian'
     - install_system_deps|default(False)|bool
 
 - import_tasks: deps_yum.yml
@@ -32,7 +32,7 @@
   tags:
     - goshimmer_ufw
   when:
-    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu' or ansible_distribution == 'Raspbian'
     - configure_firewall|default(False)|bool
 
 - import_tasks: goshimmer.yml
