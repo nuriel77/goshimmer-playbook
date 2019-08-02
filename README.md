@@ -66,6 +66,16 @@ journalctl -u goshimmer -e -f
 The database is located in `/var/lib/goshimmer/mainnetdb`
 
 
+## Goshimmer Web
+Since August 3rd 2019 nginx has been added to serve as a reverse proxy for some of goshimmer's common services.
+
+Spammer is accessible via the web-browser on port 18080, e.g.: `https://your-ip:18080`.
+
+Dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18081`.
+
+*NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installtion.
+
+
 ## Spam Test
 
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
