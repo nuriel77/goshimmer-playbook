@@ -41,7 +41,7 @@ upstream goshimmer_dashboard {
 
 server {
     limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('20') }};
-    listen {{ goshimmer_external_spammer_port }} default_server ssl http2;
+    listen {{ goshimmer_external_dashboard_port }} default_server ssl http2;
     server_name _;
     server_tokens off;
 
