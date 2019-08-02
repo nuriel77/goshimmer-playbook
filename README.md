@@ -109,17 +109,6 @@ To stop:
 curl "http://localhost:8080/spammer?cmd=stop"
 ```
 
-Although it is not recommeneded to open port 8080 on the server, should you choose to do so in order to be able to initiate spam remotely, you can run:
-```sh
-sudo ufw allow 8080
-```
-or, on CentOS:
-```sh
-firewall-cmd --allow-port=8080/tcp --permanent && firewall-cmd --reload
-```
-
-In the future this playbook might include a user/password lock (via nginx) on this port so that it is more protected. This really depends on the next steps with goshimmer, as it would be a shame to add this functionality now if things are to change completely.
-
 ## See the statusscreen
 
 Since Saturday, July 27 a new script has been added to help run goshimmer with the status screen. If you already have the playbook installed, don't worry, you can run the initial installation command to get the script ready!
