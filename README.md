@@ -1,5 +1,21 @@
 # GoShimmer Playbook
 
+*Table of contents*
+
+<!--ts-->
+   * [Requirements](#requirements)
+   * [Recommendations](#recommendations)
+   * [Installation](#installation)
+   * [Docker Usage Commands](#docker-usage-commands)
+   * [Configuration](#configuration)
+   * [Control GoShimmer](#control-goshimmer)
+     * [GoShimmer DB](#goshimmer-db)
+     * [GoShimmer Web](#goshimmer-web)
+     * [Spam Test](#spam-test)
+     * [See the statusscreen](#see-the-statusscreen)
+   * [Donations](#donations)
+<!--te-->
+
 ## Requirements
 
 Supported operating systems:
@@ -13,7 +29,7 @@ Supported operating systems:
 * RAM: At least 1.5GB RAM, as less than this can result in out-of-memory failures.
 * x2 CPUs are recommended
 
-## Install
+## Installation
 
 Run:
 ```sh
@@ -23,7 +39,7 @@ bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/mas
 This pulls the installation file from the root of this repository and executes it.
 
 
-## Some Docker Commands
+## Docker Usage Commands
 
 View all existing images:
 ```sh
@@ -62,11 +78,11 @@ GoShimmer logs follow:
 journalctl -u goshimmer -e -f
 ```
 
-## Goshimmer DB
+### Goshimmer DB
 The database is located in `/var/lib/goshimmer/mainnetdb`
 
 
-## Goshimmer Web
+### Goshimmer Web
 Since August 3rd 2019 nginx has been added to serve as a reverse proxy for some of goshimmer's common services.
 
 Spammer is accessible via the web-browser on port 18080, e.g.: `https://your-ip:18080/spammer`.
@@ -76,7 +92,7 @@ Dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-i
 *NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installtion.
 
 
-## Spam Test
+### Spam Test
 
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
@@ -104,7 +120,7 @@ firewall-cmd --allow-port=8080/tcp --permanent && firewall-cmd --reload
 
 In the future this playbook might include a user/password lock (via nginx) on this port so that it is more protected. This really depends on the next steps with goshimmer, as it would be a shame to add this functionality now if things are to change completely.
 
-## I just want to run it so that I see the statusscreen!
+## See the statusscreen
 
 Since Saturday, July 27 a new script has been added to help run goshimmer with the status screen. If you already have the playbook installed, don't worry, you can run the initial installation command to get the script ready!
 
