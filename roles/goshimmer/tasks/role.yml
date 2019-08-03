@@ -2,14 +2,14 @@
   tags:
     - goshimmer_deps_apt
   when:
-    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - ansible_distribution in debian_family_list
     - install_system_deps|default(False)|bool
 
 - import_tasks: deps_yum.yml
   tags:
     - goshimmer_deps_yum
   when:
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution in redhat_family_list
     - install_system_deps|default(False)|bool
 
 - import_tasks: pip.yml
@@ -25,14 +25,14 @@
   tags:
     - goshimmer_firewalld
   when:
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution in redhat_family_list
     - configure_firewall|default(False)|bool
 
 - import_tasks: ufw.yml
   tags:
     - goshimmer_ufw
   when:
-    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - ansible_distribution in debian_family_list
     - configure_firewall|default(False)|bool
 
 - import_tasks: goshimmer.yml

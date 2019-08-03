@@ -279,13 +279,14 @@ function set_primary_ip()
 }
 
 function display_requirements_url() {
-    echo "Only Debian, Ubuntu 18.04LTS and CentOS 7 are supported."
+    echo "Only Debian, Ubuntu 18.04LTS, Raspbian and CentOS 7 are supported."
 }
 
 function check_arch() {
     # Check architecture
     ARCH=$(uname -m)
-    if [ "$ARCH" != "x86_64" ]; then
+    local REGEXP="x86_64|arm7l"
+    if [ ! "$ARCH" =~ $REGEXP ]; then
         echo "ERROR: $ARCH architecture not supported"
         display_requirements_url
         exit 1
@@ -417,6 +418,15 @@ elif [[ "$OS" =~ ^Debian ]]; then
         exit 1
     fi
     check_arch
+    init_debian
+elif [[ "$OS" =~ ^Raspbian ]]; then
+    if [[ ! "$VER" =~ ^9 ]]; then
+        echo "ERROR: $OS version $VER not supported"
+        display_requirements_url
+        exit 1
+    fi
+    check_arch
+    # Same setup for respbian as debian
     init_debian
 else
     echo "$OS not supported"
