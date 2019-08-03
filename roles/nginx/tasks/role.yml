@@ -6,14 +6,14 @@
   tags:
     - nginx_firewalld
   when:
-    - ansible_distribution == 'CentOS'
+    - ansible_distribution in redhat_family_list
     - configure_firewall|default(False)|bool
 
 - import_tasks: ufw.yml
   tags:
     - nginx_ufw
   when:
-    - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+    - ansible_distribution in debian_family_list
     - configure_firewall|default(False)|bool
 
 - import_tasks: nginx.yml

@@ -1,16 +1,16 @@
-- name: set variables centos/redhat
+- name: set variables redhat family
   set_fact:
     systemd_dir: /usr/lib/systemd/system
     config_dir: /etc/sysconfig
   tags: always
-  when: ansible_distribution == 'CentOS'
+  when: ansible_distribution in redhat_family_list
 
-- name: set variables debian/ubuntu
+- name: set variables debian family
   set_fact:
     systemd_dir: /etc/systemd/system
     config_dir: /etc/default
   tags: always
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: ansible_distribution in debian_family_list
 
 - name: add user to run nginx as
   user:

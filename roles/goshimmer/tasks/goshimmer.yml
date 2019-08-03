@@ -2,14 +2,14 @@
   set_fact:
     systemd_dir: /usr/lib/systemd/system
     config_dir: /etc/sysconfig
-  when: ansible_distribution == 'CentOS'
+  when: ansible_distribution in redhat_family_list
   tags: always
 
 - name: set variables ubuntu
   set_fact:
     systemd_dir: /etc/systemd/system
     config_dir: /etc/default
-  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  when: ansible_distribution in debian_family_list
   tags: always
 
 - name: allow IPv4 forwarding in kernel
