@@ -85,7 +85,7 @@ The database is located in `/var/lib/goshimmer/mainnetdb`
 ### Goshimmer Web
 Since August 3rd 2019 nginx has been added to serve as a reverse proxy for some of goshimmer's common services.
 
-Spammer is accessible via the web-browser on port 18080, e.g.: `https://your-ip:18080/spammer`.
+Spammer is accessible via the web-browser on port 18080, e.g.: `https://your-ip:18080/spammer`. Note that you'll have to append a command to the URL, e.g: `cmd=start` or stop... See *Spam Test* below.
 
 Dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18081/dashboard`.
 
