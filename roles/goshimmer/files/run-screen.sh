@@ -34,5 +34,10 @@ then
     ENTRY_NODES="-autopeering-entry-nodes '$ENTRY_NODES'"
 fi
 
-docker run --rm -it --name goshimmer --net=host --user=${SHIMMER_UID} --cap-drop=ALL -v /etc/localtime:/etc/localtime:ro,Z -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z ${SHIMMER_IMAGE}:${TAG} $ENABLED_PLUGINS $ENTRY_NODES
-#-autopeering-entry-nodes "$ENTRY_NODES"
+docker run --rm -it --name goshimmer \
+	   --net=host \
+	   --user=${SHIMMER_UID} \
+	   --cap-drop=ALL \
+	   -v /etc/localtime:/etc/localtime:ro,Z \
+	   -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z \
+	   ${SHIMMER_IMAGE}:${TAG} $ENABLED_PLUGINS $ENTRY_NODES
