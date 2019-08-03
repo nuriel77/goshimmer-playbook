@@ -124,6 +124,15 @@ If you want to leave the server running with this screen you need to run it with
 
 Please refer to this article on how to use `screen` (you might need to install it): https://linuxize.com/post/how-to-use-linux-screen/
 
+### Update the run-screen script
+
+To update the script run:
+```sh
+wget -O /usr/bin/run-screen https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/roles/goshimmer/files/run-screen.sh
+```
+
+If you don't have `wget`, install it (`yum install wget -y` or Ubuntu/Debian `apt install wget -y`)
+
 # Donations
 
 If you liked this playbook, and would like to leave a donation you can use this IOTA address:
