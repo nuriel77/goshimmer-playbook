@@ -34,7 +34,7 @@ Supported operating systems:
 
 Run:
 ```sh
-bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/fullnode_install.sh)
+bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
 ```
 
 This pulls the installation file from the root of this repository and executes it.
@@ -90,7 +90,7 @@ Spammer is accessible via the web-browser on port 18080, e.g.: `https://your-ip:
 
 Dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18081/dashboard`.
 
-*NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installtion.
+*NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installation.
 
 
 ### Spam Test
