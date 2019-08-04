@@ -34,13 +34,13 @@ go
  \ `--.| |_| | | | | .  . || .  . || |__ | |_/ /
   `--. \  _  | | | | |\/| || |\/| ||  __||    /
  /\__/ / | | |_| |_| |  | || |  | || |___| |\ \
- \____/\_| |_/\___/\_|  |_/\_|  |_/\____/\_| \_| fullnode installer
+ \____/\_| |_/\___/\_|  |_/\_|  |_/\____/\_| \_| node installer
 
 EOF
 
 cat <<EOF
 Welcome to IOTA's goShimmer (unofficial) installer!
-1. By pressing 'y' you agree to install goShimmer fullnode on your system.
+1. By pressing 'y' you agree to install goShimmer node on your system.
 2. By pressing 'y' you aknowledge that this installer requires a CLEAN operating system
    and may otherwise !!!BREAK!!! existing software on your server.
 3. You read and agree to http://iri-playbook.readthedocs.io/en/master/disclaimer.html
@@ -89,6 +89,53 @@ function set_dist() {
         OS=$(uname -s)
         VER=$(uname -r)
     fi
+}
+
+# Installation selection menu
+function set_selections()
+{
+    local RC RESULTS RESULTS_ARRAY CHOICE SKIP_TAGS
+    SKIP_TAGS="--skip-tags=_"
+
+    RESULTS=$(whiptail --title "Installation Options" --checklist \
+        --cancel-button "Exit" \
+        "\nPlease choose additional installation options.\n(Its perfectly okay to leave this as is).\n\
+Select/unselect options using space and click Enter to proceed.\n" 28 78 8 \
+        "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
+        "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
+        3>&1 1>&2 2>&3)
+
+    RC=$?
+    if [[ $RC -ne 0 ]]; then
+        echo "Installation cancelled"
+        exit 1
+    fi
+
+    read -a RESULTS_ARRAY <<< "$RESULTS"
+    for CHOICE in "${RESULTS_ARRAY[@]}"
+    do
+        case $CHOICE in
+            '"INSTALL_NGINX"')
+                echo "install_nginx: true" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
+                ;;
+            '"SKIP_FIREWALL_CONFIG"')
+                echo "configure_firewall: false" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    if [[ -n "$RESULTS" ]]; then
+        RESULTS_MSG=$(echo "$RESULTS"|sed 's/ /\n/g')
+        if ! (whiptail --title "Confirmation" \
+                 --yesno "You chose:\n\n$RESULTS_MSG\n\nPlease confirm you want to proceed with the installation?" \
+                 --defaultno \
+                 2 78); then
+            exit 1
+        fi
+    fi
+    INSTALL_OPTIONS+=" $SKIP_TAGS"
 }
 
 function init_centos(){
@@ -161,7 +208,7 @@ function inform_reboot() {
     cat <<EOF >/etc/motd
 ======================== GoShimmer PLAYBOOK ========================
 To proceed with the installation, please re-run:
-bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/fullnode_install.sh)
+bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
 (make sure to run it as user root)
 EOF
 
@@ -171,7 +218,7 @@ Some system packages have been updated which require a reboot
 and allow the node installer to proceed with the installation.
 *** Please reboot this machine and re-run this script ***
 >>> To reboot run: 'reboot', and when back online:
-bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/fullnode_install.sh)
+bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
 !! Remember to re-run this script as root !!
 EOF
 }
@@ -305,6 +352,30 @@ function set_ssh_port() {
     fi
 }
 
+function copy_old_config(){
+    if [ ! -d "/opt/iri-playbook/group_vars/all" ]; then
+        return
+    fi
+
+    CONFIG_FILES=($(find /opt/goshimmer-playbook/group_vars/all -name 'z-*'))
+    if [ "$CONFIG_FILES" -eq 0 ]; then
+        return
+    fi
+
+    if ! (whiptail --title "Confirmation" \
+             --yesno "This looks like a re-install.\n\nDo you want to keep the previous configuration options? (e.g. user/password etc.)\n" \
+             --defaultno \
+             16 78); then
+        return
+    fi
+
+    SKIP_SET_SELECTIONS="true"
+    mkdir -p /tmp/goshimmer-tmp
+    for FILE in "${CONFIG_FILES[@]}"; do
+        cp "$FILE" /tmp/goshimmer-tmp/.
+    done
+}
+
 function run_playbook(){
     # Ansible output log file
     LOGFILE=/var/log/goshimmer-playbook-$(date +%Y%m%d%H%M).log
@@ -363,7 +434,7 @@ EOF
 
 * A log of this installation has been saved to: $LOGFILE
 
-* You should be able to connect to the dashboard on (and skip the browser's warning):
+* You should be able to connect to the dashboard on (and skip the warning in the browser):
 
 https://${PRIMARY_IP}:18081/dashboard
 
@@ -461,6 +532,7 @@ cd /opt
 
 # Backup any existing goshimmer-playbook directory
 if [ -d goshimmer-playbook ]; then
+    copy_old_config
     echo "Backing up older goshimmer-playbook directory..."
     rm -rf goshimmer-playbook.backup
     mv goshimmer-playbook goshimmer-playbook.backup
@@ -470,14 +542,20 @@ fi
 git clone $GIT_OPTIONS https://github.com/nuriel77/goshimmer-playbook.git
 cd goshimmer-playbook
 
-# Let user choose installation add-ons
-#set_selections
+if [ "$SKIP_SET_SELECTIONS" = true ]; then
+    # Copy old configuration
+    cp /tmp/goshimmer-tmp/* goshimmer-playbook/group_vars/all/.
+    rm -fr /tmp/goshimmer-tmp/
+else
+    # Let user choose installation add-ons
+    set_selections
 
-# Get the administrators username
-set_admin_username
+    # Get the administrators username
+    set_admin_username
 
-# web access (ipm, haproxy and grafana)
-get_admin_password
+    # web access (ipm, haproxy and grafana)
+    get_admin_password
+fi
 
 echo -e "\nRunning playbook..."
 run_playbook
