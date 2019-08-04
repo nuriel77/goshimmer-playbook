@@ -358,7 +358,7 @@ function copy_old_config(){
         return
     fi
     CONFIG_FILES=($(find /opt/goshimmer-playbook/group_vars/all -name 'z-*'))
-    if [ "$CONFIG_FILES" -eq 0 ]; then
+    if [ "${#CONFIG_FILES[@]}" -eq 0 ]; then
         return
     fi
 
@@ -531,7 +531,6 @@ cd /opt
 
 # Backup any existing goshimmer-playbook directory
 if [ -d "/opt/goshimmer-playbook" ]; then
-    echo "ENTER OLD CONFIG"
     copy_old_config
     echo "Backing up older goshimmer-playbook directory..."
     rm -rf goshimmer-playbook.backup
