@@ -99,9 +99,9 @@ function set_selections()
 
     RESULTS=$(whiptail --title "Installation Options" --checklist \
         --cancel-button "Exit" \
-        "\nPlease choose additional installation options.\n(Its perfectly okay to leave this as is).\n\
-Select/unselect options using space and click Enter to proceed.\n" 28 78 8 \
-        "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
+        "\nInstallation options.\nNote that it is perfectly okay, and even recommended, to leave this as is!\n\
+Select/unselect options using space and click Enter to proceed.\n" 12 78 2 \
+        "SKIP_INSTALL_NGINX"       "Skip installation of nginx webserver" OFF \
         "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
         3>&1 1>&2 2>&3)
 
@@ -111,12 +111,22 @@ Select/unselect options using space and click Enter to proceed.\n" 28 78 8 \
         exit 1
     fi
 
+    if [[ -n "$RESULTS" ]]; then
+        RESULTS_MSG=$(echo "$RESULTS"|sed 's/ /\n/g')
+        if ! (whiptail --title "Confirmation" \
+                 --yesno "You chose:\n\n$RESULTS_MSG\n\nPlease confirm you want to proceed with the installation?" \
+                 --defaultno \
+                 12 78); then
+            exit 1
+        fi
+    fi
+
     read -a RESULTS_ARRAY <<< "$RESULTS"
     for CHOICE in "${RESULTS_ARRAY[@]}"
     do
         case $CHOICE in
-            '"INSTALL_NGINX"')
-                echo "install_nginx: true" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
+            '"SKIP_INSTALL_NGINX"')
+                echo "install_nginx: false" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
                 ;;
             '"SKIP_FIREWALL_CONFIG"')
                 echo "configure_firewall: false" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
@@ -126,15 +136,6 @@ Select/unselect options using space and click Enter to proceed.\n" 28 78 8 \
         esac
     done
 
-    if [[ -n "$RESULTS" ]]; then
-        RESULTS_MSG=$(echo "$RESULTS"|sed 's/ /\n/g')
-        if ! (whiptail --title "Confirmation" \
-                 --yesno "You chose:\n\n$RESULTS_MSG\n\nPlease confirm you want to proceed with the installation?" \
-                 --defaultno \
-                 2 78); then
-            exit 1
-        fi
-    fi
     INSTALL_OPTIONS+=" $SKIP_TAGS"
 }
 
@@ -353,19 +354,18 @@ function set_ssh_port() {
 }
 
 function copy_old_config(){
-    if [ ! -d "/opt/iri-playbook/group_vars/all" ]; then
+    if [ ! -d "/opt/goshimmer-playbook/group_vars/all" ]; then
         return
     fi
-
     CONFIG_FILES=($(find /opt/goshimmer-playbook/group_vars/all -name 'z-*'))
     if [ "$CONFIG_FILES" -eq 0 ]; then
         return
     fi
 
     if ! (whiptail --title "Confirmation" \
-             --yesno "This looks like a re-install.\n\nDo you want to keep the previous configuration options? (e.g. user/password etc.)\n" \
+             --yesno "This looks like a re-installation.\n\nDo you want to keep the previous configuration options? (e.g. user/password etc.)\n" \
              --defaultno \
-             16 78); then
+             10 78); then
         return
     fi
 
@@ -527,11 +527,11 @@ if (( $(awk 'BEGIN {print ("'2.6'" > "'$ANSIBLE_VERSION'")}') )); then
     exit 1
 fi
 
-echo "Git cloning goshimmer-playbook repository..."
 cd /opt
 
 # Backup any existing goshimmer-playbook directory
-if [ -d goshimmer-playbook ]; then
+if [ -d "/opt/goshimmer-playbook" ]; then
+    echo "ENTER OLD CONFIG"
     copy_old_config
     echo "Backing up older goshimmer-playbook directory..."
     rm -rf goshimmer-playbook.backup
@@ -539,12 +539,13 @@ if [ -d goshimmer-playbook ]; then
 fi
 
 # Clone the repository (optional branch)
+echo "Git cloning goshimmer-playbook repository..."
 git clone $GIT_OPTIONS https://github.com/nuriel77/goshimmer-playbook.git
 cd goshimmer-playbook
 
 if [ "$SKIP_SET_SELECTIONS" = true ]; then
     # Copy old configuration
-    cp /tmp/goshimmer-tmp/* goshimmer-playbook/group_vars/all/.
+    cp /tmp/goshimmer-tmp/* /opt/goshimmer-playbook/group_vars/all/.
     rm -fr /tmp/goshimmer-tmp/
 else
     # Let user choose installation add-ons
