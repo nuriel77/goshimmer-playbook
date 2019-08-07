@@ -17,10 +17,15 @@ VERSION_TEMP=0.0.1
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
+: "${GOSC_BRANCH:=master}"
 CUR_DIR="$(pwd)"
 
 PID_FILE="/var/run/gosc.pid"
 WIDTH=78
+
+# Source if exists
+[ -f ~/.gosc ] && . ~/.gosc
+
 export NEWT_COLORS='
 window=,
 '
@@ -118,7 +123,7 @@ function verify_playbook() {
     local HEIGHT
     local RC
     if [ ! -d /opt/goshimmer-playbook ]; then
-        cd /opt && git clone -b "$GOSHIMMER_BRANCH" https://github.com/nuriel77/goshimmer-playbook.git
+        cd /opt && git clone -b "$GOSC_BRANCH" https://github.com/nuriel77/goshimmer-playbook.git
     fi
     cd /opt/goshimmer-playbook
 
@@ -152,15 +157,17 @@ function upgrade_goshimmer() {
     fi
     clear
 
-    GOSHIMMER_VERSION=$(grep ^api_version $HOME/.nbctl | cut -d: -f2- | sed 's/ *//g')
+    GOSHIMMER_VERSION=$(grep ^TAG "$SYSCONFIG_FILE" | cut -d= -f2)
     if [[ $? -ne 0 ]]; then
         whiptail --title "Error!" \
-                 --msgbox "ERROR: Cannot find $HOME/.nbctl" \
+                 --msgbox "ERROR: Failed to get current GOSHIMMER version!" \
                  8 $WIDTH
         return 1
     fi
 
-    if compare_versions $GOSHIMMER_VERSION '>=' $GOSHIMMER_LATEST; then
+    # Only use compare_versions if real versions (e.g. semver)
+    #if compare_versions $GOSHIMMER_VERSION '>=' $GOSHIMMER_LATEST; then
+    if [[ "$GOSHIMMER_VERSION" == "$GOSHIMMER_LATEST" ]]; then
         if ! (whiptail --title "No Updates" \
                  --yesno "You already have the latest version: ${GOSHIMMER_VERSION}.\nDo you want to proceed anyway?" \
                  --defaultno \
@@ -188,17 +195,11 @@ function upgrade_goshimmer() {
         return 1
     fi
 
-    echo "Updating GOSHIMMER configuration files..."
-    GOSHIMMER_CONFIG=$(grep ^file /root/.nbctl | cut -d: -f2)
-    sed -i "s/^TAG=.*$/TAG=v${GOSHIMMER_LATEST}/" $GOSHIMMER_CONFIG
-    sed -i "s/^api_version.*$/api_version: $GOSHIMMER_LATEST/" $HOME/.nbctl
-
     echo "Upgrading GOSHIMMER Docker image.... (GOSHIMMER will automatically restart if image gets updated)"
     cd /opt/goshimmer-playbook && ansible-playbook -i inventory \
                                 -v site.yml \
-                                --tags=goshimmer_docker_image,goshimmer_service_file,get_goshimmer_uid \
-                                -e "goshimmer_tag=v$GOSHIMMER_LATEST" \
-                                -e "force_pull_image=yes"
+                                --tags=goshimmer_config
+
     if [[ $? -ne 0 ]]; then
          whiptail --title "Error!" \
                   --msgbox "ERROR: Failed upgrading GOSHIMMER." \
@@ -207,24 +208,31 @@ function upgrade_goshimmer() {
          return 1
     fi
 
+    if ! docker ps -a | sed '1d' | awk {'print $2'} | grep -q "$GOSHIMMER_LATEST"
+    then
+        echo "Force update tag and restart goshimmer ..."
+        sed -i "s/^TAG=.*$/TAG=$GOSHIMMER_LATEST/" "$SYSCONFIG_FILE"
+        /bin/systemctl restart goshimmer
+    fi
+
     pause "Update finished successfully. Nevertheless, it is recommended to check the status of GOSHIMMER. Press ENTER to return to menu."
     clear
 }
 
-## GOSHIMMERC
+## GOSC
 function get_latest_gosc_version() {
     local RAND=$(echo -n $(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 7 | head -n 1))
-    curl -s -f -m 5 -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/${GOSHIMMER_BRANCH}/roles/goshimmer/files/goshimmerc?nocache=$RAND"|grep ^VERSION|cut -d= -f2
+    curl -s -f -m 5 -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/${GOSC_BRANCH}/roles/goshimmer/files/gosc?nocache=$RAND"|grep ^VERSION|cut -d= -f2
 }
 
 function check_new_gosc() {
     local CURR_VERSION="$__VERSION__"
-    local GOSHIMMERC_VERSION=$(get_latest_gosc_version 2>&1)
-    if [[ $? -ne 0 ]] || [[ "$GOSHIMMERC_VERSION" == "" ]]; then
+    local GOSC_VERSION=$(get_latest_gosc_version 2>&1)
+    if [[ $? -ne 0 ]] || [[ "$GOSC_VERSION" == "" ]]; then
         return 1
     fi
 
-    if compare_versions $CURR_VERSION '>=' $GOSHIMMERC_VERSION; then
+    if compare_versions $CURR_VERSION '>=' $GOSC_VERSION; then
         return 1
     else
         return 0
@@ -232,16 +240,16 @@ function check_new_gosc() {
 }
 
 function update_gosc() {
-    local GOSHIMMERC_VERSION=$(get_latest_gosc_version 2>&1)
+    local GOSC_VERSION=$(get_latest_gosc_version 2>&1)
     local CURR_VERSION="$__VERSION__"
-    if [[ $? -ne 0 ]] || [[ "$GOSHIMMERC_VERSION" == "" ]]; then
-        whiptail --title "GOSHIMMERC Update Failed" \
-                 --msgbox "Failed to get GOSHIMMERC version from github." \
+    if [[ $? -ne 0 ]] || [[ "$GOSC_VERSION" == "" ]]; then
+        whiptail --title "GOSC Update Failed" \
+                 --msgbox "Failed to get GOSC version from github." \
                  8 $WIDTH
         return 1
     fi
 
-    if compare_versions $CURR_VERSION '>=' $GOSHIMMERC_VERSION; then
+    if compare_versions $CURR_VERSION '>=' $GOSC_VERSION; then
         if ! (whiptail --title "No Updates" \
                      --yesno "You already have the latest version: ${CURR_VERSION}.\nDo you want to proceed anyway?" \
                      --defaultno \
@@ -257,7 +265,7 @@ function update_gosc() {
 
     if [ -z "$NO_CONFIRM" ]; then
         if ! (whiptail --title "Confirm Update" \
-                     --yesno "Are you sure you want to update GOSHIMMERC from '$__VERSION__' to '$GOSHIMMERC_VERSION'?" \
+                     --yesno "Are you sure you want to update GOSC from '$__VERSION__' to '$GOSC_VERSION'?" \
                      8 $WIDTH) then
             return
         fi
@@ -273,8 +281,8 @@ function update_gosc() {
     fi
 
     # Run playbook script upgrades
-    cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=scripts,nbctl_config
-    [[ $? -ne 0 ]] && MSG="Updating GOSHIMMERC failed!!! Check output above for errors." || MSG="Update finished successfully! Additional updates may apply upon restart of goshimmerc."
+    cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=scripts
+    [[ $? -ne 0 ]] && MSG="Updating GOSC failed!!! Check output above for errors." || MSG="Update finished successfully! Additional updates may apply upon restart of gosc."
     pause "$MSG Press ENTER to return to menu."
     clear
 
@@ -315,10 +323,10 @@ function choose_editor() {
     fi
 
     EDITOR=$USER_CHOICE
-    if ! grep -q "^export EDITOR" $HOME/.goshimmerc; then
-        echo "export EDITOR=${EDITOR}" >> $HOME/.goshimmerc
+    if ! grep -q "^export EDITOR" $HOME/.gosc; then
+        echo "export EDITOR=${EDITOR}" >> $HOME/.gosc
     else
-        sed -i "s/^export EDITOR=.*/export EDITOR=${EDITOR}/g" $HOME/.goshimmerc
+        sed -i "s/^export EDITOR=.*/export EDITOR=${EDITOR}/g" $HOME/.gosc
     fi
 }
 
@@ -441,7 +449,7 @@ function service_log() {
 function service_menu() {
     local SERVICE
     SERVICE=$1
-    whiptail --title "GOSHIMMERC v${__VERSION__} - $SERVICE Service" \
+    whiptail --title "GOSC v${__VERSION__} - $SERVICE Service" \
              --menu "For logs use SHIFT-g to skip to end of log, or q to exit." \
              --cancel-button "Back" \
              25 $WIDTH 16 \
@@ -508,10 +516,10 @@ function service() {
 }
 
 function services_menu() {
-    whiptail --title "GOSHIMMERC v${__VERSION__} - Node Services" \
+    whiptail --title "GOSC v${__VERSION__} - Node Services" \
              --menu "Choose an option" \
              --cancel-button "Back" \
-             25 $WIDTH 16 \
+             16 $WIDTH 8 \
     "a)" "GOSHIMMER" \
     "b)" "Nginx" \
     3>&1 1>&2 2>&3
@@ -544,7 +552,7 @@ function services() {
 
 ### Configure files ###
 function configure_files_menu() {
-    whiptail --title "GOSHIMMERC v${__VERSION__} - Configure Files" \
+    whiptail --title "GOSC v${__VERSION__} - Configure Files" \
              --menu "Choose an option" \
              --cancel-button "Back" \
               22 48 12 \
@@ -563,14 +571,7 @@ function configure_files() {
 
     case "$CHOICE" in
         "a)")
-            local GOSHIMMER_CONFIG=$(grep ^file /root/.nbctl | cut -d: -f2 | sed 's/ //g')
-            if [[ $? -ne 0 ]] || [ -z "$GOSHIMMER_CONFIG" ]; then
-                whiptail --title "Missing .nbctl data" \
-                         --msgbox "Error: cannot find file value in $HOME/.nbctl" \
-                         8 $WIDTH
-                return 1
-            fi
-            edit_config "$GOSHIMMER_CONFIG" "goshimmer"
+            edit_config "$SYSCONFIG_FILE" "goshimmer"
             configure_files
             ;;
 
@@ -588,14 +589,14 @@ function configure_files() {
 
 function main_menu() {
     local MENU="Choose an option"
-    if check_new_goshimmerc; then
-        MENU="${MENU}\n(*GOSHIMMERC update available)"
+    if check_new_gosc; then
+        MENU="${MENU}\n(*GOSC update available)"
     fi
 
-    whiptail --title "GOSHIMMERC v${__VERSION__} - GOSHIMMER Configuration Menu" \
+    whiptail --title "GOSC v${__VERSION__} - GOSHIMMER Configuration Menu" \
              --menu "$MENU" \
              --cancel-button "Exit" \
-              32 $WIDTH 22 \
+              14 $WIDTH 6 \
     "a)" "Update GOSHIMMER software" \
     "b)" "Manage Services" \
     "c)" "Configure Files" \
