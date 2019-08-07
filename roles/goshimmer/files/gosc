@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.0.2
+VERSION_TEMP=0.0.3
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -597,7 +597,7 @@ function main_menu() {
              --menu "$MENU" \
              --cancel-button "Exit" \
               16 $WIDTH 6 \
-    "a)" "Update  software" \
+    "a)" "Update GoShimmer Software" \
     "b)" "Manage Services" \
     "c)" "Configure Files" \
     "d)" "View Per Processes Memory Usage" \
