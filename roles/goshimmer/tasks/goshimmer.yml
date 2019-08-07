@@ -12,6 +12,33 @@
   when: ansible_distribution in debian_family_list
   tags: always
 
+- name: scripts block
+  block:
+
+    - name: copy gosc
+      copy:
+        src: files/gosc
+        dest: /usr/bin/gosc
+        mode: 0755
+        owner: root
+        group: root
+
+    - name: download ps_mem
+      get_url:
+        url: https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py
+        dest: /usr/bin/ps_mem
+        mode: 0755
+      ignore_errors: yes
+
+    - name: ensure ~/.gosc exists
+      copy:
+        dest: "{{ ansible_env.HOME }}/.gosc"
+        content: ""
+        force: no
+
+  tags:
+    - scripts
+
 - name: allow IPv4 forwarding in kernel
   sysctl:
     name: net.ipv4.ip_forward
