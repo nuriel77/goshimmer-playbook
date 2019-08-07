@@ -1,0 +1,654 @@
+#!/usr/bin/env bash
+set -o pipefail
+
+# This is just a proof-of-concept. Use with care.
+# Only use if you installed your node using goshimmer-playbook
+
+if [[ $EUID -ne 0 ]]; then
+   echo "This script must be run as root"
+   echo "Please change to root: 'sudo su -' and re-run"
+   exit 1
+fi
+
+clear
+
+: "${EDITOR:=nano}"
+VERSION_TEMP=0.0.1
+__VERSION__=${VERSION_TEMP}
+
+: "${GOSHIMMER_BRANCH:=master}"
+CUR_DIR="$(pwd)"
+
+PID_FILE="/var/run/gosc.pid"
+WIDTH=78
+export NEWT_COLORS='
+window=,
+'
+
+# Check if another process of gosc is already running.
+if [ -e "$PID_FILE" ]
+then
+    PID_FROM_FILE=$(cat "$PID_FILE")
+    if ps -fq $PID_FROM_FILE | grep -q "$(basename $0)$"
+    then
+        echo "ERROR: another instance of $(basename $0) is already running with pid ${PID_FROM_FILE}."
+        exit 1
+    fi
+fi
+
+# Cleanup function
+function cleanup() {
+    rm -f "$PID_FILE"
+    cd "$CUR_DIR"
+    trap - EXIT
+    clear
+}
+
+# Write pid to pidfile
+echo -n $$ >"$PID_FILE"
+
+# Set exit trap
+trap cleanup INT TERM EXIT
+
+function pause(){
+   read -p "$*"
+   clear
+}
+
+# Get OS and Dist
+function set_dist() {
+    if [ -f /etc/os-release ]; then
+        # freedesktop.org and systemd
+        . /etc/os-release
+        export OS=$NAME
+        export VER=$VERSION_ID
+    elif type lsb_release >/dev/null 2>&1; then
+        # linuxbase.org
+        export OS=$(lsb_release -si)
+        export VER=$(lsb_release -sr)
+    elif [ -f /etc/lsb-release ]; then
+        # For some versions of Debian/Ubuntu without lsb_release command
+        . /etc/lsb-release
+        export OS=$DISTRIB_ID
+        export VER=$DISTRIB_RELEASE
+    elif [ -f /etc/debian_version ]; then
+        # Older Debian/Ubuntu/etc.
+        export OS=Debian
+        export VER=$(cat /etc/debian_version)
+    elif [ -f /etc/SuSe-release ]; then
+        # Older SuSE/etc.
+        echo "Unsupported OS."
+        exit 1
+    elif [ -f /etc/redhat-release ]; then
+        # Older Red Hat, CentOS, etc.
+        echo "Old OS version. Minimum required is 7."
+        exit 1
+    else
+        # Fall back to uname, e.g. "Linux <version>", also works for BSD, etc.
+        export OS=$(uname -s)
+        export VER=$(uname -r)
+    fi
+
+    # Set path to goshimmer's configuration file
+    if [[ "$OS" =~ ^(CentOS|Red) ]]; then
+        export SYSCONFIG_FILE=/etc/sysconfig/goshimmer
+    elif [[ "$OS" =~ ^(Ubuntu|Debian) ]]; then
+        export SYSCONFIG_FILE=/etc/default/goshimmer
+    fi
+}
+
+function compare_versions() {
+    local FIRST_VERSION=$1
+    local EVAL_STR=$2
+    local SECOND_VERSION=$3
+
+    local GET_BOOL=$(python -c "from distutils.version import StrictVersion; print StrictVersion('$FIRST_VERSION') $EVAL_STR StrictVersion('$SECOND_VERSION')")
+    if [[ "$GET_BOOL" == "True" ]]
+    then
+        return 0
+    elif [[ "$GET_BOOL" == "False" ]]
+    then
+        return 1
+    fi
+}
+
+### Playbook ###
+function verify_playbook() {
+    local OUTPUT
+    local HEIGHT
+    local RC
+    if [ ! -d /opt/goshimmer-playbook ]; then
+        cd /opt && git clone -b "$GOSHIMMER_BRANCH" https://github.com/nuriel77/goshimmer-playbook.git
+    fi
+    cd /opt/goshimmer-playbook
+
+    OUTPUT=$(git pull 2>&1)
+    RC=$?
+    HEIGHT=$(expr $(echo "$OUTPUT"|wc -l) + 10)
+    if [[ $RC -ne 0 ]]; then
+        whiptail --title "Git Errors" \
+                 --msgbox "Errors when trying to update the playbook repository: $OUTPUT" \
+                 $HEIGHT $WIDTH
+        return 1
+    fi
+}
+
+### GoShimmer ###
+function get_latest_goshimmer_commit {
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
+}
+
+function upgrade_goshimmer() {
+    echo "Checking for updates..."
+    local GOSHIMMER_LATEST
+    local GOSHIMMER_VERSION
+
+    GOSHIMMER_LATEST=$(get_latest_goshimmer_commit)
+    if [[ $? -ne 0 ]]; then
+        whiptail --title "Error!" \
+                 --msgbox "ERROR: Failed to get GOSHIMMER latest version\n${GOSHIMMER_LATEST}" \
+                 8 $WIDTH
+        return 1
+    fi
+    clear
+
+    GOSHIMMER_VERSION=$(grep ^api_version $HOME/.nbctl | cut -d: -f2- | sed 's/ *//g')
+    if [[ $? -ne 0 ]]; then
+        whiptail --title "Error!" \
+                 --msgbox "ERROR: Cannot find $HOME/.nbctl" \
+                 8 $WIDTH
+        return 1
+    fi
+
+    if compare_versions $GOSHIMMER_VERSION '>=' $GOSHIMMER_LATEST; then
+        if ! (whiptail --title "No Updates" \
+                 --yesno "You already have the latest version: ${GOSHIMMER_VERSION}.\nDo you want to proceed anyway?" \
+                 --defaultno \
+                 10 $WIDTH) then
+            return
+        else
+            local NO_CONFIRM=1
+        fi
+    fi
+
+    if [ -z "$NO_CONFIRM" ]; then
+        if ! (whiptail --title "Upgrade GOSHIMMER" \
+                     --yesno "Are you sure you want to upgrade GOSHIMMER from ${GOSHIMMER_VERSION} to ${GOSHIMMER_LATEST}?\nWARNING: only do this if you know what your are doing!" \
+                     --defaultno \
+                     8 $WIDTH) then
+            return
+        fi
+    fi
+
+    verify_playbook
+    if [[ $? -ne 0 ]]; then
+        whiptail --title "Error!" \
+                 --msgbox "ERROR: Cannot upgrade GOSHIMMER." \
+                 8 $WIDTH
+        return 1
+    fi
+
+    echo "Updating GOSHIMMER configuration files..."
+    GOSHIMMER_CONFIG=$(grep ^file /root/.nbctl | cut -d: -f2)
+    sed -i "s/^TAG=.*$/TAG=v${GOSHIMMER_LATEST}/" $GOSHIMMER_CONFIG
+    sed -i "s/^api_version.*$/api_version: $GOSHIMMER_LATEST/" $HOME/.nbctl
+
+    echo "Upgrading GOSHIMMER Docker image.... (GOSHIMMER will automatically restart if image gets updated)"
+    cd /opt/goshimmer-playbook && ansible-playbook -i inventory \
+                                -v site.yml \
+                                --tags=goshimmer_docker_image,goshimmer_service_file,get_goshimmer_uid \
+                                -e "goshimmer_tag=v$GOSHIMMER_LATEST" \
+                                -e "force_pull_image=yes"
+    if [[ $? -ne 0 ]]; then
+         whiptail --title "Error!" \
+                  --msgbox "ERROR: Failed upgrading GOSHIMMER." \
+                  8 $WIDTH
+         rm -f "$TFILE"
+         return 1
+    fi
+
+    pause "Update finished successfully. Nevertheless, it is recommended to check the status of GOSHIMMER. Press ENTER to return to menu."
+    clear
+}
+
+## GOSHIMMERC
+function get_latest_gosc_version() {
+    local RAND=$(echo -n $(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 7 | head -n 1))
+    curl -s -f -m 5 -H 'Cache-Control: no-cache' "https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/${GOSHIMMER_BRANCH}/roles/goshimmer/files/goshimmerc?nocache=$RAND"|grep ^VERSION|cut -d= -f2
+}
+
+function check_new_gosc() {
+    local CURR_VERSION="$__VERSION__"
+    local GOSHIMMERC_VERSION=$(get_latest_gosc_version 2>&1)
+    if [[ $? -ne 0 ]] || [[ "$GOSHIMMERC_VERSION" == "" ]]; then
+        return 1
+    fi
+
+    if compare_versions $CURR_VERSION '>=' $GOSHIMMERC_VERSION; then
+        return 1
+    else
+        return 0
+    fi
+}
+
+function update_gosc() {
+    local GOSHIMMERC_VERSION=$(get_latest_gosc_version 2>&1)
+    local CURR_VERSION="$__VERSION__"
+    if [[ $? -ne 0 ]] || [[ "$GOSHIMMERC_VERSION" == "" ]]; then
+        whiptail --title "GOSHIMMERC Update Failed" \
+                 --msgbox "Failed to get GOSHIMMERC version from github." \
+                 8 $WIDTH
+        return 1
+    fi
+
+    if compare_versions $CURR_VERSION '>=' $GOSHIMMERC_VERSION; then
+        if ! (whiptail --title "No Updates" \
+                     --yesno "You already have the latest version: ${CURR_VERSION}.\nDo you want to proceed anyway?" \
+                     --defaultno \
+                     10 $WIDTH) then
+            return
+        else
+            # Don't need another confirmation question
+            local NO_CONFIRM=1
+            # Delete any 'completed' files for this version
+            rm -f "custom_updates/${CURR_VERSION}_updates.sh.completed"
+        fi
+    fi
+
+    if [ -z "$NO_CONFIRM" ]; then
+        if ! (whiptail --title "Confirm Update" \
+                     --yesno "Are you sure you want to update GOSHIMMERC from '$__VERSION__' to '$GOSHIMMERC_VERSION'?" \
+                     8 $WIDTH) then
+            return
+        fi
+    fi
+
+    # Verifies and pull latest changes
+    verify_playbook
+    if [[ $? -ne 0 ]]; then
+         whiptail --title "Error!" \
+                  --msgbox "ERROR: playbook task failed." \
+                  8 $WIDTH
+         return 1
+    fi
+
+    # Run playbook script upgrades
+    cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=scripts,nbctl_config
+    [[ $? -ne 0 ]] && MSG="Updating GOSHIMMERC failed!!! Check output above for errors." || MSG="Update finished successfully! Additional updates may apply upon restart of goshimmerc."
+    pause "$MSG Press ENTER to return to menu."
+    clear
+
+    # Remove current pid file and restart
+    rm -f "$PID_FILE"
+    exec "$0"
+}
+
+function run_custom_updates(){
+    # Run custom updates from the new version
+    if [ -f "custom_updates/${__VERSION__}_updates.sh" ] && [ ! -f "custom_updates/${__VERSION__}_updates.sh.completed" ]; then
+        echo "Updates detected: running custom updates..."
+        if ! bash "custom_updates/${__VERSION__}_updates.sh"; then
+            whiptail --title "Error!" \
+                     --msgbox "ERROR: custom updates task failed." \
+                     8 $WIDTH
+            return 1
+        else
+            touch "custom_updates/${__VERSION__}_updates.sh.completed"
+            clear
+        fi
+    fi
+}
+
+### Configs ###
+function choose_editor() {
+    USER_CHOICE=$(whiptail --inputbox "Choose a default text editor:" 8 $WIDTH ${EDITOR} --title "Choose Editor" 3>&1 1>&2 2>&3)
+    if [[ $? -ne 0 ]]; then
+        return
+    fi
+
+    which $USER_CHOICE >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+        whiptail --title "Error!" \
+                 --msgbox "ERROR: Invalid editor or editor not found on system." \
+                 8 $WIDTH
+        return 1
+    fi
+
+    EDITOR=$USER_CHOICE
+    if ! grep -q "^export EDITOR" $HOME/.goshimmerc; then
+        echo "export EDITOR=${EDITOR}" >> $HOME/.goshimmerc
+    else
+        sed -i "s/^export EDITOR=.*/export EDITOR=${EDITOR}/g" $HOME/.goshimmerc
+    fi
+}
+
+function edit_config_file() {
+    local CONFIG=$1
+    local SERVICE=$2
+    local RELOAD=$3
+
+    BEFORE_EDIT=$(md5sum $CONFIG | awk {'print $1'})
+    $EDITOR ${CONFIG}
+    AFTER_EDIT=$(md5sum $CONFIG | awk {'print $1'})
+
+    if [[ "$AFTER_EDIT" != "$BEFORE_EDIT" ]]; then
+        if (whiptail --title "File Modified" \
+                     --yesno "${CONFIG} file was modified.\n${SERVICE} requires a restart to pick up the new changes.\nDo you want to restart it now?" \
+                     8 $WIDTH) then
+            if [[ -z ${RELOAD} ]]; then
+                service_cmd $SERVICE restart
+            else
+                service_cmd $SERVICE reload
+            fi
+        fi
+    fi
+}
+
+function edit_config() {
+    local CONFIG_FILE=$1
+    local SERVICE=$2
+    local RELOAD=$3
+    if [ ! -f $CONFIG_FILE ]; then
+        whiptail --title "Missing File" \
+                 --msgbox "Error: cannot find '$CONFIG_FILE'" \
+                 8 $WIDTH
+        return 1
+    fi
+
+    # Make backup for restores
+    if [ ! -f ${CONFIG_FILE}.original ]; then
+        cp ${CONFIG_FILE} ${CONFIG_FILE}.original
+    fi
+
+    if edit_config_file ${CONFIG_FILE} ${SERVICE} ${RELOAD}; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+### PS MEM ###
+function view_ps_mem() {
+    which ps_mem >/dev/null 2>&1
+    if [[ $? -ne 0 ]]; then
+         whiptail --title "Missing ps_mem" \
+         --msgbox "Error: cannot find 'ps_mem' utility!" \
+         8 $WIDTH
+         return 1
+    fi
+
+    whiptail --title "ps_mem utility" \
+             --msgbox "This utility shows a per-process total memory usage.\nUse arrows or page up/down to scroll and q to exit." \
+             8 $WIDTH
+    ps_mem 2>/dev/null|less
+}
+
+### Services ###
+function service_status() {
+    local SERVICE
+    SERVICE=$1
+    # Pipe to less as some distros don't use pager
+    systemctl status $SERVICE|less
+}
+
+function service_cmd() {
+    local SERVICE
+    local COMMAND
+    local OUTPUT
+    local EXTRA_CMD
+    local DISABLE
+    local STATE
+    SERVICE=$1
+    COMMAND=$2
+    EXTRA_CMD=$3
+
+    echo "Running 'systemctl $COMMAND $SERVICE' ..."
+    if [ "$EXTRA_CMD" == "disable" ]; then
+        systemctl disable $SERVICE
+        STATE="and disable"
+    elif [ "$EXTRA_CMD" == "enable" ]; then
+        systemctl enable $SERVICE
+        STATE="enabled"
+    fi
+
+    if [ "$EXTRA_CMD" != "enable" ]; then
+        OUTPUT=$(systemctl $COMMAND $SERVICE 2>&1)
+    else
+        OUTPUT=""
+    fi
+    HEIGHT=$(expr $(echo "$OUTPUT"|wc -l) + 7)
+    if [ $? -ne 0 ]; then
+        whiptail --title "Failed" \
+                 --msgbox "$COMMAND $SERVICE failed: $OUTPUT" \
+                 $HEIGHT 48
+    else
+        whiptail --title "Success" \
+                 --msgbox "$COMMAND $SERVICE $STATE OK" \
+                 $HEIGHT 48
+    fi
+    clear
+}
+
+function service_log() {
+    local SERVICE
+    local ARGS
+    SERVICE=$1
+    # Pipe to less in the case too few lines.
+    # This will prevent immediately exiting the view
+    journalctl -u $SERVICE|less
+}
+
+function service_menu() {
+    local SERVICE
+    SERVICE=$1
+    whiptail --title "GOSHIMMERC v${__VERSION__} - $SERVICE Service" \
+             --menu "For logs use SHIFT-g to skip to end of log, or q to exit." \
+             --cancel-button "Back" \
+             25 $WIDTH 16 \
+    "a)" "Status" \
+    "b)" "Start" \
+    "c)" "Stop" \
+    "d)" "Restart" \
+    "e)" "Disable start on reboot" \
+    "f)" "Enable start on reboot" \
+    "g)" "View log" \
+    3>&1 1>&2 2>&3
+}
+
+function service() {
+    local SERVICE
+    local CHOICE
+    SERVICE=$1
+    CHOICE=$(service_menu $SERVICE)
+    RC=$?
+    if [[ $RC -eq 1 ]]; then
+        return
+    fi
+    case "$CHOICE" in
+
+        "a)")
+            service_status $SERVICE
+            service $SERVICE
+            ;;
+
+        "b)")
+            service_cmd $SERVICE start
+            service $SERVICE
+            ;;
+
+        "c)")
+            service_cmd $SERVICE stop
+            service $SERVICE
+            ;;
+
+        "d)")
+            service_cmd $SERVICE restart
+            service $SERVICE
+            ;;
+
+        "e)")
+            service_cmd $SERVICE stop disable
+            service $SERVICE
+            ;;
+
+        "f)")
+            service_cmd $SERVICE "" enable
+            service $SERVICE
+            ;;
+
+        "g)")
+            service_log $SERVICE
+            service $SERVICE
+            ;;
+
+        *)
+            service $SERVICE
+            ;;
+    esac
+}
+
+function services_menu() {
+    whiptail --title "GOSHIMMERC v${__VERSION__} - Node Services" \
+             --menu "Choose an option" \
+             --cancel-button "Back" \
+             25 $WIDTH 16 \
+    "a)" "GOSHIMMER" \
+    "b)" "Nginx" \
+    3>&1 1>&2 2>&3
+}
+
+function services() {
+    local CHOICE
+    CHOICE=$(services_menu)
+    RC=$?
+    if [[ $RC -eq 1 ]]; then
+        return
+    fi
+    case "$CHOICE" in
+
+        "a)")
+            service goshimmer
+            services
+            ;;
+
+        "b)")
+            service nginx
+            services
+            ;;
+
+        *)
+           services
+           ;;
+    esac
+}
+
+### Configure files ###
+function configure_files_menu() {
+    whiptail --title "GOSHIMMERC v${__VERSION__} - Configure Files" \
+             --menu "Choose an option" \
+             --cancel-button "Back" \
+              22 48 12 \
+    "a)" "GOSHIMMER System Config" \
+    "Z)" "Choose Editor" \
+    3>&1 1>&2 2>&3
+}
+
+function configure_files() {
+    local CHOICE
+    CHOICE=$(configure_files_menu)
+    RC=$?
+    if [[ $RC -eq 1 ]]; then
+        return
+    fi
+
+    case "$CHOICE" in
+        "a)")
+            local GOSHIMMER_CONFIG=$(grep ^file /root/.nbctl | cut -d: -f2 | sed 's/ //g')
+            if [[ $? -ne 0 ]] || [ -z "$GOSHIMMER_CONFIG" ]; then
+                whiptail --title "Missing .nbctl data" \
+                         --msgbox "Error: cannot find file value in $HOME/.nbctl" \
+                         8 $WIDTH
+                return 1
+            fi
+            edit_config "$GOSHIMMER_CONFIG" "goshimmer"
+            configure_files
+            ;;
+
+        "Z)")
+            choose_editor
+            configure_files
+            ;;
+
+        *)
+            configure_files
+            ;;
+    esac
+
+}
+
+function main_menu() {
+    local MENU="Choose an option"
+    if check_new_goshimmerc; then
+        MENU="${MENU}\n(*GOSHIMMERC update available)"
+    fi
+
+    whiptail --title "GOSHIMMERC v${__VERSION__} - GOSHIMMER Configuration Menu" \
+             --menu "$MENU" \
+             --cancel-button "Exit" \
+              32 $WIDTH 22 \
+    "a)" "Update GOSHIMMER software" \
+    "b)" "Manage Services" \
+    "c)" "Configure Files" \
+    "d)" "View Per Processes Memory Usage" \
+    "e)" "Update GOSC and node scripts" \
+    3>&1 1>&2 2>&3
+}
+
+function run_main_menu() {
+    local CHOICE
+    CHOICE=$(main_menu)
+    RC=$?
+    if [[ $RC -eq 1 ]]; then
+        exit
+    fi
+
+    case "$CHOICE" in
+        "a)")
+            upgrade_goshimmer
+            run_main_menu
+            ;;
+
+        "b)")
+            services
+            run_main_menu
+            ;;
+
+        "c)")
+            configure_files
+            run_main_menu
+            ;;
+
+        "d)")
+            view_ps_mem
+            run_main_menu
+            ;;
+
+        "e)")
+            update_gosc
+            run_main_menu
+            ;;
+
+        *)
+            run_main_menu
+            ;;
+    esac
+}
+
+# Get OS and version
+set_dist
+
+# Run custom updates
+run_custom_updates
+
+# Run main menu
+run_main_menu
