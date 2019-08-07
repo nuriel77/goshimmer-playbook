@@ -9,6 +9,7 @@
    * [Docker Usage Commands](#docker-usage-commands)
    * [Configuration](#configuration)
    * [Control GoShimmer](#control-goshimmer)
+     * [GoShimmer Controller](#goshimmer-controller)
      * [GoShimmer DB](#goshimmer-db)
      * [GoShimmer Web](#goshimmer-web)
      * [Spam Test](#spam-test)
@@ -77,6 +78,14 @@ GoShimmer logs follow:
 
 ```sh
 journalctl -u goshimmer -e -f
+```
+### Goshimmer Controller
+
+A GUI utility has been added to help manage some basics like controlling the server, viewing logs, upgrading goshimmer etc.
+
+Make sure you are root (`sudo su`) and run:
+```sh
+gosc
 ```
 
 ### Goshimmer DB

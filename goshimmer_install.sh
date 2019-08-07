@@ -442,6 +442,8 @@ https://${PRIMARY_IP}:18081/dashboard
 
 * Log in with username ${ADMIN_USER} and the password you have entered during the installation.
 
+* For easy node management you can use gosc, just type gosc (as root)
+
 Thank you for installing a goshimmer node with the goshimmer-playbook!
 
 EOF
