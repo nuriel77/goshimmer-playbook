@@ -151,7 +151,7 @@ function upgrade_goshimmer() {
     GOSHIMMER_LATEST=$(get_latest_goshimmer_commit)
     if [[ $? -ne 0 ]]; then
         whiptail --title "Error!" \
-                 --msgbox "ERROR: Failed to get GOSHIMMER latest version\n${GOSHIMMER_LATEST}" \
+                 --msgbox "ERROR: Failed to get GoShimmer's latest version\n${GOSHIMMER_LATEST}" \
                  8 $WIDTH
         return 1
     fi
@@ -160,7 +160,7 @@ function upgrade_goshimmer() {
     GOSHIMMER_VERSION=$(grep ^TAG "$SYSCONFIG_FILE" | cut -d= -f2)
     if [[ $? -ne 0 ]]; then
         whiptail --title "Error!" \
-                 --msgbox "ERROR: Failed to get current GOSHIMMER version!" \
+                 --msgbox "ERROR: Failed to get current GoShimmer's version!" \
                  8 $WIDTH
         return 1
     fi
@@ -179,8 +179,8 @@ function upgrade_goshimmer() {
     fi
 
     if [ -z "$NO_CONFIRM" ]; then
-        if ! (whiptail --title "Upgrade GOSHIMMER" \
-                     --yesno "Are you sure you want to upgrade GOSHIMMER from ${GOSHIMMER_VERSION} to ${GOSHIMMER_LATEST}?\nWARNING: only do this if you know what your are doing!" \
+        if ! (whiptail --title "Upgrade GoShimmer" \
+                     --yesno "Are you sure you want to upgrade GoShimmer from ${GOSHIMMER_VERSION} to ${GOSHIMMER_LATEST}?\nWARNING: only do this if you know what your are doing!" \
                      --defaultno \
                      8 $WIDTH) then
             return
@@ -190,19 +190,19 @@ function upgrade_goshimmer() {
     verify_playbook
     if [[ $? -ne 0 ]]; then
         whiptail --title "Error!" \
-                 --msgbox "ERROR: Cannot upgrade GOSHIMMER." \
+                 --msgbox "ERROR: Cannot upgrade GoShimmer." \
                  8 $WIDTH
         return 1
     fi
 
-    echo "Upgrading GOSHIMMER Docker image.... (GOSHIMMER will automatically restart if image gets updated)"
+    echo "Upgrading  Docker image.... (GoShimmer will automatically restart if image gets updated)"
     cd /opt/goshimmer-playbook && ansible-playbook -i inventory \
                                 -v site.yml \
                                 --tags=goshimmer_config
 
     if [[ $? -ne 0 ]]; then
          whiptail --title "Error!" \
-                  --msgbox "ERROR: Failed upgrading GOSHIMMER." \
+                  --msgbox "ERROR: Failed upgrading GoShimmer." \
                   8 $WIDTH
          rm -f "$TFILE"
          return 1
@@ -215,7 +215,7 @@ function upgrade_goshimmer() {
         /bin/systemctl restart goshimmer
     fi
 
-    pause "Update finished successfully. Nevertheless, it is recommended to check the status of GOSHIMMER. Press ENTER to return to menu."
+    pause "Update finished successfully. Nevertheless, it is recommended to check the status of GoShimmer. Press ENTER to return to menu."
     clear
 }
 
@@ -520,7 +520,7 @@ function services_menu() {
              --menu "Choose an option" \
              --cancel-button "Back" \
              16 $WIDTH 8 \
-    "a)" "GOSHIMMER" \
+    "a)" "GoShimmer" \
     "b)" "Nginx" \
     3>&1 1>&2 2>&3
 }
@@ -556,7 +556,7 @@ function configure_files_menu() {
              --menu "Choose an option" \
              --cancel-button "Back" \
               22 48 12 \
-    "a)" "GOSHIMMER System Config" \
+    "a)" "GoShimmer System Config" \
     "Z)" "Choose Editor" \
     3>&1 1>&2 2>&3
 }
@@ -593,11 +593,11 @@ function main_menu() {
         MENU="${MENU}\n(*GOSC update available)"
     fi
 
-    whiptail --title "GOSC v${__VERSION__} - GOSHIMMER Configuration Menu" \
+    whiptail --title "GOSC v${__VERSION__} - GoShimmer Configuration Menu" \
              --menu "$MENU" \
              --cancel-button "Exit" \
               14 $WIDTH 6 \
-    "a)" "Update GOSHIMMER software" \
+    "a)" "Update  software" \
     "b)" "Manage Services" \
     "c)" "Configure Files" \
     "d)" "View Per Processes Memory Usage" \
