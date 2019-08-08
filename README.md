@@ -24,7 +24,7 @@ Supported operating systems:
 * CentOS 7
 * Ubuntu 16/18.04LTS
 * Debian 9.5
-* Raspbian 9.9
+* Raspbian ^9 (Tested on Raspberry Pi 4 with 4 GB RAM)
 
 ## Recommendations
 
