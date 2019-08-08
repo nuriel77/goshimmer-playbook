@@ -8,6 +8,9 @@ if [[ $EUID -ne 0 ]]; then
    exit 1
 fi
 
+# Default value for goshimmer-playbook repository URL
+: "${GIT_REPO_URL:=https://github.com/nuriel77/goshimmer-playbook.git}"
+
 export NEWT_COLORS='
 window=,
 '
@@ -541,7 +544,7 @@ fi
 
 # Clone the repository (optional branch)
 echo "Git cloning goshimmer-playbook repository..."
-git clone $GIT_OPTIONS https://github.com/nuriel77/goshimmer-playbook.git
+git clone $GIT_OPTIONS "$GIT_REPO_URL"
 cd goshimmer-playbook
 
 if [ "$SKIP_SET_SELECTIONS" = true ]; then
