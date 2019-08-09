@@ -496,7 +496,7 @@ elif [[ "$OS" =~ ^Debian ]]; then
     check_arch
     init_debian
 elif [[ "$OS" =~ ^Raspbian ]]; then
-    if [[ ! "$VER" =~ ^9 ]]; then
+    if [[ ! "$VER" =~ ^(9|10) ]]; then
         echo "ERROR: $OS version $VER not supported"
         display_requirements_url
         exit 1

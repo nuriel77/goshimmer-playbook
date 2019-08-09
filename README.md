@@ -24,7 +24,7 @@ Tested on the following operating systems:
 * CentOS 7
 * Ubuntu 16/18.04LTS
 * Debian 9.5 and 10
-* Raspbian 9.9
+* Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
 
 ## Recommendations
 
