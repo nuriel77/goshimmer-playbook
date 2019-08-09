@@ -19,12 +19,12 @@
 
 ## Requirements
 
-Supported operating systems:
+Tested on the following operating systems:
 
 * CentOS 7
 * Ubuntu 16/18.04LTS
-* Debian 9.5
-* Raspbian ^9 (Tested with Raspberry Pi 4 - 4GB RAM)
+* Debian 9.5 and 10
+* Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
 
 ## Recommendations
 
@@ -33,7 +33,7 @@ Supported operating systems:
 
 ## Installation
 
-Run:
+Run (as root):
 ```sh
 bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
 ```
