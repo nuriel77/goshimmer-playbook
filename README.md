@@ -7,6 +7,9 @@
    * [Recommendations](#recommendations)
    * [Installation](#installation)
    * [Docker Usage Commands](#docker-usage-commands)
+     * [Docker Images](#docker-images)
+     * [View Docker Containers](#view-docker-containers)
+     * [GoShimmer Help Output](#goshimmer-help-output)
    * [Configuration](#configuration)
    * [Control GoShimmer](#control-goshimmer)
      * [GoShimmer Controller](#goshimmer-controller)
@@ -40,22 +43,62 @@ bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/mas
 
 This pulls the installation file from the root of this repository and executes it.
 
+The installation will:
+
+* Install latest GoShimmer and start it up.
+* Configure basic security (firewalls) and open all required ports for GoShimmer to operate.
+* Install nginx as a reverse proxy to access GoShimmer's Dashboard, spammer, etc.
+* Add some helpful tools, e.g.: `gosc` and `run-screen` (read below).
 
 ## Docker Usage Commands
 
-View all existing images:
+These are just a few helpful commands to help you find your way around docker:
+
+### Docker Images
+
+List all images
 ```sh
 docker images
 ```
+The output will look something like:
+```sh
+REPOSITORY             TAG                 IMAGE ID            CREATED             SIZE
+iotaledger/goshimmer   588e0ff             506e4a44db0d        2 days ago          23MB
+iotaledger/goshimmer   af1fee9             ffef5d662ba0        6 days ago          23MB
+nginx                  latest              e445ab08b2be        2 weeks ago         126MB
+golang                 1.12-alpine         6b21b4c6e7a3        4 weeks ago         350MB
+alpine                 latest              b7b28af77ffe        4 weeks ago         5.58MB
+```
+Note that an image consists of a "REPOSITORY" name and a "TAG". Above we have 2 `iotaledger/goshimmer` images. The older can be deleted if no longer in use.
 
-View all running docker containers:
+Delete a certain image (or example an older version of goshimmer you don't use anymore):
+```sh
+docker rmi iotaledger/goshimmer:af1fee9
+```
+
+### View Docker Containers
+
+View all docker containers:
 ```sh
 docker ps -a
 ```
 
-Run goshimmer with `--help`: given that we know the image name and the tag:
+### GoShimmer Help Output
+Run goshimmer with `--help`: given that we know the image name and the tag. A quick way to get the tag variable configured:
 ```sh
 docker run --rm -it iotaledger/goshimmer:9fda4b8 --help
+```
+
+You can get the tag by viewing all images, or check the configuration file to see what is the currently used TAG:
+
+On CentOS:
+```sh
+grep ^TAG /etc/sysconfig/goshimmer
+```
+
+On Ubuntu/Debian/Raspbian:
+```sh
+grep ^TAG /etc/default/goshimmer
 ```
 
 ## Configuration
