@@ -177,14 +177,9 @@ If you want to leave the server running with this screen you need to run it with
 
 Please refer to this article on how to use `screen` (you might need to install it): https://linuxize.com/post/how-to-use-linux-screen/
 
-### Update the run-screen script
+## Update the run-screen script or gosc
 
-To update the script run:
-```sh
-wget -O /usr/bin/run-screen https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/roles/goshimmer/files/run-screen.sh
-```
-
-If you don't have `wget`, install it (`yum install wget -y` or Ubuntu/Debian `apt install wget -y`)
+To update any scripts provided by this playbook simply use `gosc` and select to update gosc and scripts option from the menu.
 
 # Donations
 
