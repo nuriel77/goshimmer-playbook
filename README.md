@@ -19,11 +19,11 @@
 
 ## Requirements
 
-Supported operating systems:
+Tested on the following operating systems:
 
 * CentOS 7
 * Ubuntu 16/18.04LTS
-* Debian 9.5
+* Debian 9.5 and 10
 * Raspbian 9.9
 
 ## Recommendations
