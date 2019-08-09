@@ -33,7 +33,7 @@ Supported operating systems:
 
 ## Installation
 
-Run:
+Run (as root):
 ```sh
 bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
 ```
