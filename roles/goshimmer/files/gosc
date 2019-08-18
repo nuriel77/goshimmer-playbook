@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.0.4
+VERSION_TEMP=0.0.5
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -582,6 +582,30 @@ function rerun_playbook() {
     clear
 }
 
+### Clean Dangling Images ###
+function remove_dangling_images() {
+    local DANGLING_IMAGES
+    DANGLING_IMAGES=($(/usr/bin/docker images -f "dangling=true" -q))
+    if [[ ${#DANGLING_IMAGES[@]} -eq 0 ]]; then
+        whiptail --title "No Images" \
+                 --msgbox "INFO: There are no unused images to clean at this time." \
+                 8 $WIDTH
+        return
+    fi
+
+    if ! (whiptail --title "${#DANGLING_IMAGES[@]} Unused Images" \
+                 --yesno "There is/are ${#DANGLING_IMAGES[@]} unused images.\n\nDo you want to remove those to free up some space on the harddrive?" \
+                 --defaultno \
+                 10 $WIDTH) then
+        return
+    else
+        /usr/bin/docker rmi -f $(/usr/bin/docker images -f "dangling=true" -q)
+        [[ $? -ne 0 ]] && MSG="Failed to cleanup unused images! Check output above for errors." || MSG="Cleanup finished successfully!"
+        pause "$MSG Press ENTER to return to menu."
+        clear
+    fi
+}
+
 ### Configure files ###
 function configure_files_menu() {
     whiptail --title "GOSC v${__VERSION__} - Configure Files" \
@@ -628,13 +652,14 @@ function main_menu() {
     whiptail --title "GOSC v${__VERSION__} - GoShimmer Configuration Menu" \
              --menu "$MENU" \
              --cancel-button "Exit" \
-              16 $WIDTH 6 \
+              16 $WIDTH 8 \
     "a)" "Update GoShimmer Software" \
     "b)" "Manage Services" \
     "c)" "Configure Files" \
     "d)" "View Per Processes Memory Usage" \
-    "e)" "Rerun playbook installation" \
-    "f)" "Update GOSC and node scripts" \
+    "e)" "Rerun Playbook Installation" \
+    "f)" "Clean Unused Docker Images" \
+    "g)" "Update GOSC and node scripts" \
     3>&1 1>&2 2>&3
 }
 
@@ -673,6 +698,11 @@ function run_main_menu() {
             ;;
 
         "f)")
+            remove_dangling_images
+            run_main_menu
+            ;;
+
+        "g)")
             update_gosc
             run_main_menu
             ;;
