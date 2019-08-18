@@ -17,6 +17,8 @@
      * [GoShimmer Web](#goshimmer-web)
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
+   * [Appendix](#appendix)
+     * [Install Alongside IRI-Playbook](#install-alongside-iri-playbook)
    * [Donations](#donations)
 <!--te-->
 
@@ -24,7 +26,7 @@
 
 Tested on the following operating systems:
 
-* CentOS 7
+* CentOS 7.x
 * Ubuntu 16/18.04LTS
 * Debian 9.5 and 10
 * Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
@@ -180,6 +182,18 @@ Please refer to this article on how to use `screen` (you might need to install i
 ## Update the run-screen script or gosc
 
 To update any scripts provided by this playbook simply use `gosc` and select to update gosc and scripts option from the menu.
+
+# Appendix
+
+## Install Alongside IRI-Playbook
+
+It is possible to run this installation on an IRI-playbook node. You must have enough RAM and CPU power to accommodate both.
+
+A few notes:
+
+* This has only been tested in the case where you already have a Dockerized IRI-playbook node and run this installer afterwards.
+* GoShimmer-playbook re-uses IRI's HTTPS configuration (SSL certificate)
+* You will also be able to access the web services using the user you have configured for IRI
 
 # Donations
 

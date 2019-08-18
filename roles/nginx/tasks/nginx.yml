@@ -12,6 +12,17 @@
   tags: always
   when: ansible_distribution in debian_family_list
 
+- name: check if this is an IRI node for nginx ssl override config
+  stat:
+    path: "/opt/iri-playbook/group_vars/all/z-ssl-override.yml"
+  register: iri_ssl_override_config
+  tags: always
+
+- name: load override iri ssl override config variables
+  include_vars: "/opt/iri-playbook/group_vars/all/z-ssl-override.yml"
+  when: iri_ssl_override_config.stat.exists == True
+  tags: always
+
 - name: add user to run nginx as
   user:
     name: "{{ nginx_username }}"
@@ -36,6 +47,8 @@
   template:
     src: templates/nginx.service.j2
     dest: "{{ systemd_dir }}/nginx.service"
+    force: "{{ overwrite | default('no') }}"
+    backup: yes
   notify:
     - restart nginx
 
@@ -43,6 +56,8 @@
   template:
     src: templates/nginx.sysconfig.j2
     dest: "{{ config_dir }}/nginx"
+    force: "{{ overwrite | default('no') }}"
+    backup: yes
   notify:
     - restart nginx
 
@@ -51,6 +66,8 @@
     src: ../shared-files/validate_nginx_config.sh
     dest: /usr/local/bin/validate_nginx_config.sh
     mode: 0755
+    force: "{{ overwrite | default('no') }}"
+    backup: yes
 
 - name: ensure nginx config directories exist
   file:
@@ -74,6 +91,8 @@
     src: ../shared-files/ssl.cfg.j2
     dest: /etc/nginx/conf.d/ssl.cfg
     validate: "/usr/local/bin/validate_nginx_config.sh -t %s -d ssl.cfg"
+    force: "{{ overwrite | default('no') }}"
+    backup: yes
   notify:
     - restart nginx
   tags:
