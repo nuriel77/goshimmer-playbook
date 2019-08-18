@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.0.3
+VERSION_TEMP=0.0.4
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -550,6 +550,38 @@ function services() {
     esac
 }
 
+### Rerun playbook installation ###
+function rerun_playbook() {
+
+    if (whiptail --title "Rerun Playbook Method" \
+                 --yesno "Sometimes you may want to rerun the entire installation if you think something has changed and you want to try to reset the node to its initial state.\nThere are two options:\n\n1. simply rerun the installation\n2. use the override method: it will reset any configurations you may have configured manually.\n\nIf you would like to use the override method choose Yes else choose No for normal rerun.\n" \
+                 --defaultno \
+             18 $WIDTH) then
+        local OVERWRITE=yes
+    else
+        local OVERWRITE=no
+    fi
+
+    if ! (whiptail --title "Rerun Playbook Confirm" \
+                   --yesno "This option will allow you to rerun the entire installation.\nUsing override method: $OVERWRITE\n\nWould you like to proceed?\n" \
+                   --defaultno \
+          12 $WIDTH) then
+        return
+    fi
+
+    verify_playbook
+    if [[ $? -ne 0 ]]; then
+        whiptail --title "Error!" \
+                 --msgbox "ERROR: Cannot rerun GoShimmer installation, unknown error." \
+                 8 $WIDTH
+        return 1
+    fi
+    cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v -e "overwrite=$OVERWRITE"
+    [[ $? -ne 0 ]] && MSG="Rerunning the playbook installation failed!!! Check output above for errors." || MSG="Rerun finished successfully!"
+    pause "$MSG Press ENTER to return to menu."
+    clear
+}
+
 ### Configure files ###
 function configure_files_menu() {
     whiptail --title "GOSC v${__VERSION__} - Configure Files" \
@@ -601,7 +633,8 @@ function main_menu() {
     "b)" "Manage Services" \
     "c)" "Configure Files" \
     "d)" "View Per Processes Memory Usage" \
-    "e)" "Update GOSC and node scripts" \
+    "e)" "Rerun playbook installation" \
+    "f)" "Update GOSC and node scripts" \
     3>&1 1>&2 2>&3
 }
 
@@ -635,6 +668,11 @@ function run_main_menu() {
             ;;
 
         "e)")
+            rerun_playbook
+            run_main_menu
+            ;;
+
+        "f)")
             update_gosc
             run_main_menu
             ;;
