@@ -1,8 +1,3 @@
-- name: Install Docker
-  package:
-    name: "{{ docker_package }}"
-    state: "{{ docker_package_state }}"
-
 - name: Ensure Docker is started and enabled
   service:
     name: docker
