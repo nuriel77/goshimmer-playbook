@@ -652,7 +652,7 @@ function main_menu() {
     whiptail --title "GOSC v${__VERSION__} - GoShimmer Configuration Menu" \
              --menu "$MENU" \
              --cancel-button "Exit" \
-              16 $WIDTH 8 \
+             18 $WIDTH 8 \
     "a)" "Update GoShimmer Software" \
     "b)" "Manage Services" \
     "c)" "Configure Files" \
