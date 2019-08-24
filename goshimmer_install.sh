@@ -184,7 +184,7 @@ function init_ubuntu(){
     apt-add-repository ppa:ansible/ansible -y
     add-apt-repository universe -y
     apt-get update -y
-    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail -y
+    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail lsb-release -y
 }
 
 function init_debian(){
@@ -205,7 +205,7 @@ function init_debian(){
     apt-get install dirmngr --install-recommends -y
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
     apt-get update -y
-    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail -y
+    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail lsb-release -y
 }
 
 function inform_reboot() {
