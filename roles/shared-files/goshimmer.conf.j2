@@ -2,7 +2,7 @@
 limit_req_zone $binary_remote_addr zone=goshimmer:{{ nginx_shared_mem_rate_limit | default('2m') }} rate={{ nginx_req_per_sec | default('10') }}r/s;
 
 #
-# goshimmer spammer
+# goshimmer spammer / ui
 #
 upstream goshimmer_spammer {
     server {{ goshimmer_bind_address }}:{{ goshimmer_internal_spammer_port }};
@@ -29,6 +29,14 @@ server {
 
     location / {
         proxy_pass http://goshimmer_spammer;
+    }
+    location /ws {
+        proxy_pass http://goshimmer_spammer;
+        # WebSocket support
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
     }
 }
 
