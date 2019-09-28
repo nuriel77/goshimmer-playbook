@@ -140,15 +140,20 @@ The database is located in `/var/lib/goshimmer/mainnetdb`
 ### Goshimmer Web
 Since August 3rd 2019 nginx has been added to serve as a reverse proxy for some of goshimmer's common services.
 
-Spammer is accessible via the web-browser on port 18080, e.g.: `https://your-ip:18080/spammer`. Note that you'll have to append a command to the URL, e.g: `cmd=start` or stop... See *Spam Test* below.
+#### Check if new UI is enabled
+Make sure that the plugins are configured in `/etc/default/goshimmer` (or `/etc/sysconfig/goshimmer in CentOS). Under the OPTIONS option you should see something like `-node-enable-plugins 'dashboard spammer ui'`. If you are missing `ui`, simply add it and restart goshimmer.
 
-Dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18081/dashboard`.
+#### Access new UI
+New full-feature dashboard UI is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18080/ui`.
 
+#### Old Dashboard
+Older dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18081/dashboard`
+
+#### Certificate Security Warning
 *NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installation.
 
-
 ### Spam Test
-
+If not via the above Web/UI, you can use the command line.
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
 curl "http://localhost:8080/spammer?cmd=start"
