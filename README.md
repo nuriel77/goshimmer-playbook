@@ -141,7 +141,7 @@ The database is located in `/var/lib/goshimmer/mainnetdb`
 Since August 3rd 2019 nginx has been added to serve as a reverse proxy for some of goshimmer's common services.
 
 #### Check if new UI is enabled
-Make sure that the plugins are configured in `/etc/default/goshimmer` (or `/etc/sysconfig/goshimmer in CentOS). Under the OPTIONS option you should see something like `-node-enable-plugins 'dashboard spammer ui'`. If you are missing `ui`, simply add it and restart goshimmer.
+Make sure that the plugins are configured in `/etc/default/goshimmer` (or `/etc/sysconfig/goshimmer` in CentOS). Under the OPTIONS option you should see something like `-node-enable-plugins 'dashboard spammer ui'`. If you are missing `ui`, simply add it and restart goshimmer.
 
 #### Access new UI
 New full-feature dashboard UI is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18080/ui`.
