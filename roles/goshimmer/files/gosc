@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.1.0
+VERSION_TEMP=0.1.1
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -586,22 +586,28 @@ function rerun_playbook() {
 function remove_dangling_images() {
     local DANGLING_IMAGES
     DANGLING_IMAGES=($(/usr/bin/docker images -f "dangling=true" -q))
-    if [[ ${#DANGLING_IMAGES[@]} -eq 0 ]]; then
-        whiptail --title "No Images" \
-                 --msgbox "INFO: There are no unused images to clean at this time." \
-                 8 $WIDTH
-        return
-    fi
-
-    if ! (whiptail --title "${#DANGLING_IMAGES[@]} Unused Images" \
-                 --yesno "There is/are ${#DANGLING_IMAGES[@]} unused images.\n\nDo you want to remove those to free up some space on the harddrive?" \
-                 --defaultno \
-                 10 $WIDTH) then
-        return
-    else
+    if [[ ${#DANGLING_IMAGES[@]} -gt 0 ]]; then
         /usr/bin/docker rmi -f $(/usr/bin/docker images -f "dangling=true" -q)
-        [[ $? -ne 0 ]] && MSG="Failed to cleanup unused images! Check output above for errors." || MSG="Cleanup finished successfully!"
-        pause "$MSG Press ENTER to return to menu."
+        return $?
+    fi
+}
+
+### Cleanup Docker Images ###
+function cleanup_docker_images() {
+    if (whiptail --title "Cleanup Docker Images" \
+                 --yesno "To free up some diskspace you can delete unused docker images and volumes. For services that are temporarily off this isn't a problem: the image will be pulled again once you start up the service.\n\nWould you like proceed?" \
+                 --defaultno \
+                 14 $WIDTH) then
+        echo "Removing unused volumes, please wait..."
+        /usr/bin/docker volume prune -f
+
+        echo "Removing unused images and volumes, please wait..."
+        /usr/bin/docker image prune -a -f
+
+        echo "Removing dangling images, please wait..."
+        remove_dangling_images
+        [[ $? -ne 0 ]] && MSG="Failed to cleanup unused images! Check output above for errors. " || MSG="Cleanup finished successfully! "
+        pause "${MSG}Press ENTER to return to menu."
         clear
     fi
 }
@@ -698,7 +704,7 @@ function run_main_menu() {
             ;;
 
         "f)")
-            remove_dangling_images
+            cleanup_docker_images
             run_main_menu
             ;;
 
