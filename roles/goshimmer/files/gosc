@@ -293,6 +293,23 @@ function update_gosc() {
     exec "$0"
 }
 
+# Used by sort_func to sort an array
+# based on versions.
+function version_sort() {
+    local FIRST_VERSION=$(basename "$1" | cut -d_ -f1)
+    local SECOND_VERSION=$(basename "$2" | cut -d_ -f1)
+    local EVAL_STR='<'
+
+    local GET_BOOL=$(python -c "from distutils.version import StrictVersion; print(StrictVersion('$FIRST_VERSION') $EVAL_STR StrictVersion('$SECOND_VERSION'))")
+    if [[ "$GET_BOOL" == "True" ]]
+    then
+        return 0
+    elif [[ "$GET_BOOL" == "False" ]]
+    then
+        return 1
+    fi
+}
+
 # Generic sort version. Will accept a
 # function that is supposed to return
 # 0 or 1 for sorting
