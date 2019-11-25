@@ -22,8 +22,8 @@ then
     docker rm -f goshimmer
 fi
 
-ENTRY_NODES=$(echo "$OPTIONS" | sed 's/^.*-autopeering-entry-nodes\(.*\)/\1/' | awk -F"'" {'print $2'})
-ENABLED_PLUGINS=$(echo "$OPTIONS" | sed 's/^.-node-enable-plugins\(.*\) /\1/' | awk -F"'" {'print $2'})
+ENTRY_NODES=$(echo "$OPTIONS" | sed 's/^.*--autopeering.entryNodes\(.*\)/\1/' | awk -F"'" {'print $2'})
+ENABLED_PLUGINS=$(echo "$OPTIONS" | sed 's/^.--node.enablePlugins\(.*\) /\1/' | awk -F"'" {'print $2'})
 
 docker run --rm -it --name goshimmer \
    --net=host \
@@ -32,5 +32,5 @@ docker run --rm -it --name goshimmer \
    -v /etc/localtime:/etc/localtime:ro,Z \
    -v /var/lib/goshimmer/mainnetdb:/app/mainnetdb:rw,Z \
    ${SHIMMER_IMAGE}:${TAG} \
-   -node-enable-plugins "$ENABLED_PLUGINS" \
-   -autopeering-entry-nodes "$ENTRY_NODES"
+   --node.enablePlugins "$ENABLED_PLUGINS" \
+   --autopeering.entryNodes "$ENTRY_NODES"
