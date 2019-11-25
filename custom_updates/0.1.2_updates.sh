@@ -6,6 +6,7 @@ if [ -e /etc/default/goshimmer ]
 then
     CONFIG=/etc/default/goshimmer
 elif [ -e /etc/sysconfig/goshimmer ]
+then
     CONFIG=/etc/sysconfig/goshimmer
 else
     >&2 echo "Missing goshimmer configuration file"
