@@ -26,6 +26,9 @@
   docker_image:
     build:
       path: "{{ goshimmer_git_dest }}"
+      pull: no
+      network: host
+      dockerfile: '{{ goshimmer_dockerfile | default(omit) }}'
     name: "{{ goshimmer_image }}"
     tag: "{{ goshimmer_tag }}"
     source: build
