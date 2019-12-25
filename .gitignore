@@ -3,3 +3,6 @@ _site/
 .*.swp
 group_vars/all/z-*.yml
 custom_updates/*.completed
+gilt.dev.yml
+roles/docker
+roles/nginx
