@@ -411,10 +411,10 @@ function set_ssh_port() {
 }
 
 function copy_old_config(){
-    if [ ! -d "/opt/goshimmer-playbook/group_vars/all" ]; then
+    if [ ! -d "${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all" ]; then
         return
     fi
-    CONFIG_FILES=($(find "$GOSHIMMER_PLAYBOOK_DIR/group_vars/all" -name 'z-*'))
+    CONFIG_FILES=($(find "${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all" -name 'z-*'))
     if [ "${#CONFIG_FILES[@]}" -eq 0 ]; then
         return
     fi
@@ -429,7 +429,7 @@ function copy_old_config(){
     SKIP_SET_SELECTIONS="true"
     mkdir -p /tmp/goshimmer-tmp
     for FILE in "${CONFIG_FILES[@]}"; do
-        cp "$FILE" /tmp/goshimmer-tmp/.
+        cp -- "$FILE" /tmp/goshimmer-tmp/.
     done
 }
 
