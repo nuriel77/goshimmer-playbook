@@ -72,6 +72,8 @@
       loop_control:
         loop_var: roleinputvar
   vars:
+    fullnode_user_password: "{{ admin_user_password }}"
+    fullnode_user: "{{ admin_user }}"
     fullnode_roles:
       - docker
       - goshimmer
