@@ -13,13 +13,14 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.1.2
+VERSION_TEMP=0.1.3
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
 : "${GOSC_BRANCH:=master}"
 CUR_DIR="$(pwd)"
-
+GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"
+GOSHIMMER_GIT_URL="https://github.com/nuriel77/goshimmer-playbook.git"
 PID_FILE="/var/run/gosc.pid"
 WIDTH=78
 
@@ -122,10 +123,10 @@ function verify_playbook() {
     local OUTPUT
     local HEIGHT
     local RC
-    if [ ! -d /opt/goshimmer-playbook ]; then
-        cd /opt && git clone -b "$GOSC_BRANCH" https://github.com/nuriel77/goshimmer-playbook.git
+    if [ ! -d "$GOSHIMMER_PLAYBOOK_DIR" ]; then
+        cd /opt && git clone -b "$GOSC_BRANCH" "$GOSHIMMER_GIT_URL"
     fi
-    cd /opt/goshimmer-playbook
+    cd "$GOSHIMMER_PLAYBOOK_DIR"
 
     OUTPUT=$(git pull 2>&1)
     RC=$?
@@ -196,7 +197,7 @@ function upgrade_goshimmer() {
     fi
 
     echo "Upgrading  Docker image.... (GoShimmer will automatically restart if image gets updated)"
-    cd /opt/goshimmer-playbook && ansible-playbook -i inventory \
+    cd "$GOSHIMMER_PLAYBOOK_DIR" && ansible-playbook -i inventory \
                                 -v site.yml \
                                 --tags=goshimmer_config
 
@@ -283,7 +284,7 @@ function update_gosc() {
     fi
 
     # Run playbook script upgrades
-    cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=scripts
+    cd "$GOSHIMMER_PLAYBOOK_DIR" && ansible-playbook -i inventory site.yml -v --tags=scripts
     [[ $? -ne 0 ]] && MSG="Updating GOSC failed!!! Check output above for errors." || MSG="Update finished successfully! Additional updates may apply upon restart of gosc."
     pause "$MSG Press ENTER to return to menu."
     clear
@@ -648,7 +649,7 @@ function rerun_playbook() {
                  8 $WIDTH
         return 1
     fi
-    cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v -e "overwrite=$OVERWRITE"
+    cd "$GOSHIMMER_PLAYBOOK_DIR" && ansible-playbook -i inventory site.yml -v -e "overwrite=$OVERWRITE"
     [[ $? -ne 0 ]] && MSG="Rerunning the playbook installation failed!!! Check output above for errors." || MSG="Rerun finished successfully!"
     pause "$MSG Press ENTER to return to menu."
     clear
