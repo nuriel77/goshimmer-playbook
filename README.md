@@ -32,7 +32,7 @@ Tested on the following operating systems:
 * Debian 9.5 and 10
 * Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
 
-Architectures (arm/aarch 32 and 64 bit)
+Architectures (x86_64, arm/aarch 32 and 64 bit)
 
 ## Recommendations
 
