@@ -6,6 +6,7 @@
    * [Requirements](#requirements)
    * [Recommendations](#recommendations)
    * [Installation](#installation)
+     * [For Development](#for-development)
    * [Docker Usage Commands](#docker-usage-commands)
      * [Docker Images](#docker-images)
      * [View Docker Containers](#view-docker-containers)
@@ -51,6 +52,15 @@ The installation will:
 * Configure basic security (firewalls) and open all required ports for GoShimmer to operate.
 * Install nginx as a reverse proxy to access GoShimmer's Dashboard, spammer, etc.
 * Add some helpful tools, e.g.: `gosc` and `run-screen` (read below).
+
+### For Development
+
+### For Development
+
+If you are working on a fork in a feature branch or happen to directly contribute to this repository you can run the installer pointing it to the appropriate branch, e.g.:
+```sh
+BRANCH="dev-branch"; GIT_OPTIONS="-b $BRANCH" bash <(curl -s "https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/$BRANCH/goshimmer_install.sh")
+```
 
 ## Docker Usage Commands
 
