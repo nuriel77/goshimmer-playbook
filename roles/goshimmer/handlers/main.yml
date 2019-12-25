@@ -4,3 +4,6 @@
     state: restarted
     daemon_reload: yes
     enabled: yes
+  when:
+    - not skip_goshimmer_restart|default(False)|bool
+    - not goshimmer_started.changed

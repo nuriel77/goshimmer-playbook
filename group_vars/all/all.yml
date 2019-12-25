@@ -16,3 +16,5 @@ redhat_family_list:
 
 # UFW logging: on, off, low, medium, high or full.
 ufw_logging: off
+
+install_docker: true

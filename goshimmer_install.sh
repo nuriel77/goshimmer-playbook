@@ -1,11 +1,19 @@
 #!/usr/bin/env bash
+# This script will auto-detect the OS and Version
+# It will update system packages and install Ansible and git
+# Then it will clone the goshimmer-playbook and run it.
+
+# Goshimmer playbook: https://github.com/nuriel77/goshimmer-playbook
+# By Nuriel Shem-Tov (https://github.com/nuriel77), December 2019
+# Copyright (c) 2019 Nuriel Shem-Tov
+
 set -o pipefail
 set -e
 
 if [[ $EUID -ne 0 ]]; then
-   echo "This script must be run as user root"
-   echo "Please change to root using: 'sudo su -' and re-run the script"
-   exit 1
+    echo "This script must be run as user root"
+    echo "Please change to root using: 'sudo su -' and re-run the script"
+    exit 1
 fi
 
 # Default value for goshimmer-playbook repository URL
@@ -15,10 +23,19 @@ export NEWT_COLORS='
 window=,
 '
 
-if grep -q 'GoShimmer PLAYBOOK' /etc/motd; then
+declare -g GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"
+declare -g INSTALLER_OVERRIDE_FILE="${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all/z-installer-override.yml"
+
+# Configurable install options passed to ansible-playbook command
+: "${INSTALL_OPTIONS:=}"
+
+# Set minimum ram, used to set profile.
+: "${MIN_RAM_KB:=1572864}"
+
+if test -e /etc/motd && grep -q 'GoShimmer PLAYBOOK' /etc/motd; then
     :>/etc/motd
 else
-    if [ -f "/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml" ] && [ "$1" != "rerun" ]
+    if [ -f "$INSTALLER_OVERRIDE_FILE" ] && [ "$1" != "rerun" ]
     then
         if ! (whiptail --title "Confirmation" \
                  --yesno "It looks like a previous installation already exists.\n\nRunning the installaer on an already working node is not recommended.\n\nIf you want to re-run only the playbook check the documentation or ask for assistance on Discord #goshimmer-discussion channel.\n\nPlease confirm you want to proceed with the installation?" \
@@ -129,10 +146,10 @@ Select/unselect options using space and click Enter to proceed.\n" 12 78 2 \
     do
         case $CHOICE in
             '"SKIP_INSTALL_NGINX"')
-                echo "install_nginx: false" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
+                echo "install_nginx: false" >>"$INSTALLER_OVERRIDE_FILE"
                 ;;
             '"SKIP_FIREWALL_CONFIG"')
-                echo "configure_firewall: false" >>/opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
+                echo "configure_firewall: false" >>"$INSTALLER_OVERRIDE_FILE"
                 ;;
             *)
                 ;;
@@ -142,7 +159,7 @@ Select/unselect options using space and click Enter to proceed.\n" 12 78 2 \
     INSTALL_OPTIONS+=" $SKIP_TAGS"
 }
 
-function init_centos(){
+function init_centos_7(){
     echo "Updating system packages..."
     yum update -y
 
@@ -167,6 +184,29 @@ function init_centos(){
     yum install ansible git expect-devel cracklib newt -y
 }
 
+function init_centos_8(){
+    echo "Updating system packages..."
+    dnf update -y --nobest
+
+    echo "Install epel-release..."
+    dnf install epel-release -y
+
+    echo "Update epel packages..."
+    dnf update -y --nobest
+
+    echo "Install yum utils..."
+    dnf install -y yum-utils
+
+    local OUTPUT=$(needs-restarting)
+    if [[ "$OUTPUT" != "" ]]; then
+        [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
+    fi
+
+    echo "Installing Ansible, git and other requirements..."
+    dnf install git expect newt python3-pip cracklib newt -y
+    pip3 --disable-pip-version-check install ansible
+}
+
 function init_ubuntu(){
     echo "Updating system packages..."
     apt update -qqy --fix-missing
@@ -184,7 +224,14 @@ function init_ubuntu(){
     apt-add-repository ppa:ansible/ansible -y
     add-apt-repository universe -y
     apt-get update -y
-    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail lsb-release -y
+    apt-get install ansible\
+                    git\
+                    expect-dev\
+                    tcl\
+                    libcrack2\
+                    cracklib-runtime\
+                    whiptail\
+                    lsb-release -y
 }
 
 function init_debian(){
@@ -205,7 +252,14 @@ function init_debian(){
     apt-get install dirmngr --install-recommends -y
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 93C4A3FD7BB9C367
     apt-get update -y
-    apt-get install ansible git expect-dev tcl libcrack2 cracklib-runtime whiptail lsb-release -y
+    apt-get install ansible\
+                    git\
+                    expect-dev\
+                    tcl\
+                    libcrack2\
+                    cracklib-runtime\
+                    whiptail\
+                    lsb-release -y
 }
 
 function inform_reboot() {
@@ -330,13 +384,13 @@ function set_primary_ip()
 }
 
 function display_requirements_url() {
-    echo "Only Debian, Ubuntu 18.04LTS, Raspbian and CentOS 7 are supported."
+    echo "Only Debian, Ubuntu 18.04LTS, Raspbian, CentOS 7 and 8 are supported."
 }
 
 function check_arch() {
     # Check architecture
     ARCH=$(uname -m)
-    local REGEXP="x86_64|armv7l"
+    local REGEXP="x86_64|armv7l|armv8l|aarch64|aarch32|armhf"
     if [[ ! "$ARCH" =~ $REGEXP ]]; then
         echo "ERROR: $ARCH architecture not supported"
         display_requirements_url
@@ -357,10 +411,10 @@ function set_ssh_port() {
 }
 
 function copy_old_config(){
-    if [ ! -d "/opt/goshimmer-playbook/group_vars/all" ]; then
+    if [ ! -d "${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all" ]; then
         return
     fi
-    CONFIG_FILES=($(find /opt/goshimmer-playbook/group_vars/all -name 'z-*'))
+    CONFIG_FILES=($(find "${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all" -name 'z-*'))
     if [ "${#CONFIG_FILES[@]}" -eq 0 ]; then
         return
     fi
@@ -375,7 +429,7 @@ function copy_old_config(){
     SKIP_SET_SELECTIONS="true"
     mkdir -p /tmp/goshimmer-tmp
     for FILE in "${CONFIG_FILES[@]}"; do
-        cp "$FILE" /tmp/goshimmer-tmp/.
+        cp -- "$FILE" /tmp/goshimmer-tmp/.
     done
 }
 
@@ -403,7 +457,7 @@ function run_playbook(){
 -------------------- GoShimmer PLAYBOOK --------------------
 It seems you have rebooted the node. You can proceed with
 the installation by running the command:
-/opt/goshimmer-playbook/rerun.sh
+${GOSHIMMER_PLAYBOOK_DIR}/rerun.sh
 (make sure you are user root before you run it)
 -------------------- GoShimmer PLAYBOOK --------------------
 EOF
@@ -415,7 +469,7 @@ most probably to enable a functionality required by the playbook.
 You can reboot the server using the command 'reboot'.
 Once the server is back online you can use the following command
 to proceed with the installation (become user root first):
-/opt/goshimmer-playbook/rerun.sh
+${GOSHIMMER_PLAYBOOK_DIR}/rerun.sh
 -------------------- NOTE --------------------
 EOF
 
@@ -430,7 +484,7 @@ EOF
     # This could happen on script re-run
     # due to reboot, therefore the variable is empty
     if [ -z "$ADMIN_USER" ]; then
-        ADMIN_USER=$(grep ^admin_user /opt/goshimmer-playbook/group_vars/all/z-installer-override.yml | awk {'print $2'})
+        ADMIN_USER=$(grep ^admin_user "$INSTALLER_OVERRIDE_FILE" | awk {'print $2'})
     fi
 
     OUTPUT=$(cat <<EOF
@@ -439,7 +493,7 @@ EOF
 
 * You should be able to connect to the dashboard on (and skip the warning in the browser):
 
-https://${PRIMARY_IP}:18081/dashboard
+https://${PRIMARY_IP}:18080/ui
 
 * Note that your IP might be different as this one has been auto-detected in best-effort.
 
@@ -472,13 +526,13 @@ set_dist
 
 # Check OS version compatibility
 if [[ "$OS" =~ ^(CentOS|Red) ]]; then
-    if [ "$VER" != "7" ]; then
+    if [[ ! "$VER" =~ ^(7|8) ]]; then
         echo "ERROR: $OS version $VER not supported"
         display_requirements_url
         exit 1
     fi
     check_arch
-    init_centos
+    init_centos_$VER
 elif [[ "$OS" =~ ^Ubuntu ]]; then
     if [[ ! "$VER" =~ ^(16|17|18) ]]; then
         echo "ERROR: $OS version $VER not supported"
@@ -539,13 +593,13 @@ if [ -d "/opt/goshimmer-playbook" ]; then
     copy_old_config
     echo "Backing up older goshimmer-playbook directory..."
     rm -rf goshimmer-playbook.backup
-    mv goshimmer-playbook goshimmer-playbook.backup
+    mv -- goshimmer-playbook goshimmer-playbook.backup
 fi
 
 # Clone the repository (optional branch)
 echo "Git cloning goshimmer-playbook repository..."
 git clone $GIT_OPTIONS "$GIT_REPO_URL"
-cd goshimmer-playbook
+cd "$GOSHIMMER_PLAYBOOK_DIR"
 
 if [ "$SKIP_SET_SELECTIONS" = true ]; then
     # Copy old configuration

@@ -1,10 +1,5 @@
-install_nginx: true
-nginx_image: nginx
-nginx_tag: latest
-nginx_username: www-data
-nginx_shared_mem_rate_limit: 2m
-nginx_req_per_sec: 10
-vhost_nginx_burst_limit: 25
+nginx_vhost_files:
+  - src: '../shared-files/goshimmer.conf.j2'
 
 goshimmer_bind_address: 127.0.0.1
 goshimmer_internal_spammer_port: '8080'

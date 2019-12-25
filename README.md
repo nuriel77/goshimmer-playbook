@@ -6,6 +6,7 @@
    * [Requirements](#requirements)
    * [Recommendations](#recommendations)
    * [Installation](#installation)
+     * [For Development](#for-development)
    * [Docker Usage Commands](#docker-usage-commands)
      * [Docker Images](#docker-images)
      * [View Docker Containers](#view-docker-containers)
@@ -26,10 +27,12 @@
 
 Tested on the following operating systems:
 
-* CentOS 7.x
+* CentOS 7.x, CentOS 8.x
 * Ubuntu 16/18.04LTS
 * Debian 9.5 and 10
 * Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
+
+Architectures (arm/aarch 32 and 64 bit)
 
 ## Recommendations
 
@@ -51,6 +54,15 @@ The installation will:
 * Configure basic security (firewalls) and open all required ports for GoShimmer to operate.
 * Install nginx as a reverse proxy to access GoShimmer's Dashboard, spammer, etc.
 * Add some helpful tools, e.g.: `gosc` and `run-screen` (read below).
+
+### For Development
+
+### For Development
+
+If you are working on a fork in a feature branch or happen to directly contribute to this repository you can run the installer pointing it to the appropriate branch, e.g.:
+```sh
+BRANCH="dev-branch"; GIT_OPTIONS="-b $BRANCH" bash <(curl -s "https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/$BRANCH/goshimmer_install.sh")
+```
 
 ## Docker Usage Commands
 

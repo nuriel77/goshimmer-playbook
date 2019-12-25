@@ -1,9 +1,0 @@
-- name: allow goshimmer extra ports in firewall
-  ufw:
-    rule: allow
-    direction: in
-    port: "{{ item }}"
-    proto: "tcp"
-  with_items:
-    - "{{ goshimmer_external_spammer_port }}"
-    - "{{ goshimmer_external_dashboard_port }}"
