@@ -433,6 +433,18 @@ function copy_old_config(){
     done
 }
 
+function skip_all_updates() {
+    readarray -t TO_RUN_UPDATES < <(find "${GOSHIMMER_PLAYBOOK_DIR}/custom_updates/" -maxdepth 1 -type f -name '*_updates.sh')
+
+    # Return if nothing to update
+    ((${#TO_RUN_UPDATES[@]} == 0)) && { clear; return; }
+
+    for FILE in "${TO_RUN_UPDATES[@]}"
+    do
+        touch "${FILE}.completed"
+    done
+}
+
 function run_playbook(){
     # Ansible output log file
     LOGFILE=/var/log/goshimmer-playbook-$(date +%Y%m%d%H%M).log
@@ -600,6 +612,9 @@ fi
 echo "Git cloning goshimmer-playbook repository..."
 git clone $GIT_OPTIONS "$GIT_REPO_URL"
 cd "$GOSHIMMER_PLAYBOOK_DIR"
+
+# first installation? Skip all upgrades
+skip_all_updates
 
 if [ "$SKIP_SET_SELECTIONS" = true ]; then
     # Copy old configuration
