@@ -121,3 +121,11 @@
 # Image
 - name: build goshimmer image task
   import_tasks: image-goshimmer.yml
+
+- name: start goshimmer
+  systemd:
+    name: goshimmer.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  register: goshimmer_started
