@@ -15,7 +15,9 @@
       ignore_errors: "{{ ignore_assert_errors }}"
 
     - name: install local dependencies
-      tags: local_deps
+      tags:
+        - always
+        - check_version
       apt:
         name: "{{ packages }}"
         state: present
@@ -25,7 +27,9 @@
       when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
 
     - name: install local dependencies
-      tags: local_deps
+      tags:
+        - always
+        - check_version
       package:
         name: "{{ packages }}"
       vars:
@@ -33,10 +37,12 @@
       when: ansible_distribution == 'CentOS'
 
     - name: install gilt
+      tags:
+        - always
+        - check_version
       pip:
         name: python-gilt
         state: present
-      tags: local_deps
 
     - name: run gilt overlay
       command: "gilt --config {{ gilt_config | default('gilt.yml') }} overlay"
