@@ -23,7 +23,7 @@ export NEWT_COLORS='
 window=,
 '
 
-declare -g GOSHIMMER_PLAYBOOK_DIR="/opt/hornet-playbook"
+declare -g GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"
 declare -g INSTALLER_OVERRIDE_FILE="${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all/z-installer-override.yml"
 
 # Configurable install options passed to ansible-playbook command
