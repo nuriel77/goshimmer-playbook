@@ -532,7 +532,7 @@ if [[ "$OS" =~ ^(CentOS|Red) ]]; then
         exit 1
     fi
     check_arch
-    init_centos_7
+    init_centos_$VER
 elif [[ "$OS" =~ ^Ubuntu ]]; then
     if [[ ! "$VER" =~ ^(16|17|18) ]]; then
         echo "ERROR: $OS version $VER not supported"
