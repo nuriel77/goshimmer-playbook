@@ -493,7 +493,7 @@ EOF
 
 * You should be able to connect to the dashboard on (and skip the warning in the browser):
 
-https://${PRIMARY_IP}:18081/dashboard
+https://${PRIMARY_IP}:18080/ui
 
 * Note that your IP might be different as this one has been auto-detected in best-effort.
 
