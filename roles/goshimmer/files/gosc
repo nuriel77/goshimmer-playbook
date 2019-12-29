@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.1.3
+VERSION_TEMP=0.1.4
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -98,7 +98,7 @@ function set_dist() {
     # Set path to goshimmer's configuration file
     if [[ "$OS" =~ ^(CentOS|Red) ]]; then
         export SYSCONFIG_FILE=/etc/sysconfig/goshimmer
-    elif [[ "$OS" =~ ^(Ubuntu|Debian) ]]; then
+    elif [[ "$OS" =~ ^(Ubuntu|Debian|Raspbian) ]]; then
         export SYSCONFIG_FILE=/etc/default/goshimmer
     fi
 }
