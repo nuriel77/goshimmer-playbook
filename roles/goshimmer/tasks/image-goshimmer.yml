@@ -33,6 +33,7 @@
     tag: "{{ goshimmer_tag }}"
     source: build
   notify:
+    - start goshimmer
     - restart goshimmer
   tags: goshimmer_image_build
   register: build_image_status

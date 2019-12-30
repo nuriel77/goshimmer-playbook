@@ -117,6 +117,7 @@
     force: "{{ overwrite | default('no') }}"
     backup: yes
   notify:
+    - start goshimmer
     - restart goshimmer
 
 - name: copy goshimmer systemd file
@@ -126,16 +127,9 @@
   tags:
     - goshimmer_service_file
   notify:
+    - start goshimmer
     - restart goshimmer
 
 # Image
 - name: build goshimmer image task
   import_tasks: image-goshimmer.yml
-
-- name: start goshimmer
-  systemd:
-    name: goshimmer.service
-    state: started
-    daemon_reload: yes
-    enabled: yes
-  register: goshimmer_started

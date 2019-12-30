@@ -1,3 +1,11 @@
+- name: start goshimmer
+  systemd:
+    name: goshimmer.service
+    state: started
+    daemon_reload: yes
+    enabled: yes
+  register: goshimmer_started
+
 - name: restart goshimmer
   systemd:
     name: goshimmer.service
