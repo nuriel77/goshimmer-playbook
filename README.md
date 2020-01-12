@@ -1,6 +1,6 @@
 # GoShimmer Playbook
 
-This repository installs a fully operational [IOTA GOSHIMMER](https://github.com/iotaledger/goshimme) node.
+This repository installs a fully operational [IOTA GOSHIMMER](https://github.com/iotaledger/goshimmer) node.
 
 *Table of contents*
 
