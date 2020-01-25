@@ -199,7 +199,7 @@ function init_centos_7(){
     set -e
 
     echo "Installing Ansible and git..."
-    yum install ansible git expect-devel cracklib newt -y
+    yum install ansible git expect-devel cracklib newt redhat-lsb-core -y
 }
 
 function init_centos_8(){
@@ -221,7 +221,7 @@ function init_centos_8(){
     fi
 
     echo "Installing Ansible, git and other requirements..."
-    dnf install git expect newt python3-pip cracklib newt -y
+    dnf install git expect newt python3-pip cracklib newt redhat-lsb-core -y
     pip3 --disable-pip-version-check install ansible
 }
 
