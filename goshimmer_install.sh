@@ -43,6 +43,7 @@ else
                  16 78); then
             exit 1
         fi
+        SKIP_CONFIRM="true"
     fi
 fi
 
@@ -68,10 +69,13 @@ Welcome to IOTA's goShimmer (unofficial) installer!
 5. If you already have a configured server, re-running this script might overwrite previous configuration.
 EOF
 
-read -p "Do you wish to proceed? [y/N] " yn
-if echo "$yn" | grep -v -iq "^y"; then
-    echo Cancelled
-    exit 1
+if [[ "$SKIP_CONFIRM" != true ]]
+then
+    read -p "Do you wish to proceed? [y/N] " yn
+    if echo "$yn" | grep -v -iq "^y"; then
+        echo Cancelled
+        exit
+    fi
 fi
 
 #################
