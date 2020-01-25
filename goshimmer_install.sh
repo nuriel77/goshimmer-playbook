@@ -223,6 +223,8 @@ function init_centos_8(){
     echo "Installing Ansible, git and other requirements..."
     dnf install git expect newt python3-pip cracklib newt redhat-lsb-core -y
     pip3 --disable-pip-version-check install ansible
+    echo "$PATH" | grep -q '/usr/local/bin' || export PATH=$PATH:/usr/local/bin
+    grep PATH /root/.bashrc | grep -q '/usr/local/bin' || echo 'export PATH=$PATH:/usr/local/bin' >> /root/.bashrc
 }
 
 function init_ubuntu(){
