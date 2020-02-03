@@ -147,7 +147,7 @@
   notify:
     - restart goshimmer
   tags:
-    - goshimmer_config
+    - goshimmer_config_file
 
 # Goshimmer system config
 - name: copy goshimmer environment config file
