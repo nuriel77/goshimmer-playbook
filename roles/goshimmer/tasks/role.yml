@@ -1,3 +1,14 @@
+- set_fact:
+    server_arch: >-
+      {%- if ansible_architecture in ["armv7l", "armhf", "aarch32"] -%}
+      armhf
+      {%- elif ansible_architecture in ["armv8l", "aarch64"] -%}
+      arm64
+      {%- elif ansible_architecture == "x86_64" -%}
+      amd64
+      {%- endif -%}
+  tags: always
+
 - import_tasks: deps_apt.yml
   tags:
     - goshimmer_deps_apt
@@ -15,6 +26,14 @@
 - import_tasks: pip.yml
   tags:
     - py_docker
+
+#- import_tasks: tanglemonitor.yml
+#  tags:
+#    - tanglemonitor_role
+
+- import_tasks: tanglevisualiser.yml
+  tags:
+    - tanglevisualiser_role
 
 - name: set ip variable if not set
   set_fact:

@@ -15,7 +15,7 @@
     "port": {{ goshimmer_autopeering_port | default('14626') }}
   },
   "dashboard": {
-    "bindAddress": "{{ goshimmer_dashboard_bind_address | default('0.0.0.0') }}:{{ goshimmer_dashboard_bind_port | default('8081') }}",
+    "bindAddress": "{{ goshimmer_dashboard_internal_address | default('0.0.0.0') }}:{{ goshimmer_dashboard_internal_port | default('18081') }}",
     "dev": {{ goshimmer_dashboard_dev_enabled | default('false') | lower | string }},
     "basic_auth": {
       "enabled": {{ goshimmer_dashboard_basic_auth | default('false') | lower | string }},
@@ -30,7 +30,7 @@
     "port": {{ goshimmer_gossip_port | default('14666') }}
   },
   "graph": {
-    "bindAddress": "{{ goshimmer_graph_bind_address | default('0.0.0.0') }}:{{ goshimmer_graph_bind_port | default('8082') }}",
+    "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('18082') }}",
     "domain": "{{ goshimmer_domain_address | default('') }}",
     "networkName": "GoShimmer",
     "socketIOPath": "socket.io-client/dist/socket.io.js",
@@ -60,6 +60,6 @@
       "privateKey": "{{ goshimmer_webapi_auth_private_key | default('') }}",
       "username": "{{ fullnode_user }}"
     },
-    "bindAddress": "{{ goshimmer_webapi_bind_address | default('0.0.0.0') }}:{{ goshimmer_webapi_bind_port | default('8080') }}"
+    "bindAddress": "{{ goshimmer_webapi_internal_address | default('0.0.0.0') }}:{{ goshimmer_webapi_internal_port | default('18080') }}"
   }
 }

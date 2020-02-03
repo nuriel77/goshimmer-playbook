@@ -14,6 +14,7 @@ goshimmer_group: shimmer
 goshimmer_home_path: /var/lib/goshimmer
 goshimmber_db_path: "{{ goshimmer_home_path }}/mainnetdb"
 
+# Ports
 goshimmer_ports:
   autopeering:
     port: 14626
@@ -31,12 +32,21 @@ goshimmer_ports:
     port: 8080
     proto: tcp
     allow: yes
+  graph:
+    port: 8082
+    proto: tcp
+    allow: yes
 
 #goshimmer_ports:
 #  - {port: 14666, proto: tcp}
 #  - {port: 14626, proto: udp}
 #  - {port: 14626, proto: tcp}
 
+# Plugins
+goshimmer_enable_plugins: []
+goshimmer_disable_plugins:
+  - spammer
+  - graph
 
 goshimmer_autopeering_entrynodes:
   - "V8LYtWWcPYYDTTXLeIEFjJEuWlsjDiI0+Pq/Cx9ai6g=@116.202.49.178:14626"
@@ -45,13 +55,27 @@ goshimmer_autopeering_port: "{{ goshimmer_ports.autopeering.port }}"
 goshimmer_gossip_port: "{{ goshimmer_ports.gossip.port }}"
 goshimmer_network_bind_address: 0.0.0.0
 
-goshimmer_dashboard_bind_address: 0.0.0.0
-goshimmer_dashboard_bind_port: "{{ goshimmer_ports.dashboard.port }}"
+# Dashboard
+goshimmer_dashboard_external_address: 0.0.0.0
+goshimmer_dashboard_internal_address: 127.0.0.1
+goshimmer_dashboard_internal_port: "18081"
+goshimmer_dashboard_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
 
-goshimmer_disable_plugins: []
-goshimmer_enable_plugins: []
-
-goshimmer_webapi_bind_address: 0.0.0.0
-goshimmer_webapi_bind_port: "{{ goshimmer_ports.webapi.port }}"
+# Webapi
+goshimmer_webapi_external_address: 0.0.0.0
+goshimmer_webapi_internal_address: 127.0.0.1
+goshimmer_webapi_internal_port: "18080"
+goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
 
 goshimmer_logger_level: info
+
+# Tangle Visualiser/Graph config
+goshimmer_graph_external_address: 0.0.0.0
+goshimmer_graph_internal_address: 127.0.0.1
+goshimmer_graph_internal_port: "18083"
+goshimmer_graph_proxy_port: "{{ goshimmer_ports.graph.port }}"
+tanglevisualiser_git_url: "https://github.com/glumb/IOTAtangle.git"
+socketio_git_url: "https://github.com/socketio/socket.io-client.git"
+tanglevisualiser_path: "{{ goshimmer_home_path }}/tanglevisualiser"
+socketio_path: "{{ goshimmer_home_path }}/socket.io-client"
+goshimmer_mqtt_ws_path: '/ws'

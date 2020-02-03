@@ -1,8 +1,3 @@
 nginx_vhost_files:
   - src: '../shared-files/goshimmer.conf.j2'
-
-goshimmer_bind_address: 127.0.0.1
-goshimmer_internal_spammer_port: '8080'
-goshimmer_external_spammer_port: '18080'
-goshimmer_internal_dashboard_port: '8081'
-goshimmer_external_dashboard_port: '18081'
+  - src: '../shared-files/tanglevisualiser.conf.j2'
