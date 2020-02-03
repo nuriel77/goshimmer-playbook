@@ -19,6 +19,8 @@ ExecStart=/usr/bin/docker run \
   -v /etc/localtime:/etc/localtime:ro,Z \
   -v {{ goshimmer_home_path }}/config.json:/app/config.json:ro,Z \
   -v {{ goshimmber_db_path }}:/app/mainnetdb:rw,Z \
+  -v {{ tanglevisualiser_path }}:/app/IOTAtangle:ro,Z \
+  -v {{ socketio_path }}:/app/socket.io-client:ro,Z \
   --ulimit nofile={{ goshimmer_nofile_limit }}:{{ goshimmer_nofile_limit }} \
   $DOCKER_OPTS \
   ${SHIMMER_IMAGE}:${TAG} \
