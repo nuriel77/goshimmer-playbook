@@ -4,8 +4,8 @@ limit_req_zone $binary_remote_addr zone=goshimmer:{{ nginx_shared_mem_rate_limit
 #
 # goshimmer webapi
 #
-upstream goshimmer_ui {
-    server {{ goshimmer_webapi_internal_address }}:{{ goshimmer_internal_webapi_port }};
+upstream goshimmer_spammer {
+    server {{ goshimmer_webapi_internal_address }}:{{ goshimmer_webapi_internal_port }};
 }
 
 server {
@@ -27,16 +27,8 @@ server {
     auth_basic "Restricted";
     auth_basic_user_file /etc/nginx/.htpasswd;
 
-    location /ws {
-        proxy_pass http://goshimmer_ui/ws;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_read_timeout 86400;
-    }
-
     location / {
-        proxy_pass http://goshimmer_ui;
+        proxy_pass http://goshimmer_spammer;
     }
 }
 
@@ -65,6 +57,14 @@ server {
     # For password authentication use a htpasswd file
     auth_basic "Restricted";
     auth_basic_user_file /etc/nginx/.htpasswd;
+
+    location /ws {
+        proxy_pass http://goshimmer_dashboard/ws;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 86400;
+    }
 
     location / {
         proxy_pass http://goshimmer_dashboard;

@@ -14,4 +14,4 @@
     enabled: yes
   when:
     - not skip_goshimmer_restart|default(False)|bool
-    - not goshimmer_started.changed
+    - not goshimmer_started.changed|default(False)|bool

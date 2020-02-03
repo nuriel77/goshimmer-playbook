@@ -51,8 +51,8 @@
     "externalAddress": "auto"
   },
   "node": {
-    "disableplugins": {{ goshimmer_disable_plugins | to_nice_json(indent=4) }},
-    "enableplugins": {{ goshimmer_enable_plugins | to_nice_json(indent=4) }}
+    "disableplugins": {{ goshimmer_disable_plugins | to_nice_json(indent=6) }},
+    "enableplugins": {{ goshimmer_enable_plugins | to_nice_json(indent=6) }}
   },
   "webapi": {
     "auth": {
