@@ -65,20 +65,46 @@
     state: present
     reload: yes
 
-- name: clone goshimmer repository
-  git:
-    repo: '{{ goshimmer_git_url }}'
-    dest: '{{ goshimmer_git_dest }}'
+#- name: clone goshimmer repository
+#  git:
+#    repo: '{{ goshimmer_git_url }}'
+#    dest: '{{ goshimmer_git_dest }}'
 
 # Clone goshimmer
-- name: get latest goshimmer git commit
-  shell: "cd {{ goshimmer_git_dest }} && git rev-parse --short HEAD"
-  register: shimmer_commit_hash
-  changed_when: false
+#- name: get latest goshimmer git commit
+#  shell: "cd {{ goshimmer_git_dest }} && git rev-parse --short HEAD"
+#  register: shimmer_commit_hash
+#  changed_when: false
 
-- name: set goshimmer image tag
-  set_fact:
-    goshimmer_tag: "{{ shimmer_commit_hash.stdout }}"
+#- name: set goshimmer image tag
+#  set_fact:
+#    goshimmer_tag: "{{ shimmer_commit_hash.stdout }}"
+
+- name: goshimmer source code
+  tags:
+    - goshimmer_source
+    - build_goshimmer_image
+  block:
+
+    - name: get latest goshimmer release
+      uri:
+        url: "{{ goshimmer_releases_url }}/latest"
+        return_content: yes
+      register: goshimmer_release_json
+
+    - name: get release tag
+      set_fact:
+        goshimmer_tag: >-
+          {%- if goshimmer_version == 'latest' -%}
+            {{ goshimmer_release_json.content | from_json | json_query('tag_name') }}
+          {%- else -%}
+            {%- if goshimmer_version[0] != 'v' -%}v{%- endif -%}{{ goshimmer_version }}
+          {%- endif -%}
+    - name: clone goshimmer repository
+      git:
+        repo: '{{ goshimmer_git_url }}'
+        dest: '{{ goshimmer_git_dest }}'
+        version: '{{ goshimmer_tag }}'
 
 # User
 - name: add user to run goshimmer as
@@ -108,6 +134,20 @@
   with_items:
     - "{{ goshimmer_home_path }}"
     - "{{ goshimmber_db_path }}"
+
+- name: goshimmer config
+  template:
+    src: templates/goshimmer.config.json.j2
+    dest: "{{ goshimmer_home_path }}/config.json"
+    mode: 0600
+    owner: "{{ goshimmer_user }}"
+    group: "{{ goshimmer_group }}"
+    force: "{{ overwrite | default('no') }}"
+    backup: yes
+  notify:
+    - restart goshimmer
+  tags:
+    - goshimmer_config
 
 # Goshimmer system config
 - name: copy goshimmer environment config file

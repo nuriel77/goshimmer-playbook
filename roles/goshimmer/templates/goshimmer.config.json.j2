@@ -1,0 +1,65 @@
+{
+  "analysis": {
+    "client": {
+      "serverAddress": "{{ goshimmer_analysis_client_address | default('ressims.iota.cafe:188') }}"
+    },
+    "server": {
+      "port": 0
+    },
+    "httpServer": {
+      "bindAddress": "{{ goshimmer_analysis_bind_address | default('0.0.0.0:80') }}"
+    }
+  },
+  "autopeering": {
+    "entryNodes": {{ goshimmer_autopeering_entrynodes | to_nice_json(indent=6) }},
+    "port": {{ goshimmer_autopeering_port | default('14626') }}
+  },
+  "dashboard": {
+    "bindAddress": "{{ goshimmer_dashboard_bind_address | default('0.0.0.0') }}:{{ goshimmer_dashboard_bind_port | default('8081') }}",
+    "dev": {{ goshimmer_dashboard_dev_enabled | default('false') | lower | string }},
+    "basic_auth": {
+      "enabled": {{ goshimmer_dashboard_basic_auth | default('false') | lower | string }},
+      "password": "{{ fullnode_user_password }}",
+      "username": "{{ fullnode_user }}"
+    }
+  },
+  "database": {
+    "directory": "mainnetdb"
+  },
+  "gossip": {
+    "port": {{ goshimmer_gossip_port | default('14666') }}
+  },
+  "graph": {
+    "bindAddress": "{{ goshimmer_graph_bind_address | default('0.0.0.0') }}:{{ goshimmer_graph_bind_port | default('8082') }}",
+    "domain": "{{ goshimmer_domain_address | default('') }}",
+    "networkName": "GoShimmer",
+    "socketIOPath": "socket.io-client/dist/socket.io.js",
+    "webrootPath": "IOTAtangle/webroot"
+  },
+  "logger": {
+    "level": "{{ goshimmer_logger_level | default('info') }}",
+    "disableCaller": false,
+    "disableStacktrace": false,
+    "encoding": "console",
+    "outputPaths": [
+      "stdout"
+    ],
+    "disableEvents": {{ goshimmer_logger_disable_events | default('false') | lower | string }}
+  },
+  "network": {
+    "bindAddress": "{{ goshimmer_network_bind_address | default('0.0.0.0') }}",
+    "externalAddress": "auto"
+  },
+  "node": {
+    "disableplugins": {{ goshimmer_disable_plugins | to_nice_json(indent=4) }},
+    "enableplugins": {{ goshimmer_enable_plugins | to_nice_json(indent=4) }}
+  },
+  "webapi": {
+    "auth": {
+      "password": "{{ fullnode_user_password }}",
+      "privateKey": "{{ goshimmer_webapi_auth_private_key | default('') }}",
+      "username": "{{ fullnode_user }}"
+    },
+    "bindAddress": "{{ goshimmer_webapi_bind_address | default('0.0.0.0') }}:{{ goshimmer_webapi_bind_port | default('8080') }}"
+  }
+}

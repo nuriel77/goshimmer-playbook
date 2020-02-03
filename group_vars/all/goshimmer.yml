@@ -1,13 +1,57 @@
-goshimmer_git_url: https://github.com/iotaledger/goshimmer.git
+playbook_basename: goshimmer
+
+goshimmer_repo_name: "iotaledger/goshimmer"
+goshimmer_git_url: "https://github.com/{{ goshimmer_repo_name }}.git"
+goshimmer_releases_url: "https://api.github.com/repos/{{ goshimmer_repo_name }}/releases"
+goshimmer_releases_download_url: "https://github.com/{{ goshimmer_repo_name }}/releases/download"
+goshimmer_releases_url: 
 goshimmer_git_dest: /opt/goshimmer
-goshimmer_ports:
-  - {port: 14666, proto: tcp}
-  - {port: 14626, proto: udp}
-  - {port: 14626, proto: tcp}
 
 goshimmer_image: iotaledger/goshimmer
-goshimmer_tag: latest
+goshimmer_version: latest
 goshimmer_user: shimmer
 goshimmer_group: shimmer
 goshimmer_home_path: /var/lib/goshimmer
 goshimmber_db_path: "{{ goshimmer_home_path }}/mainnetdb"
+
+goshimmer_ports:
+  autopeering:
+    port: 14626
+    proto: tcp
+    allow: yes
+  gossip:
+    port: 14666
+    proto: tcp
+    allow: yes
+  dashboard:
+    port: 8081
+    proto: tcp
+    allow: yes
+  webapi:
+    port: 8080
+    proto: tcp
+    allow: yes
+
+#goshimmer_ports:
+#  - {port: 14666, proto: tcp}
+#  - {port: 14626, proto: udp}
+#  - {port: 14626, proto: tcp}
+
+
+goshimmer_autopeering_entrynodes:
+  - "V8LYtWWcPYYDTTXLeIEFjJEuWlsjDiI0+Pq/Cx9ai6g=@116.202.49.178:14626"
+
+goshimmer_autopeering_port: "{{ goshimmer_ports.autopeering.port }}"
+goshimmer_gossip_port: "{{ goshimmer_ports.gossip.port }}"
+goshimmer_network_bind_address: 0.0.0.0
+
+goshimmer_dashboard_bind_address: 0.0.0.0
+goshimmer_dashboard_bind_port: "{{ goshimmer_ports.dashboard.port }}"
+
+goshimmer_disable_plugins: []
+goshimmer_enable_plugins: []
+
+goshimmer_webapi_bind_address: 0.0.0.0
+goshimmer_webapi_bind_port: "{{ goshimmer_ports.webapi.port }}"
+
+goshimmer_logger_level: info

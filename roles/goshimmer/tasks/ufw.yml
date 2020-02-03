@@ -1,21 +1,29 @@
-- name: allow goshimmer ports in firewall
-  ufw:
-    rule: allow
-    direction: in
-    proto: "{{ item.proto }}"
-    port: "{{ item.port }}"
-  with_items: "{{ goshimmer_ports }}"
+#- name: allow goshimmer ports in firewall
+#  ufw:
+#    rule: allow
+#    direction: in
+#    proto: "{{ item.proto }}"
+#    port: "{{ item.port }}"
+#  with_items: "{{ goshimmer_ports }}"
+#
+#- name: allow goshimmer extra ports in firewall
+#  ufw:
+#    rule: allow
+#    direction: in
+#    port: "{{ item }}"
+#    proto: "tcp"
+#  with_items:
+#    - "{{ goshimmer_external_spammer_port }}"
+#    - "{{ goshimmer_external_dashboard_port }}"
+#  when: install_nginx | default(true) | bool
 
-- name: allow goshimmer extra ports in firewall
+- name: configure goshimmer ports in firewall
   ufw:
-    rule: allow
+    rule: "{% if goshimmer_ports[item].allow|bool %}allow{% else %}deny{% endif %}"
     direction: in
-    port: "{{ item }}"
-    proto: "tcp"
-  with_items:
-    - "{{ goshimmer_external_spammer_port }}"
-    - "{{ goshimmer_external_dashboard_port }}"
-  when: install_nginx | default(true) | bool
+    proto: "{{ goshimmer_ports[item].proto }}"
+    port: "{{ goshimmer_ports[item].port }}"
+  with_items: "{{ goshimmer_ports.keys() | list }}"
 
 - name: allow ssh port firewall
   ufw:
