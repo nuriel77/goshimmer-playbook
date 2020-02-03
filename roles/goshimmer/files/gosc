@@ -781,6 +781,7 @@ print(json.dumps(obj))
              --defaultno \
              10 $WIDTH) then
         jq . <<< "$JSON_OUTPUT" > "$CONFIG_FILE"
+        echo "Restarting goshimmer, please wait ..."
         /bin/systemctl restart goshimmer
     fi
 }
