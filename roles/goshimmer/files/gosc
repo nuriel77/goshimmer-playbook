@@ -751,11 +751,11 @@ Select/unselect options using space and\nclick Enter to proceed.\n" 15 50 "${#DI
         case $CHOICE in
             '"spammer"')
                 ENABLE_PLUGINS+=",spammer"
-                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/Spammer/}")
+                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/spammer/}")
                 ;;
             '"graph"')
                 ENABLE_PLUGINS+=",graph"
-                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/Graph/}")
+                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/graph/}")
                 ;;
             *)
                 ;;
