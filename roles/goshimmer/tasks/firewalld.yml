@@ -4,21 +4,29 @@
     state: started
     enabled: yes
 
-- name: allow goshimmer tcp port in firewall
-  firewalld:
-    port: "{{ item.port }}/{{ item.proto }}"
-    permanent: true
-    state: enabled
-    immediate: yes
-  with_items: "{{ goshimmer_ports }}"
+#- name: allow goshimmer tcp port in firewall
+#  firewalld:
+#    port: "{{ item.port }}/{{ item.proto }}"
+#    permanent: true
+#    state: enabled
+#    immediate: yes
+#  with_items: "{{ goshimmer_ports }}"
+#
+#- name: allow goshimmer tcp port in firewall
+#  firewalld:
+#    port: "{{ item }}"
+#    permanent: true
+#    state: enabled
+#    immediate: yes
+#  with_items:
+#    - "{{ goshimmer_external_spammer_port }}/tcp"
+#    - "{{ goshimmer_external_dashboard_port }}/tcp"
+#  when: install_nginx | default(true) | bool
 
-- name: allow goshimmer tcp port in firewall
+- name: configure goshimmer tcp ports in firewall
   firewalld:
-    port: "{{ item }}"
+    port: "{{ goshimmer_ports[item].port }}/{{ goshimmer_ports[item].proto }}"
+    state: "{% if goshimmer_ports[item].allow|bool %}enabled{% else %}disabled{% endif %}"
     permanent: true
-    state: enabled
     immediate: yes
-  with_items:
-    - "{{ goshimmer_external_spammer_port }}/tcp"
-    - "{{ goshimmer_external_dashboard_port }}/tcp"
-  when: install_nginx | default(true) | bool
+  with_items: "{{ goshimmer_ports.keys() | list }}"

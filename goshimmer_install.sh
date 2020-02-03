@@ -203,7 +203,21 @@ function init_centos_7(){
     set -e
 
     echo "Installing Ansible and git..."
-    yum install ansible git expect-devel cracklib newt redhat-lsb-core -y
+    yum install -y\
+      ansible\
+      git\
+      expect-devel\
+      cracklib\
+      newt\
+      redhat-lsb-core\
+      python-pip
+
+    if [ -e /usr/bin/pip ]; then
+        /usr/bin/pip install jmespath
+    fi
+    if [ -e /usr/bin/pip3 ]; then
+        /usr/bin/pip3 install jmespath
+    fi
 }
 
 function init_centos_8(){
@@ -225,8 +239,16 @@ function init_centos_8(){
     fi
 
     echo "Installing Ansible, git and other requirements..."
-    dnf install git expect newt python3-pip cracklib newt redhat-lsb-core -y
-    pip3 --disable-pip-version-check install ansible
+    dnf install -y\
+      git\
+      expect\
+      newt\
+      python3-pip\
+      cracklib\
+      newt\
+      redhat-lsb-core
+
+    pip3 --disable-pip-version-check install ansible jmespath
     echo "$PATH" | grep -q '/usr/local/bin' || export PATH=$PATH:/usr/local/bin
     grep PATH /root/.bashrc | grep -q '/usr/local/bin' || echo 'export PATH=$PATH:/usr/local/bin' >> /root/.bashrc
 }
@@ -257,7 +279,16 @@ function init_ubuntu(){
                     libcrack2\
                     cracklib-runtime\
                     whiptail\
+                    python3-pip\
+                    python-pip\
                     lsb-release -y
+
+    if [ -e /usr/bin/pip ]; then
+        /usr/bin/pip install jmespath
+    fi
+    if [ -e /usr/bin/pip3 ]; then
+        /usr/bin/pip3 install jmespath
+    fi
 }
 
 function init_debian(){
@@ -287,7 +318,17 @@ function init_debian(){
                     libcrack2\
                     cracklib-runtime\
                     whiptail\
-                    lsb-release -y
+                    lsb-release\
+                    python3-pip\
+                    python-pip\
+                    python-backports.functools-lru-cache -y
+
+    if [ -e /usr/bin/pip ]; then
+        /usr/bin/pip install jmespath
+    fi
+    if [ -e /usr/bin/pip3 ]; then
+        /usr/bin/pip3 install jmespath
+    fi
 }
 
 function inform_reboot() {
