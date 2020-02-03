@@ -17,7 +17,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
    * [Control GoShimmer](#control-goshimmer)
      * [GoShimmer Controller](#goshimmer-controller)
      * [GoShimmer DB](#goshimmer-db)
-     * [GoShimmer Web](#goshimmer-web)
+     * [GoShimmer Dashboard](#goshimmer-dashboard)
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
    * [Appendix](#appendix)
@@ -55,9 +55,7 @@ The installation will:
 * Install latest GoShimmer and start it up.
 * Configure basic security (firewalls) and open all required ports for GoShimmer to operate.
 * Install nginx as a reverse proxy to access GoShimmer's Dashboard, spammer, etc.
-* Add some helpful tools, e.g.: `gosc` and `run-screen` (read below).
-
-### For Development
+* Add some helpful tools, e.g.: `gosc`
 
 ### For Development
 
@@ -89,7 +87,7 @@ Note that an image consists of a "REPOSITORY" name and a "TAG". Above we have 2 
 
 Delete a certain image (or example an older version of goshimmer you don't use anymore):
 ```sh
-docker rmi iotaledger/goshimmer:af1fee9
+docker rmi iotaledger/goshimmer:v0.1
 ```
 
 ### View Docker Containers
@@ -151,56 +149,56 @@ gosc
 The database is located in `/var/lib/goshimmer/mainnetdb`
 
 
-### Goshimmer Web
-Since August 3rd 2019 nginx has been added to serve as a reverse proxy for some of goshimmer's common services.
+### Goshimmer Dashboard
+Goshimmer dashboard is accessible by default via your public IP and port 8081. e.g:
 
-#### Check if new UI is enabled
-Make sure that the plugins are configured in `/etc/default/goshimmer` (or `/etc/sysconfig/goshimmer` in CentOS). Under the OPTIONS option you should see something like `--node.enablePlugins 'dashboard spammer ui'`. If you are missing `ui`, simply add it and restart goshimmer.
+```
+https://mydomain.io:8081
+```
 
-#### Access new UI
-New full-feature dashboard UI is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18080/ui`.
+You can login using the username and password you've selected during the installation.
 
-#### Old Dashboard
-Older dashboard is accessible via the web-browser on port 18081, e.g.: `https://your-ip:18081/dashboard`
+### Tangle Visualiser
+If you've enabled the graph plugin (e.g. via `gosc`) you can point your browser to your node's public IP (or domain-name) and port 8082, e.g.:
+
+```
+https://mydomain.io:8082
+```
+
+You can login using the username and password you've selected during the installation.
 
 #### Certificate Security Warning
 *NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installation.
 
 ### Spam Test
-If not via the above Web/UI, you can use the command line.
+If you've enabled the spammer plugin (e.g. via `gosc`) you can start or stop spamming from the commandline.
+
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
 curl "http://localhost:8080/spammer?cmd=start"
 ```
+
 You can add the parameter "tps=<number>" to specify how many TPS to spam with, for example:
 ```sh
 curl "http://localhost:8080/spammer?cmd=start&tps=100"
 ```
-
 
 To stop:
 ```sh
 curl "http://localhost:8080/spammer?cmd=stop"
 ```
 
-## See the statusscreen
+Note that for security reasons the spammer is not made available on the browser by default.
 
-Since Saturday, July 27 a new script has been added to help run goshimmer with the status screen. If you already have the playbook installed, don't worry, you can run the initial installation command to get the script ready!
-
-To activate the screen run:
-```sh
-sudo run-screen
+You can enable it on the browser by running:
+```
+grep -q "^goshimmer_webapi_external_address: 0.0.0.0" /opt/goshimmer-playbook/group_vars/all/z-installer-override.yml || echo "goshimmer_webapi_external_address: 0.0.0.0" >> /opt/goshimmer-playbook/group_vars/all/z-installer-override.yml
 ```
 
-Use CTRL-c to exit.
-
-If you want to leave the server running with this screen you need to run it within what is called a `screen` session.
-
-Please refer to this article on how to use `screen` (you might need to install it): https://linuxize.com/post/how-to-use-linux-screen/
-
-## Update the run-screen script or gosc
-
-To update any scripts provided by this playbook simply use `gosc` and select to update gosc and scripts option from the menu.
+Then run the following to apply the change:
+```sh
+cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=nginx_role
+```
 
 # Appendix
 
