@@ -81,6 +81,6 @@ goshimmer_graph_proxy_port: "{{ goshimmer_ports.graph.port }}"
 tanglevisualiser_git_url: "https://github.com/glumb/IOTAtangle.git"
 socketio_git_url: "https://github.com/socketio/socket.io-client.git"
 tanglevisualiser_path: "{{ goshimmer_home_path }}/tanglevisualiser"
-tanglevisualiser_version: 07bba77a296a2d06277cdae56aa963abeeb5f66e
+tanglevisualiser_version: master
 socketio_path: "{{ goshimmer_home_path }}/socket.io-client"
 goshimmer_mqtt_ws_path: '/ws'
