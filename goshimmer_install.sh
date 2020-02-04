@@ -5,7 +5,7 @@
 
 # Goshimmer playbook: https://github.com/nuriel77/goshimmer-playbook
 # By Nuriel Shem-Tov (https://github.com/nuriel77), December 2019
-# Copyright (c) 2019 Nuriel Shem-Tov
+# Copyright (c) 2020 Nuriel Shem-Tov
 
 set -o pipefail
 set -e
