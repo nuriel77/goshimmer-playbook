@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.2.0
+VERSION_TEMP=0.2.1
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -223,6 +223,20 @@ function upgrade_goshimmer() {
     clear
 }
 
+function check_new_goshimmer {
+    local GOSHIMMER_LATEST
+    local GOSHIMMER_VERSION
+
+    GOSHIMMER_LATEST=$(get_latest_goshimmer_release)
+    GOSHIMMER_VERSION=$(grep ^TAG "$SYSCONFIG_FILE" | cut -d= -f2)
+
+    if compare_versions $GOSHIMMER_VERSION '<' $GOSHIMMER_LATEST; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 ## GOSC
 function get_latest_gosc_version() {
     local RAND=$(echo -n $(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 7 | head -n 1))
@@ -265,7 +279,7 @@ function update_gosc() {
             # Delete any 'completed' files for this version
             # This forces to re-run updates specific for
             # this version if any.
-            rm -f "custom_updates/${CURR_VERSION}_updates.sh.completed"
+            rm -f "${GOSHIMMER_PLAYBOOK_DIR}/custom_updates/${CURR_VERSION}_updates.sh.completed"
         fi
     fi
 
@@ -352,7 +366,7 @@ function sort_func() {
 
 function run_custom_updates(){
     # Find pending update files
-    readarray -t TO_RUN_UPDATES < <(find custom_updates/ -maxdepth 1 -type f -name '*_updates.sh')
+    readarray -t TO_RUN_UPDATES < <(find "${GOSHIMMER_PLAYBOOK_DIR}/custom_updates/" -maxdepth 1 -type f -name '*_updates.sh')
 
     # Return if nothing to update
     ((${#TO_RUN_UPDATES[@]} == 0)) && { clear; return; }
@@ -816,6 +830,10 @@ function main_menu() {
     local MENU="Choose an option"
     if check_new_gosc; then
         MENU="${MENU}\n(*GOSC update available)"
+    fi
+
+    if check_new_goshimmer; then
+        MENU="${MENU}\n(*goshimmer update available)"
     fi
 
     whiptail --title "GOSC v${__VERSION__} - GoShimmer Configuration Menu" \
