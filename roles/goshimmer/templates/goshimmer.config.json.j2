@@ -44,7 +44,7 @@
     "outputPaths": [
       "stdout"
     ],
-    "disableEvents": {{ goshimmer_logger_disable_events | default('false') | lower | string }}
+    "disableEvents": {{ goshimmer_logger_disable_events | default('true') | lower | string }}
   },
   "network": {
     "bindAddress": "{{ goshimmer_network_bind_address | default('0.0.0.0') }}",
