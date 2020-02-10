@@ -34,20 +34,20 @@ Tested on the following operating systems:
 * Debian 9.5 and 10
 * Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
 
-Architectures (x86_64, arm/aarch 32 and 64 bit)
+Architectures (x86_64, arm/aarch 64 bit)
 
 ## Recommendations
 
-* RAM: At least 1.5GB RAM, as less than this can result in out-of-memory failures.
+* RAM: At least 1GB RAM, as less than this can result in out-of-memory failures.
 * x2 CPUs are recommended
 
 ## Installation
 
-Run (as root):
-```sh
-bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
-```
+You can first download the script to inspect it before running it, or run it directly:
 
+```sh
+sudo bash -c "bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)"
+```
 This pulls the installation file from the root of this repository and executes it.
 
 The installation will:
@@ -59,7 +59,7 @@ The installation will:
 
 ### For Development
 
-If you are working on a fork in a feature branch or happen to directly contribute to this repository you can run the installer pointing it to the appropriate branch, e.g.:
+If you are working on a fork in a feature branch or happen to directly contribute to this repository you can run the installer as user root, pointing it to the appropriate branch, e.g.:
 ```sh
 BRANCH="dev-branch"; GIT_OPTIONS="-b $BRANCH" bash <(curl -s "https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/$BRANCH/goshimmer_install.sh")
 ```
@@ -140,9 +140,9 @@ journalctl -u goshimmer -e -f
 
 A GUI utility has been added to help manage some basics like controlling the server, viewing logs, upgrading goshimmer etc.
 
-Make sure you are root (`sudo su`) and run:
+Run:
 ```sh
-gosc
+sudo gosc
 ```
 
 ### Goshimmer DB
