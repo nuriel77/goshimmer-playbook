@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.2.2
+VERSION_TEMP=0.2.3
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -814,20 +814,21 @@ print(json.dumps(obj))
     NEW_NODE_OBJ=$(jq -r '.node | "\(.enableplugins) \(.disableplugins)"' <<<"$JSON_OUTPUT")
     [[ "$ORIGINAL_NODE_OBJ" == "$NEW_NODE_OBJ" ]] && return
 
-    # Modify events for remotelog
-    if [[ "$ENABLE_PLUGINS" =~ remotelog ]]
-    then
-        jq '.logger.disableEvents = false' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
-    else
-        jq '.logger.disableEvents = true' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
-    fi
-    file_update "/var/lib/goshimmer/config.json" "/tmp/config.json.$$.tmp"
-
     if (whiptail --title "Restart Goshimmer" \
              --yesno "You've made changes to the plugins. A restart of Goshimmer is needed to load the new configuration.\n\nRestart now?" \
              --defaultno \
              10 $WIDTH) then
         jq . <<< "$JSON_OUTPUT" > "$CONFIG_FILE"
+
+        # Modify events for remotelog
+        if [[ "$ENABLE_PLUGINS" =~ remotelog ]]
+        then
+            jq '.logger.disableEvents = false' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
+        else
+            jq '.logger.disableEvents = true' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
+        fi
+        file_update "/var/lib/goshimmer/config.json" "/tmp/config.json.$$.tmp"
+
         echo "Restarting goshimmer, please wait ..."
         /bin/systemctl restart goshimmer
     fi
