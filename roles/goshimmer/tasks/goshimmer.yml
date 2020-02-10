@@ -36,14 +36,6 @@
         content: ""
         force: no
 
-    - name: copy status screen run script
-      copy:
-        src: files/run-screen.sh
-        dest: /usr/bin/run-screen
-        mode: 0755
-        owner: root
-        group: root
-
     - name: link python3 to python
       file:
         src: /usr/bin/python3
