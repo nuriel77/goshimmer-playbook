@@ -51,6 +51,7 @@ goshimmer_enable_plugins: []
 goshimmer_disable_plugins:
   - spammer
   - graph
+  - remotelog
 
 goshimmer_autopeering_entrynodes:
   - "V8LYtWWcPYYDTTXLeIEFjJEuWlsjDiI0+Pq/Cx9ai6g=@116.202.49.178:14626"

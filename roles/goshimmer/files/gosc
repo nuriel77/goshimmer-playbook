@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.2.1
+VERSION_TEMP=0.2.2
 __VERSION__=${VERSION_TEMP}
 
 : "${GOSHIMMER_BRANCH:=master}"
@@ -713,6 +713,18 @@ function configure_files_menu() {
     3>&1 1>&2 2>&3
 }
 
+function file_update {
+    local FILE="$1"
+    local TEMP_FILE="$2"
+    cmp -s "$FILE" "$TEMP_FILE"
+    if [ $? = 0 ];
+    then
+        rm "$TEMP_FILE"
+    else
+        mv -- "$TEMP_FILE" "$FILE"
+    fi
+}
+
 ### Goshimmer Plugins ###
 function goshimmer_plugins() {
     local RESULTS=
@@ -723,7 +735,7 @@ function goshimmer_plugins() {
 
     # By default list all the existing plugins as disabled
     export ENABLE_PLUGINS=""
-    export DISABLE_PLUGINS="spammer,graph"
+    export DISABLE_PLUGINS="spammer,graph,remotelog"
 
     CONFIG_FILE="/var/lib/goshimmer/config.json"
 
@@ -747,6 +759,13 @@ function goshimmer_plugins() {
         PLUGIN_GRAPH_STATE="OFF"
     fi
 
+    if jq -e -r '.node.enableplugins | index("remotelog")' < "$CONFIG_FILE" >/dev/null
+    then
+        PLUGIN_REMOTELOG_STATE="ON"
+    else
+        PLUGIN_REMOTELOG_STATE="OFF"
+    fi
+
     RESULTS=$(whiptail --title "GOSC v${__VERSION__} - Plugins" \
         --checklist \
         --cancel-button "Exit" \
@@ -754,6 +773,7 @@ function goshimmer_plugins() {
 Select/unselect options using space and\nclick Enter to proceed.\n" 15 50 "${#DISABLE_PLUGINS_ARRAY[@]}" \
         "spammer"           "...         Spammer" "$PLUGIN_SPAMMER_STATE" \
         "graph"             "...         Tangle Visualiser" "$PLUGIN_GRAPH_STATE" \
+        "remotelog"         "...         Remote Logging" "$PLUGIN_REMOTELOG_STATE" \
         3>&1 1>&2 2>&3)
 
     RC=$?
@@ -770,6 +790,10 @@ Select/unselect options using space and\nclick Enter to proceed.\n" 15 50 "${#DI
             '"graph"')
                 ENABLE_PLUGINS+=",graph"
                 DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/graph/}")
+                ;;
+            '"remotelog"')
+                ENABLE_PLUGINS+=",remotelog"
+                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/remotelog/}")
                 ;;
             *)
                 ;;
@@ -789,6 +813,15 @@ print(json.dumps(obj))
 
     NEW_NODE_OBJ=$(jq -r '.node | "\(.enableplugins) \(.disableplugins)"' <<<"$JSON_OUTPUT")
     [[ "$ORIGINAL_NODE_OBJ" == "$NEW_NODE_OBJ" ]] && return
+
+    # Modify events for remotelog
+    if [[ "$ENABLE_PLUGINS" =~ remotelog ]]
+    then
+        jq '.logger.disableEvents = false' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
+    else
+        jq '.logger.disableEvents = true' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
+    fi
+    file_update "/var/lib/goshimmer/config.json" "/tmp/config.json.$$.tmp"
 
     if (whiptail --title "Restart Goshimmer" \
              --yesno "You've made changes to the plugins. A restart of Goshimmer is needed to load the new configuration.\n\nRestart now?" \
