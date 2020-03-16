@@ -105,11 +105,9 @@
     shell: /sbin/nologin
     createhome: no
     home: "{{ goshimmer_home_path }}"
-    uid: "{{ goshimmer_user_uid }}"
   tags:
     - goshimmer_user
 
-# Backward compatibility
 - name: get goshimmer user uid
   shell: "echo -n $(id -u {{ goshimmer_user }})"
   changed_when: false
