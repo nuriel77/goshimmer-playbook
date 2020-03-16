@@ -33,8 +33,8 @@
     "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('18082') }}",
     "domain": "{{ goshimmer_domain_address | default('') }}",
     "networkName": "GoShimmer",
-    "socketIOPath": "socket.io-client/dist/socket.io.js",
-    "webrootPath": "IOTAtangle/webroot"
+    "socketIOPath": "/socket.io-client/dist/socket.io.js",
+    "webrootPath": "/IOTAtangle/webroot"
   },
   "logger": {
     "level": "{{ goshimmer_logger_level | default('info') }}",

@@ -105,16 +105,9 @@
     shell: /sbin/nologin
     createhome: no
     home: "{{ goshimmer_home_path }}"
+    uid: "{{ goshimmer_uid }}"
   tags:
     - goshimmer_user
-
-- name: get goshimmer user uid
-  shell: "echo -n $(id -u {{ goshimmer_user }})"
-  changed_when: false
-  register: goshimmer_uid
-  tags:
-    - goshimmer_create_container
-    - get_goshimmer_uid
 
 - name: goshimmer paths
   file:

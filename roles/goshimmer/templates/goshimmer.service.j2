@@ -14,7 +14,7 @@ ExecStartPre=-/bin/bash -c "/usr/bin/docker rm %p || /bin/true"
 ExecStart=/usr/bin/docker run \
   --name %p \
   --net=host \
-  --user={{ goshimmer_uid.stdout }} \
+  --user={{ goshimmer_uid }} \
   --cap-drop=ALL \
   -v /etc/localtime:/etc/localtime:ro,Z \
   -v {{ goshimmer_home_path }}/config.json:/config.json:ro,Z \
