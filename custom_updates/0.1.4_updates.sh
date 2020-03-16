@@ -1,2 +1,6 @@
 #!/usr/bin/env bash
-cd /opt/goshimmer-playbook && git pull && ansible-playbook -i inventory site.yml -v --tags=goshimmer_service_file
+
+if /usr/bin/docker images "iotaledger/goshimmer:v0.1.3" | grep -q v0.1.3
+then
+    cd /opt/goshimmer-playbook && git pull && ansible-playbook -i inventory site.yml -v --tags=goshimmer_service_file
+fi
