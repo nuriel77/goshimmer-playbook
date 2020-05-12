@@ -7,6 +7,13 @@
 # By Nuriel Shem-Tov (https://github.com/nuriel77), December 2019
 # Copyright (c) 2020 Nuriel Shem-Tov
 
+# Some options can be passed via environment variables:
+# SET_DEFAULTS="true"   ..... set default option selections
+# SKIP_PASSWORD="true"  ..... skip user and password selection (sets defaults)
+# SKIP_REBOOT="true"    ..... skip require reboot (except on selinux/centos)
+# SKIP_CONFIRM="true"   ..... skip installer confirmation
+# INSTALL_OPTIONS       ..... additional command line arguments to pass to ansible-playbook
+
 set -o pipefail
 set -e
 
@@ -16,15 +23,13 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
-# Default value for goshimmer-playbook repository URL
-: "${GIT_REPO_URL:=https://github.com/nuriel77/goshimmer-playbook.git}"
-
 export NEWT_COLORS='
 window=,
 '
 
 declare -g GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"
 declare -g INSTALLER_OVERRIDE_FILE="${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all/z-installer-override.yml"
+declare -g PLAYBOOK_LIGHT="false"
 
 # Configurable install options passed to ansible-playbook command
 : "${INSTALL_OPTIONS:=}"
@@ -35,10 +40,16 @@ declare -g INSTALLER_OVERRIDE_FILE="${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all/z-i
 if test -e /etc/motd && grep -q 'GoShimmer PLAYBOOK' /etc/motd; then
     :>/etc/motd
 else
-    if [ -f "$INSTALLER_OVERRIDE_FILE" ] && [ "$1" != "rerun" ]
+    if [ -f "$INSTALLER_OVERRIDE_FILE" ] && [[ "$1" != "rerun" ]] && [[ "$SKIP_CONFIRM" != true ]]
     then
         if ! (whiptail --title "Confirmation" \
-                 --yesno "It looks like a previous installation already exists.\n\nRunning the installaer on an already working node is not recommended.\n\nIf you want to re-run only the playbook check the documentation or ask for assistance on Discord #goshimmer-discussion channel.\n\nPlease confirm you want to proceed with the installation?" \
+                 --yesno "
+It looks like a previous installation already exists.
+
+Running the installer on an already working node is not recommended.
+If you want to re-run only the playbook check the documentation or ask for assistance on Discord #fullnodes channel.
+
+Please confirm you want to proceed with the installation?" \
                  --defaultno \
                  16 78); then
             exit 1
@@ -47,26 +58,33 @@ else
     fi
 fi
 
+clear
 cat <<'EOF'
 
-go
   _____ _   _ ________  ______  ___ ___________
  /  ___| | | |_   _|  \/  ||  \/  ||  ___| ___ \
  \ `--.| |_| | | | | .  . || .  . || |__ | |_/ /
   `--. \  _  | | | | |\/| || |\/| ||  __||    /
  /\__/ / | | |_| |_| |  | || |  | || |___| |\ \
- \____/\_| |_/\___/\_|  |_/\_|  |_/\____/\_| \_| node installer
+ \____/\_| |_/\___/\_|  |_/\_|  |_/\____/\_| \_|
+
+          _|                      _|                            _|
+_|_|_|    _|    _|_|_|  _|    _|  _|_|_|      _|_|      _|_|    _|  _|
+_|    _|  _|  _|    _|  _|    _|  _|    _|  _|    _|  _|    _|  _|_|
+_|    _|  _|  _|    _|  _|    _|  _|    _|  _|    _|  _|    _|  _|  _|
+_|_|_|    _|    _|_|_|    _|_|_|  _|_|_|      _|_|      _|_|    _|    _|
+_|                            _|
+_|                        _|_|
 
 EOF
 
 cat <<EOF
-Welcome to IOTA's goShimmer (unofficial) installer!
-1. By pressing 'y' you agree to install goShimmer node on your system.
+Welcome to IOTA's GoShimmer (unofficial) installer!
+1. By pressing 'y' you agree to install GoShimmer node on your system.
 2. By pressing 'y' you aknowledge that this installer requires a CLEAN operating system
    and may otherwise !!!BREAK!!! existing software on your server.
-3. You read and agree to http://iri-playbook.readthedocs.io/en/master/disclaimer.html
-4. This installation ensures firewall is enabled.
-5. If you already have a configured server, re-running this script might overwrite previous configuration.
+3. If you already have a configured server, re-running this script might overwrite previous configuration.
+
 EOF
 
 if [[ "$SKIP_CONFIRM" != true ]]
@@ -115,54 +133,6 @@ function set_dist() {
     fi
 }
 
-# Installation selection menu
-function set_selections()
-{
-    local RC RESULTS RESULTS_ARRAY CHOICE SKIP_TAGS
-    SKIP_TAGS="--skip-tags=_"
-
-    RESULTS=$(whiptail --title "Installation Options" --checklist \
-        --cancel-button "Exit" \
-        "\nInstallation options.\nNote that it is perfectly okay, and even recommended, to leave this as is!\n\
-Select/unselect options using space and click Enter to proceed.\n" 12 78 2 \
-        "SKIP_INSTALL_NGINX"       "Skip installation of nginx webserver" OFF \
-        "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
-        3>&1 1>&2 2>&3)
-
-    RC=$?
-    if [[ $RC -ne 0 ]]; then
-        echo "Installation cancelled"
-        exit 1
-    fi
-
-    if [[ -n "$RESULTS" ]]; then
-        RESULTS_MSG=$(echo "$RESULTS"|sed 's/ /\n/g')
-        if ! (whiptail --title "Confirmation" \
-                 --yesno "You chose:\n\n$RESULTS_MSG\n\nPlease confirm you want to proceed with the installation?" \
-                 --defaultno \
-                 12 78); then
-            exit 1
-        fi
-    fi
-
-    read -a RESULTS_ARRAY <<< "$RESULTS"
-    for CHOICE in "${RESULTS_ARRAY[@]}"
-    do
-        case $CHOICE in
-            '"SKIP_INSTALL_NGINX"')
-                echo "install_nginx: false" >>"$INSTALLER_OVERRIDE_FILE"
-                ;;
-            '"SKIP_FIREWALL_CONFIG"')
-                echo "configure_firewall: false" >>"$INSTALLER_OVERRIDE_FILE"
-                ;;
-            *)
-                ;;
-        esac
-    done
-
-    INSTALL_OPTIONS+=" $SKIP_TAGS"
-}
-
 function wait_apt(){
     local i=0
     tput sc
@@ -197,7 +167,7 @@ function init_centos_7(){
     set +e
     set +o pipefail
     if $(needs-restarting -r 2>&1 | grep -q "Reboot is required"); then
-        [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
+        [[ "$SKIP_REBOOT" != true ]] && { inform_reboot; exit 0; }
     fi
     set -o pipefail
     set -e
@@ -205,13 +175,12 @@ function init_centos_7(){
     echo "Installing Ansible and git..."
     yum install -y\
       ansible\
+      redhat-lsb-core\
       git\
       expect-devel\
       cracklib\
       newt\
-      redhat-lsb-core\
       python-pip
-
     if [ -e /usr/bin/pip ]; then
         /usr/bin/pip install jmespath
     fi
@@ -235,7 +204,7 @@ function init_centos_8(){
 
     local OUTPUT=$(needs-restarting)
     if [[ "$OUTPUT" != "" ]]; then
-        [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
+        [[ "$SKIP_REBOOT" != true ]] && { inform_reboot; exit 0; }
     fi
 
     echo "Installing Ansible, git and other requirements..."
@@ -245,9 +214,7 @@ function init_centos_8(){
       newt\
       python3-pip\
       cracklib\
-      newt\
       redhat-lsb-core
-
     pip3 --disable-pip-version-check install ansible jmespath
     echo "$PATH" | grep -q '/usr/local/bin' || export PATH=$PATH:/usr/local/bin
     grep PATH /root/.bashrc | grep -q '/usr/local/bin' || echo 'export PATH=$PATH:/usr/local/bin' >> /root/.bashrc
@@ -264,12 +231,13 @@ function init_ubuntu(){
 
     echo "Check reboot required..."
     if [ -f /var/run/reboot-required ]; then
-        [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
+        [[ "$SKIP_REBOOT" != true ]] && { inform_reboot; exit 0; }
     fi
 
     echo "Installing Ansible and git..."
     apt-get install software-properties-common -y
-    apt-add-repository ppa:ansible/ansible -y
+    # PPA not ready for ubuntu focal yet (20.04)
+    [[ ! "$VER" =~ ^20 ]] && apt-add-repository ppa:ansible/ansible -y
     add-apt-repository universe -y
     apt-get update -y
     apt-get install ansible\
@@ -279,9 +247,9 @@ function init_ubuntu(){
                     libcrack2\
                     cracklib-runtime\
                     whiptail\
-                    python3-pip\
-                    python-pip\
-                    lsb-release -y
+                    python3-pip -y
+
+    [[ ! "$VER" =~ ^20 ]] && apt-get install python-pip -y
 
     if [ -e /usr/bin/pip ]; then
         /usr/bin/pip install jmespath
@@ -302,7 +270,7 @@ function init_debian(){
 
     echo "Check reboot required..."
     if [ -f /var/run/reboot-required ]; then
-        [ -z "$SKIP_REBOOT" ] && { inform_reboot; exit 0; }
+        [[ "$SKIP_REBOOT" != true ]] && { inform_reboot; exit 0; }
     fi
 
     echo "Installing Ansible and git..."
@@ -313,6 +281,7 @@ function init_debian(){
     apt-get update -y
     apt-get install ansible\
                     git\
+                    less\
                     expect-dev\
                     tcl\
                     libcrack2\
@@ -320,9 +289,8 @@ function init_debian(){
                     whiptail\
                     lsb-release\
                     python3-pip\
-                    python-pip\
+                    python-pip \
                     python-backports.functools-lru-cache -y
-
     if [ -e /usr/bin/pip ]; then
         /usr/bin/pip install jmespath
     fi
@@ -334,25 +302,41 @@ function init_debian(){
 function inform_reboot() {
     cat <<EOF >/etc/motd
 ======================== GoShimmer PLAYBOOK ========================
+
 To proceed with the installation, please re-run:
+
 bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
+
 (make sure to run it as user root)
+
 EOF
 
     cat <<EOF
+
+
 ======================== PLEASE REBOOT AND RE-RUN THIS SCRIPT =========================
+
 Some system packages have been updated which require a reboot
 and allow the node installer to proceed with the installation.
+
 *** Please reboot this machine and re-run this script ***
+
+
 >>> To reboot run: 'reboot', and when back online:
 bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
+
 !! Remember to re-run this script as root !!
+
 EOF
 }
 
 function set_admin_password_a() {
     whiptail --title "Admin Password" \
-             --passwordbox "Please enter the password with which you will connect to services (e.g. Web, etc). Use a stong password!!! Not 'hello123' or 'iota8181', you get the point ;). Only valid ASCII characters are allowed." \
+             --passwordbox "
+Please enter the password with which you will connect to services (IOTA Peer manager, Grafana, etc).
+
+Use a stong password!!! Not 'hello123' or 'iota8181', you get the point ;).
+Only valid ASCII characters are allowed." \
              10 78 3>&1 1>&2 2>&3
 
     if [[ $? -ne 0 ]]; then
@@ -380,7 +364,10 @@ function get_admin_password() {
     case "${PASSWORD_A}" in
         *[![:cntrl:][:print:]]*)
             whiptail --title "Invalid characters!!" \
-                     --msgbox "Only ASCII characters are allowed:\n\n!\"#\$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" \
+                     --msgbox "
+Only ASCII characters are allowed:
+
+!\"#\$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" \
                      12 78
             get_admin_password
             return
@@ -413,12 +400,16 @@ function get_admin_password() {
     # Ensure we escape single quotes (using single quotes) because we need to
     # encapsulate the password with single quotes for the Ansible variable file
     PASSWORD_A=$(echo "${PASSWORD_A}" | sed "s/'/''/g")
-    echo "admin_user_password: '${PASSWORD_A}'" >> "$INSTALLER_OVERRIDE_FILE"
-    chmod 400 group_vars/all/z-installer-override.yml
+    echo "fullnode_user_password: '${PASSWORD_A}'" >> "$INSTALLER_OVERRIDE_FILE"
+    chmod 600 "$INSTALLER_OVERRIDE_FILE"
 }
 
 function set_admin_username() {
-    ADMIN_USER=$(whiptail --inputbox "Choose an administrator's username.\nOnly valid ASCII characters are allowed:" 10 $WIDTH "$ADMIN_USER" --title "Choose Admin Username" 3>&1 1>&2 2>&3)
+    ADMIN_USER=$(whiptail --inputbox "
+Choose an administrator's username.
+Only valid ASCII characters are allowed:" \
+                 10 $WIDTH "$ADMIN_USER" \
+                 --title "Choose Admin Username" 3>&1 1>&2 2>&3)
     if [[ $? -ne 0 ]]; then
         echo "Installation cancelled"
     fi
@@ -427,33 +418,129 @@ function set_admin_username() {
     case "${ADMIN_USER}" in
         *[![:cntrl:][:print:]]*)
             whiptail --title "Invalid characters!!" \
-                     --msgbox "Only ASCII characters are allowed:\n\n!\"#\$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" \
+                     --msgbox "
+Only ASCII characters are allowed:
+
+!\"#\$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_\`abcdefghijklmnopqrstuvwxyz{|}~" \
                      12 78
             set_admin_username
             return
             ;;
     esac
 
-    echo "admin_user: '${ADMIN_USER}'" >> "$INSTALLER_OVERRIDE_FILE"
+    echo "fullnode_user: '${ADMIN_USER}'" >> "$INSTALLER_OVERRIDE_FILE"
 
+}
+
+# Installation selection menu
+function set_selections() {
+    local RC RESULTS RESULTS_ARRAY CHOICE SKIP_TAGS
+    SKIP_TAGS="--skip-tags=_"
+    DISABLE_MONITORING_DEFAULT="ON"
+    DISABLE_MONITORING_MSG=" (recommended)"
+
+    if [[ "$PLAYBOOK_LIGHT" = true ]]
+    then
+        echo "hornet_profile: light" >>"$INSTALLER_OVERRIDE_FILE"
+    elif [[ ! "$OS" =~ ^Raspbian ]]
+    then
+        DISABLE_MONITORING_DEFAULT="OFF"
+        DISABLE_MONITORING_MSG=""
+    fi
+
+    RESULTS=$(whiptail --title "Installation Options" --checklist \
+        --cancel-button "Exit" \
+        "
+Please choose additional installation options.
+Note that defaults have been set according to your system's configuration.
+
+Select/unselect options using space and click Enter to proceed.
+        " 24 78 5 \
+        "INSTALL_DOCKER"           "Install Docker runtime (recommended)" ON \
+        "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
+        "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
+        "ENABLE_HAPROXY"           "Enable HAProxy (recommended)" ON \
+        "DISABLE_MONITORING"       "Disable node monitoring${DISABLE_MONITORING_MSG}" "$DISABLE_MONITORING_DEFAULT" \
+        3>&1 1>&2 2>&3)
+
+    RC=$?
+    if [[ $RC -ne 0 ]]; then
+        echo "Installation cancelled"
+        exit 1
+    fi
+
+    read -a RESULTS_ARRAY <<< "$RESULTS"
+    for CHOICE in "${RESULTS_ARRAY[@]}"
+    do
+        case $CHOICE in
+            '"INSTALL_DOCKER"')
+                echo "install_docker: true" >>"$INSTALLER_OVERRIDE_FILE"
+                ;;
+            '"INSTALL_NGINX"')
+                echo "install_nginx: true" >>"$INSTALLER_OVERRIDE_FILE"
+                ;;
+            '"SKIP_FIREWALL_CONFIG"')
+                echo "configure_firewall: false" >>"$INSTALLER_OVERRIDE_FILE"
+                ;;
+            '"DISABLE_MONITORING"')
+                SKIP_TAGS+=",monitoring_role"
+                echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
+                ;;
+            '"ENABLE_HAPROXY"')
+                echo "lb_bind_addresses: ['0.0.0.0']" >>"$INSTALLER_OVERRIDE_FILE"
+                ;;
+            *)
+                ;;
+        esac
+    done
+
+    if [[ -n "$RESULTS" ]]; then
+        RESULTS_MSG=$(echo "$RESULTS"|sed 's/ /\n/g')
+        if ! (whiptail --title "Confirmation" \
+                 --yesno "
+You chose:
+
+$RESULTS_MSG
+
+Please confirm you want to proceed with the installation?" \
+                 --defaultno \
+                 16 78); then
+            exit 1
+        fi
+    fi
+    INSTALL_OPTIONS+=" $SKIP_TAGS"
+}
+
+function set_defaults() {
+    cat <<EOF >>"$INSTALLER_OVERRIDE_FILE"
+install_docker: true
+install_nginx: true
+configure_firewall: false
+lb_bind_addresses: ['0.0.0.0']
+EOF
+
+    if [[ "$PLAYBOOK_LIGHT" = true ]] || [[ "$OS" =~ ^Raspbian ]]
+    then
+        echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
+    fi
 }
 
 # Get primary IP from ICanHazIP, if it does not validate, fallback to local hostname
 function set_primary_ip()
 {
-    echo "Getting external IP address..."
-    local ip=$(curl -s -f --max-time 10 --retry 2 -4 'https://icanhazip.com')
-    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
-        echo "Got IP $ip"
-        PRIMARY_IP=$ip
-    else
-        PRIMARY_IP=$(hostname -I|tr ' ' '\n'|head -1)
-        echo "Failed to get external IP... using local IP $PRIMARY_IP instead"
+  echo "Getting external IP address..."
+  local ip=$(curl -s -f --max-time 10 --retry 2 -4 'https://icanhazip.com')
+  if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+      echo "Got IP $ip"
+      PRIMARY_IP=$ip
+  else
+      PRIMARY_IP=$(hostname -I|tr ' ' '\n'|head -1)
+      echo "Failed to get external IP... using local IP $PRIMARY_IP instead"
   fi
 }
 
 function display_requirements_url() {
-    echo "Only Debian, Ubuntu 18.04LTS, Raspbian, CentOS 7 and 8 are supported."
+    echo "Only Debian, Ubuntu 18.04LTS, Ubuntu 19.x, Raspbian, CentOS 7 and 8 are supported."
 }
 
 function check_arch() {
@@ -467,8 +554,25 @@ function check_arch() {
     fi
 }
 
+function check_total_ram_min_kb() {
+    MIN_RAM=$1
+    MEM_TOTAL=$(grep ^MemTotal /proc/meminfo | awk {'print $2'})
+    if [[ "$MEM_TOTAL" -gt "$MIN_RAM" ]]
+    then
+        return 1
+    fi
+}
+
+function set_playbook_light() {
+    PLAYBOOK_LIGHT="true"
+}
+
 function set_ssh_port() {
-    SSH_PORT=$(whiptail --inputbox "Please verify this is your active SSH port:" 8 78 "$SSH_PORT" --title "Verify SSH Port" 3>&1 1>&2 2>&3)
+    SSH_PORT=$(whiptail --inputbox "
+Please verify this is your active SSH port:" \
+               8 78 \
+               "$SSH_PORT" \
+               --title "Verify SSH Port" 3>&1 1>&2 2>&3)
     if [[ $? -ne 0 ]] || [[ "$SSH_PORT" == "" ]]; then
         set_ssh_port
     elif [[ "$SSH_PORT" =~ [^0-9] ]] || [[ $SSH_PORT -gt 65535 ]] || [[ $SSH_PORT -lt 1 ]]; then
@@ -479,31 +583,8 @@ function set_ssh_port() {
     fi
 }
 
-function copy_old_config(){
-    if [ ! -d "${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all" ]; then
-        return
-    fi
-    CONFIG_FILES=($(find "${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all" -name 'z-*'))
-    if [ "${#CONFIG_FILES[@]}" -eq 0 ]; then
-        return
-    fi
-
-    if ! (whiptail --title "Confirmation" \
-             --yesno "This looks like a re-installation.\n\nDo you want to keep the previous configuration options? (e.g. user/password etc.)\n" \
-             --defaultno \
-             10 78); then
-        return
-    fi
-
-    SKIP_SET_SELECTIONS="true"
-    mkdir -p /tmp/goshimmer-tmp
-    for FILE in "${CONFIG_FILES[@]}"; do
-        cp -- "$FILE" /tmp/goshimmer-tmp/.
-    done
-}
-
 function skip_all_updates() {
-    readarray -t TO_RUN_UPDATES < <(find "${GOSHIMMER_PLAYBOOK_DIR}/custom_updates/" -maxdepth 1 -type f -name '*_updates.sh')
+    readarray -t TO_RUN_UPDATES < <(find "${HORNET_PLAYBOOK_DIR}/custom_updates/" -maxdepth 1 -type f -name '*_updates.sh')
 
     # Return if nothing to update
     ((${#TO_RUN_UPDATES[@]} == 0)) && { clear; return; }
@@ -515,16 +596,27 @@ function skip_all_updates() {
 }
 
 function run_playbook(){
+    # Get default SSH port
+    set +o pipefail
+    SSH_PORT=$(grep ^Port /etc/ssh/sshd_config | awk {'print $2'})
+    set -o pipefail
+    if [[ "$SSH_PORT" != "" ]] && [[ "$SSH_PORT" != "22" ]]; then
+        set_ssh_port
+    else
+        SSH_PORT=22
+    fi
+    echo "SSH port to use: $SSH_PORT"
+
     # Ansible output log file
-    LOGFILE=/var/log/goshimmer-playbook-$(date +%Y%m%d%H%M).log
+    LOGFILE=/var/log/hornet-playbook-$(date +%Y%m%d%H%M).log
 
     # Override ssh_port
-    [[ $SSH_PORT -ne 22 ]] && echo "ssh_port: \"${SSH_PORT}\"" > group_vars/all/z-ssh-port.yml
+    [[ $SSH_PORT -ne 22 ]] && echo "ssh_port: \"${SSH_PORT}\"" > "${HORNET_PLAYBOOK_DIR}/group_vars/all/z-ssh-port.yml"
 
     # Run the playbook
-    echo "*** Running playbook command: ansible-playbook -i inventory -v site.yml $INSTALL_OPTIONS" | tee -a "$LOGFILE"
+    echo "*** Running playbook command: ansible-playbook -i inventory -v site.yml -e "memory_autoset=true" $INSTALL_OPTIONS" | tee -a "$LOGFILE"
     set +e
-    unbuffer ansible-playbook -i inventory -v site.yml $INSTALL_OPTIONS | tee -a "$LOGFILE"
+    unbuffer ansible-playbook -i inventory -v site.yml -e "memory_autoset=true" $INSTALL_OPTIONS | tee -a "$LOGFILE"
     RC=$?
     if [ $RC -ne 0 ]; then
         echo "ERROR! The playbook exited with failure(s). A log has been save here '$LOGFILE'"
@@ -536,22 +628,32 @@ function run_playbook(){
     if [ -f "/var/run/playbook_reboot" ]; then
         cat <<EOF >/etc/motd
 -------------------- GoShimmer PLAYBOOK --------------------
+
 It seems you have rebooted the node. You can proceed with
 the installation by running the command:
+
 ${GOSHIMMER_PLAYBOOK_DIR}/rerun.sh
-(make sure you are user root before you run it)
+
+(make sure you are user root!)
+
 -------------------- GoShimmer PLAYBOOK --------------------
 EOF
 
         cat <<EOF
 -------------------- NOTE --------------------
+
 The installer detected that the server requires a reboot,
 most probably to enable a functionality required by the playbook.
+
 You can reboot the server using the command 'reboot'.
+
 Once the server is back online you can use the following command
 to proceed with the installation (become user root first):
+
 ${GOSHIMMER_PLAYBOOK_DIR}/rerun.sh
+
 -------------------- NOTE --------------------
+
 EOF
 
         rm -f "/var/run/playbook_reboot"
@@ -565,33 +667,36 @@ EOF
     # This could happen on script re-run
     # due to reboot, therefore the variable is empty
     if [ -z "$ADMIN_USER" ]; then
-        ADMIN_USER=$(grep ^admin_user "$INSTALLER_OVERRIDE_FILE" | awk {'print $2'})
+        ADMIN_USER=$(grep "^fullnode_user:" "$INSTALLER_OVERRIDE_FILE" | awk {'print $2'})
+    fi
+
+    if ! grep -q "^disable_monitoring: true" "$INSTALLER_OVERRIDE_FILE"; then
+        MONITORING_MSG=" and Grafana"
+        MONITORING_URL=" and https://${PRIMARY_IP}:5555"
     fi
 
     OUTPUT=$(cat <<EOF
-
 * A log of this installation has been saved to: $LOGFILE
 
-* You should be able to connect to the dashboard on (and skip the warning in the browser):
+* You should be able to connect to Hornet Dashboard${MONITORING_MS}:
 
-https://${PRIMARY_IP}:8081/dashboard
+https://${PRIMARY_IP}:8081${MONITORING_URL}
 
 * Note that your IP might be different as this one has been auto-detected in best-effort.
 
 * Log in with username ${ADMIN_USER} and the password you have entered during the installation.
 
-* For easy node management you can use gosc, just type gosc (as root)
-
-Thank you for installing a goshimmer node with the goshimmer-playbook!
+Thank you for installing an IOTA node with the hornet-playbook!
 
 EOF
 )
 
-HEIGHT=$(expr $(echo "$OUTPUT"|wc -l) + 10)
-whiptail --title "Installation Done" \
-         --msgbox "$OUTPUT" \
-         $HEIGHT 78
+    HEIGHT=$(expr $(echo "$OUTPUT"|wc -l) + 10)
+    whiptail --title "Installation Done" \
+             --msgbox "$OUTPUT" \
+             $HEIGHT 78
 }
+
 #####################
 ### End Functions ###
 #####################
@@ -602,7 +707,7 @@ if [[ -n "$1" ]] && [[ "$1" == "rerun" ]]; then
     exit
 fi
 
-# Get OS and version
+### Get OS and version
 set_dist
 
 # Check OS version compatibility
@@ -615,7 +720,7 @@ if [[ "$OS" =~ ^(CentOS|Red) ]]; then
     check_arch
     init_centos_$VER
 elif [[ "$OS" =~ ^Ubuntu ]]; then
-    if [[ ! "$VER" =~ ^(16|17|18) ]]; then
+    if [[ ! "$VER" =~ ^(16|17|18|19|20) ]]; then
         echo "ERROR: $OS version $VER not supported"
         display_requirements_url
         exit 1
@@ -637,66 +742,71 @@ elif [[ "$OS" =~ ^Raspbian ]]; then
         exit 1
     fi
     check_arch
+
+    # Workaround to make sure we detect
+    # if reboot is needed
+    apt install unattended-upgrades -y
+
     # Same setup for respbian as debian
     init_debian
+
+    # remove workaround
+    apt remove unattended-upgrades -y
 else
     echo "$OS not supported"
     exit 1
 fi
 
-set +o pipefail
-# Get default SSH port
-SSH_PORT=$(grep ^Port /etc/ssh/sshd_config | awk {'print $2'})
-set -o pipefail
-if [[ "$SSH_PORT" != "" ]] && [[ "$SSH_PORT" != "22" ]]; then
-    set_ssh_port
-else
-    SSH_PORT=22
-fi
-echo "SSH port to use: $SSH_PORT"
-
 echo "Verifying Ansible version..."
 ANSIBLE_VERSION=$(ansible --version|head -1|awk {'print $2'}|cut -d. -f1-2)
-if (( $(awk 'BEGIN {print ("'2.6'" > "'$ANSIBLE_VERSION'")}') )); then
-    echo "Error: Ansible minimum version 2.6 required."
-    echo "Please remove Ansible: (yum remove ansible -y for CentOS, or apt-get remove -y ansible for Ubuntu)."
-    echo
-    echo "Then refer to the documentation on how to get latest Ansible installed:"
-    echo "http://docs.ansible.com/ansible/latest/intro_installation.html#latest-release-via-yum"
-    echo "Note that for CentOS you may need to install Ansible from Epel to get version 2.6 or higher."
+if (( $(awk 'BEGIN {print ("'2.8'" > "'$ANSIBLE_VERSION'")}') )); then
+    cat <<EOF
+Error: Ansible minimum version 2.8 required.
+Please remove Ansible: (yum remove ansible -y for CentOS, or apt-get remove -y ansible for Ubuntu).
+
+Then refer to the documentation on how to get latest Ansible installed.
+http://docs.ansible.com/ansible/latest/intro_installation.html
+Note that for CentOS you may need to install Ansible from Epel to get version 2.8 or higher.
+EOF
     exit 1
 fi
 
+echo "Git cloning goshimmer-playbook repository..."
 cd /opt
 
 # Backup any existing goshimmer-playbook directory
 if [ -d "/opt/goshimmer-playbook" ]; then
-    copy_old_config
     echo "Backing up older goshimmer-playbook directory..."
     rm -rf goshimmer-playbook.backup
-    mv -- goshimmer-playbook goshimmer-playbook.backup
+    mv -- goshimmer-playbook "goshimmer-playbook.backup.$(date +%s)"
 fi
 
 # Clone the repository (optional branch)
-echo "Git cloning goshimmer-playbook repository..."
-git clone $GIT_OPTIONS "$GIT_REPO_URL"
+git clone $GIT_OPTIONS "https://github.com/nuriel77/goshimmer-playbook.git"
 cd "$GOSHIMMER_PLAYBOOK_DIR"
 
 # first installation? Skip all upgrades
 skip_all_updates
 
-if [ "$SKIP_SET_SELECTIONS" = true ]; then
-    # Copy old configuration
-    cp /tmp/goshimmer-tmp/* /opt/goshimmer-playbook/group_vars/all/.
-    rm -fr /tmp/goshimmer-tmp/
-else
-    # Let user choose installation add-ons
-    set_selections
+if check_total_ram_min_kb "$MIN_RAM_KB"
+then
+    set_playbook_light
+fi
 
+# Let user choose installation add-ons or set defaults
+if [[ "$SET_DEFAULTS" = true ]]
+then
+    set_defaults
+else
+    set_selections
+fi
+
+if [[ "$SKIP_PASSWORD" != true ]]
+then
     # Get the administrators username
     set_admin_username
 
-    # web access (ipm, haproxy and grafana)
+    # web access (ipm, haproxy, grafana, etc)
     get_admin_password
 fi
 
