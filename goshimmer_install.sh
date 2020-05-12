@@ -474,22 +474,22 @@ Select/unselect options using space and click Enter to proceed.
     for CHOICE in "${RESULTS_ARRAY[@]}"
     do
         case $CHOICE in
-            '"INSTALL_DOCKER"')
-                echo "install_docker: true" >>"$INSTALLER_OVERRIDE_FILE"
-                ;;
+#            '"INSTALL_DOCKER"')
+#                echo "install_docker: true" >>"$INSTALLER_OVERRIDE_FILE"
+#                ;;
             '"INSTALL_NGINX"')
                 echo "install_nginx: true" >>"$INSTALLER_OVERRIDE_FILE"
                 ;;
             '"SKIP_FIREWALL_CONFIG"')
                 echo "configure_firewall: false" >>"$INSTALLER_OVERRIDE_FILE"
                 ;;
-            '"DISABLE_MONITORING"')
-                SKIP_TAGS+=",monitoring_role"
-                echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
-                ;;
-            '"ENABLE_HAPROXY"')
-                echo "lb_bind_addresses: ['0.0.0.0']" >>"$INSTALLER_OVERRIDE_FILE"
-                ;;
+#            '"DISABLE_MONITORING"')
+#                SKIP_TAGS+=",monitoring_role"
+#                echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
+#                ;;
+#            '"ENABLE_HAPROXY"')
+#                echo "lb_bind_addresses: ['0.0.0.0']" >>"$INSTALLER_OVERRIDE_FILE"
+#                ;;
             *)
                 ;;
         esac
