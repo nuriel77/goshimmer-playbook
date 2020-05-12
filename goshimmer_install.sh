@@ -456,7 +456,7 @@ Please choose additional installation options.
 Note that defaults have been set according to your system's configuration.
 
 Select/unselect options using space and click Enter to proceed.
-        " 24 78 5 \
+        " 24 78 2 \ # set the 2 to 5 to activate all menu options
 #        "INSTALL_DOCKER"           "Install Docker runtime (recommended)" ON \
         "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
         "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
