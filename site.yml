@@ -85,6 +85,4 @@
       - docker
       - goshimmer
       - nginx
-      - haproxy
-      - monitoring
       - cleanup
