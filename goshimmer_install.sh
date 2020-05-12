@@ -60,13 +60,13 @@ fi
 
 clear
 cat <<'EOF'
-
-  _____ _   _ ________  ______  ___ ___________
- /  ___| | | |_   _|  \/  ||  \/  ||  ___| ___ \
- \ `--.| |_| | | | | .  . || .  . || |__ | |_/ /
-  `--. \  _  | | | | |\/| || |\/| ||  __||    /
- /\__/ / | | |_| |_| |  | || |  | || |___| |\ \
- \____/\_| |_/\___/\_|  |_/\_|  |_/\____/\_| \_|
+ _____       _____ _     _                               
+|  __ \     /  ___| |   (_)                              
+| |  \/ ___ \ `--.| |__  _ _ __ ___  _ __ ___   ___ _ __ 
+| | __ / _ \ `--. \ '_ \| | '_ ` _ \| '_ ` _ \ / _ \ '__|
+| |_\ \ (_) /\__/ / | | | | | | | | | | | | | |  __/ |   
+ \____/\___/\____/|_| |_|_|_| |_| |_|_| |_| |_|\___|_|   
+                                                         
 
           _|                      _|                            _|
 _|_|_|    _|    _|_|_|  _|    _|  _|_|_|      _|_|      _|_|    _|  _|
@@ -456,11 +456,11 @@ Note that defaults have been set according to your system's configuration.
 
 Select/unselect options using space and click Enter to proceed.
         " 24 78 5 \
-        "INSTALL_DOCKER"           "Install Docker runtime (recommended)" ON \
+#        "INSTALL_DOCKER"           "Install Docker runtime (recommended)" ON \
         "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
         "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
-        "ENABLE_HAPROXY"           "Enable HAProxy (recommended)" ON \
-        "DISABLE_MONITORING"       "Disable node monitoring${DISABLE_MONITORING_MSG}" "$DISABLE_MONITORING_DEFAULT" \
+#        "ENABLE_HAPROXY"           "Enable HAProxy (recommended)" ON \
+#        "DISABLE_MONITORING"       "Disable node monitoring${DISABLE_MONITORING_MSG}" "$DISABLE_MONITORING_DEFAULT" \
         3>&1 1>&2 2>&3)
 
     RC=$?
