@@ -202,7 +202,7 @@ function upgrade_goshimmer() {
     echo "Upgrading  Docker image.... (GoShimmer will automatically restart if image gets updated)"
     cd "$GOSHIMMER_PLAYBOOK_DIR" && ansible-playbook -i inventory \
                                 -v site.yml \
-                                --tags=goshimmer_role
+                                --tags=build_goshimmer_image
 
     if [[ $? -ne 0 ]]; then
          whiptail --title "Error!" \

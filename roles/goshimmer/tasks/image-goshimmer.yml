@@ -16,31 +16,41 @@
 
   when: remove_goshimmer_image|default(False)|bool
 
-- name: check goshimmer image exists
-  shell: "/usr/bin/docker images {{ goshimmer_image }}:{{ goshimmer_tag }} | grep -q ^goshimmer"
-  changed_when: False
-  register: goshimmer_image_stat
-  failed_when: "goshimmer_image_stat.rc > 1"
-
-- name: build goshimmer image, this can take a moment...
+- name: download goshimmer from dockerhub (for arch amd64 only)
+  when: "server_arch == 'amd64'"
   docker_image:
-    build:
-      path: "{{ goshimmer_git_dest }}"
-      pull: no
-      network: host
-      dockerfile: '{{ goshimmer_dockerfile | default(omit) }}'
-    name: "{{ goshimmer_image }}"
-    tag: "{{ goshimmer_tag }}"
-    source: build
-  notify:
-    - start goshimmer
-    - restart goshimmer
-  tags: goshimmer_image_build
-  register: build_image_status
-  until: build_image_status is succeeded
-  retries: 3
-  delay: 2
-  when: >
-        goshimmer_image_stat.rc == 1 and
-        (images_from_master is not defined or
-         images_from_master|bool == False)
+    name: "{{ goshimmer_image }}:{{ goshimmer_tag }}"
+    source: pull
+
+- name: build goshimmer image
+  when: "server_arch != 'amd64'"
+  block:
+
+    - name: check goshimmer image exists
+      shell: "/usr/bin/docker images {{ goshimmer_image }}:{{ goshimmer_tag }} | grep -q ^goshimmer"
+      changed_when: False
+      register: goshimmer_image_stat
+      failed_when: "goshimmer_image_stat.rc > 1"
+
+    - name: build goshimmer image, this can take a moment...
+      docker_image:
+        build:
+          path: "{{ goshimmer_git_dest }}"
+          pull: no
+          network: host
+          dockerfile: '{{ goshimmer_dockerfile | default(omit) }}'
+          args:
+            ARCH: "{{ server_arch | default('amd64') }}"
+        name: "{{ goshimmer_image }}"
+        tag: "{{ goshimmer_tag }}"
+        source: build
+      notify:
+        - restart goshimmer
+      register: build_image_status
+      until: build_image_status is succeeded
+      retries: 3
+      delay: 2
+      when: >
+            goshimmer_image_stat.rc == 1 and
+            (images_from_master is not defined or
+            images_from_master|bool == False)

@@ -1,6 +1,7 @@
 playbook_basename: goshimmer
 
-goshimmer_repo_name: "iotaledger/goshimmer"
+#goshimmer_repo_name: "iotaledger/goshimmer"
+goshimmer_repo_name: "antonionardella/goshimmer"
 goshimmer_git_url: "https://github.com/{{ goshimmer_repo_name }}.git"
 goshimmer_releases_url: "https://api.github.com/repos/{{ goshimmer_repo_name }}/releases"
 goshimmer_releases_download_url: "https://github.com/{{ goshimmer_repo_name }}/releases/download"
