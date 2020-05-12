@@ -23,6 +23,10 @@ if [[ $EUID -ne 0 ]]; then
     exit 1
 fi
 
+
+# Default value for goshimmer-playbook repository URL
+: "${GIT_REPO_URL:=https://github.com/nuriel77/goshimmer-playbook.git}"
+
 export NEWT_COLORS='
 window=,
 '
@@ -461,6 +465,7 @@ Select/unselect options using space and click Enter to proceed.
         "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
         3>&1 1>&2 2>&3)
 
+# use the following block as soon as all options have been upgraded from the HORNET repository
 #Select/unselect options using space and click Enter to proceed.
 #        " 24 78 5 \
 #        "INSTALL_DOCKER"           "Install Docker runtime (recommended)" ON \
@@ -791,7 +796,7 @@ if [ -d "/opt/goshimmer-playbook" ]; then
 fi
 
 # Clone the repository (optional branch)
-git clone $GIT_OPTIONS "https://github.com/nuriel77/goshimmer-playbook.git"
+git clone $GIT_OPTIONS "$GIT_REPO_URL"
 cd "$GOSHIMMER_PLAYBOOK_DIR"
 
 # first installation? Skip all upgrades
