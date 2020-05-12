@@ -83,7 +83,7 @@
   vars:
     fullnode_roles:
       - docker
-      - hornet
+      - goshimmer
       - nginx
       - haproxy
       - monitoring

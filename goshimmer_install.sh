@@ -441,7 +441,7 @@ function set_selections() {
 
     if [[ "$PLAYBOOK_LIGHT" = true ]]
     then
-        echo "hornet_profile: light" >>"$INSTALLER_OVERRIDE_FILE"
+        echo "goshimmer_profile: light" >>"$INSTALLER_OVERRIDE_FILE"
     elif [[ ! "$OS" =~ ^Raspbian ]]
     then
         DISABLE_MONITORING_DEFAULT="OFF"
@@ -584,7 +584,7 @@ Please verify this is your active SSH port:" \
 }
 
 function skip_all_updates() {
-    readarray -t TO_RUN_UPDATES < <(find "${HORNET_PLAYBOOK_DIR}/custom_updates/" -maxdepth 1 -type f -name '*_updates.sh')
+    readarray -t TO_RUN_UPDATES < <(find "${GOSHIMMER_PLAYBOOK_DIR}/custom_updates/" -maxdepth 1 -type f -name '*_updates.sh')
 
     # Return if nothing to update
     ((${#TO_RUN_UPDATES[@]} == 0)) && { clear; return; }
@@ -608,10 +608,10 @@ function run_playbook(){
     echo "SSH port to use: $SSH_PORT"
 
     # Ansible output log file
-    LOGFILE=/var/log/hornet-playbook-$(date +%Y%m%d%H%M).log
+    LOGFILE=/var/log/goshimmer-playbook-$(date +%Y%m%d%H%M).log
 
     # Override ssh_port
-    [[ $SSH_PORT -ne 22 ]] && echo "ssh_port: \"${SSH_PORT}\"" > "${HORNET_PLAYBOOK_DIR}/group_vars/all/z-ssh-port.yml"
+    [[ $SSH_PORT -ne 22 ]] && echo "ssh_port: \"${SSH_PORT}\"" > "${GOSHIMMER}/group_vars/all/z-ssh-port.yml"
 
     # Run the playbook
     echo "*** Running playbook command: ansible-playbook -i inventory -v site.yml -e "memory_autoset=true" $INSTALL_OPTIONS" | tee -a "$LOGFILE"
@@ -678,7 +678,7 @@ EOF
     OUTPUT=$(cat <<EOF
 * A log of this installation has been saved to: $LOGFILE
 
-* You should be able to connect to Hornet Dashboard${MONITORING_MS}:
+* You should be able to connect to GoShimmer Dashboard${MONITORING_MS}:
 
 https://${PRIMARY_IP}:8081${MONITORING_URL}
 
@@ -686,7 +686,7 @@ https://${PRIMARY_IP}:8081${MONITORING_URL}
 
 * Log in with username ${ADMIN_USER} and the password you have entered during the installation.
 
-Thank you for installing an IOTA node with the hornet-playbook!
+Thank you for installing an IOTA node with the GoShimmer-playbook!
 
 EOF
 )

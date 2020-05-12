@@ -1,0 +1,4 @@
+- import_tasks: uninstall.yml
+  tags:
+    - uninstall
+  when: uninstall_playbook | default(false) | bool

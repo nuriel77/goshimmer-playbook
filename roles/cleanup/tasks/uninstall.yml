@@ -1,0 +1,4 @@
+---
+- name: debug
+  debug:
+    msg: "To be done."
