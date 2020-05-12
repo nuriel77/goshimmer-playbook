@@ -269,7 +269,8 @@ function init_ubuntu(){
 
     echo "Installing Ansible and git..."
     apt-get install software-properties-common -y
-    apt-add-repository ppa:ansible/ansible -y
+    # PPA not ready for ubuntu focal yet (20.04)
+    [[ ! "$VER" =~ ^20 ]] && apt-add-repository ppa:ansible/ansible -y
     add-apt-repository universe -y
     apt-get update -y
     apt-get install ansible\
@@ -280,9 +281,8 @@ function init_ubuntu(){
                     cracklib-runtime\
                     whiptail\
                     python3-pip\
-                    python-pip\
                     lsb-release -y
-
+    [[ ! "$VER" =~ ^20 ]] && apt-get install python-pip -y
     if [ -e /usr/bin/pip ]; then
         /usr/bin/pip install jmespath
     fi
@@ -615,7 +615,7 @@ if [[ "$OS" =~ ^(CentOS|Red) ]]; then
     check_arch
     init_centos_$VER
 elif [[ "$OS" =~ ^Ubuntu ]]; then
-    if [[ ! "$VER" =~ ^(16|17|18|20) ]]; then
+    if [[ ! "$VER" =~ ^(16|17|18|19|20) ]]; then
         echo "ERROR: $OS version $VER not supported"
         display_requirements_url
         exit 1
