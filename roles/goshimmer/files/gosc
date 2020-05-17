@@ -16,7 +16,7 @@ clear
 VERSION_TEMP=0.2.5
 __VERSION__=${VERSION_TEMP}
 
-: "${GOSHIMMER_BRANCH:=master}"
+: "${GOSHIMMER_BRANCH:=docker_aarch64}"
 : "${GOSC_BRANCH:=master}"
 CUR_DIR="$(pwd)"
 GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"
@@ -141,11 +141,11 @@ function verify_playbook() {
 
 ### GoShimmer ###
 function get_latest_goshimmer_commit {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/antonionardella/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
 }
 
 function get_latest_goshimmer_release {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f https://api.github.com/repos/iotaledger/goshimmer/releases/latest  | jq -r .tag_name
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f https://api.github.com/repos/antonionardella/goshimmer/releases/latest  | jq -r .tag_name
 }
 
 function upgrade_goshimmer() {

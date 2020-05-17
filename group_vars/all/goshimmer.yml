@@ -7,7 +7,7 @@ goshimmer_releases_url: "https://api.github.com/repos/{{ goshimmer_repo_name }}/
 goshimmer_releases_download_url: "https://github.com/{{ goshimmer_repo_name }}/releases/download"
 goshimmer_git_dest: /opt/goshimmer
 
-goshimmer_image: iotaledger/goshimmer
+goshimmer_image: antonionardella/goshimmer
 goshimmer_version: latest
 goshimmer_user: shimmer
 goshimmer_group: shimmer
