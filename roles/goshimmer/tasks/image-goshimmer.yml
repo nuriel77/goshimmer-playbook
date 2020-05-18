@@ -51,7 +51,7 @@
           path: "{{ goshimmer_git_dest }}"
           pull: no
           network: host
-          dockerfile: '{{ goshimmer_dockerfile | default(omit) }}'
+          dockerfile: '{{ goshimmer_dockerfile }}'
           args:
             ARCH: "{{ server_arch | default('amd64') }}"
         name: "{{ goshimmer_image }}"
