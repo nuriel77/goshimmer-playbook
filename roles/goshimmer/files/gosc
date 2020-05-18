@@ -16,7 +16,7 @@ clear
 VERSION_TEMP=0.2.5
 __VERSION__=${VERSION_TEMP}
 
-: "${GOSHIMMER_BRANCH:=docker_aarch64}"
+: "${GOSHIMMER_BRANCH:=master}"
 : "${GOSC_BRANCH:=master}"
 CUR_DIR="$(pwd)"
 GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"

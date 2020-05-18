@@ -4,9 +4,11 @@ TAG={{ goshimmer_tag }}
 # goshimmer base image
 SHIMMER_IMAGE={{ goshimmer_image }}
 
+# Optional options for Docker
+DOCKER_OPTS="--entrypoint=/app/goshimmer"
+
 # Command line options to pass to goshimmer executable
 # E.g. "--config config --autopeering.port 5555"
-OPTIONS=""
+OPTIONS="--config-dir=/, --database.directory=/tmp/mainnetdb"
 
-# Optional options for Docker
-DOCKER_OPTS=""
+
