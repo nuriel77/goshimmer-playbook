@@ -6,7 +6,6 @@
         name: goshimmer.service
         state: stopped
       ignore_errors: yes
-
     - name: delete goshimmer image
       docker_image:
         name: "{{ goshimmer_image }}"
@@ -22,8 +21,13 @@
     name: "{{ goshimmer_image }}:{{ goshimmer_tag }}"
     source: pull
 
+
+
 - name: build goshimmer image
-  when: "server_arch != 'amd64'"
+  when: >
+        server_arch != 'amd64' or
+        ('failed' in image_built and image_built.failed) or
+        build_image|default(False)|bool
   block:
 
     - name: check goshimmer image exists
@@ -32,6 +36,15 @@
       register: goshimmer_image_stat
       failed_when: "goshimmer_image_stat.rc > 1"
 
+    - name: set dockerfile
+      set_fact:
+        goshimmer_dockerfile: >-
+          {%- if server_arch == 'amd64' -%}
+          docker/Dockerfile
+          {%- else -%}
+          docker/Dockerfile.{{ server_arch }}
+          {%- endif -%}
+          
     - name: build goshimmer image, this can take a moment...
       docker_image:
         build:
