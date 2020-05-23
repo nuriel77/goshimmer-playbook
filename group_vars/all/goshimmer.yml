@@ -55,7 +55,7 @@ goshimmer_disable_plugins:
   - remotelog
 
 goshimmer_autopeering_entrynodes:
-  - "V8LYtWWcPYYDTTXLeIEFjJEuWlsjDiI0+Pq/Cx9ai6g=@116.202.49.178:14626"
+  - "MRCJTGX9x+PPiT3um1DQSHXvALaUg/tCH/oQr6mliGo=@35.246.104.243:14626"
 
 goshimmer_autopeering_port: "{{ goshimmer_ports.autopeering_tcp.port }}"
 goshimmer_gossip_port: "{{ goshimmer_ports.gossip.port }}"
@@ -64,8 +64,14 @@ goshimmer_network_bind_address: 0.0.0.0
 # Dashboard
 goshimmer_dashboard_external_address: 0.0.0.0
 goshimmer_dashboard_internal_address: 127.0.0.1
-goshimmer_dashboard_internal_port: "18081"
+goshimmer_dashboard_internal_port: "8081"
 goshimmer_dashboard_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
+
+## drng
+#goshimmer_drng_instanceID: 1
+#goshimmer_drng_threshold: 3
+#goshimmer_drng_distributedPubKey: ""
+#goshimmer_drng_committeeMembers: []
 
 # Webapi
 goshimmer_webapi_external_address: 127.0.0.1
