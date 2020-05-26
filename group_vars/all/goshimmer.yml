@@ -29,6 +29,10 @@ goshimmer_ports:
     port: 14666
     proto: tcp
     allow: yes
+  webInterface:
+    port: 80
+    proto: tcp
+    allow: yes
   dashboard:
     port: 8081
     proto: tcp
@@ -76,7 +80,7 @@ goshimmer_dashboard_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
 # Webapi
 goshimmer_webapi_external_address: 127.0.0.1
 goshimmer_webapi_internal_address: 127.0.0.1
-goshimmer_webapi_internal_port: "18080"
+goshimmer_webapi_internal_port: "8080"
 goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
 
 goshimmer_logger_level: info
@@ -84,7 +88,7 @@ goshimmer_logger_level: info
 # Tangle Visualiser/Graph config
 goshimmer_graph_external_address: 0.0.0.0
 goshimmer_graph_internal_address: 127.0.0.1
-goshimmer_graph_internal_port: "18082"
+goshimmer_graph_internal_port: "8082"
 goshimmer_graph_proxy_port: "{{ goshimmer_ports.graph.port }}"
 tanglevisualiser_git_url: "https://github.com/glumb/IOTAtangle.git"
 socketio_git_url: "https://github.com/socketio/socket.io-client.git"

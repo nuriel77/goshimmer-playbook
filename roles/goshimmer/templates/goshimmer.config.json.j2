@@ -36,7 +36,7 @@
     "port": {{ goshimmer_gossip_port | default('14666') }}
   },
   "graph": {
-    "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('18082') }}",
+    "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('8082') }}",
     "domain": "{{ goshimmer_domain_address | default('') }}",
     "networkName": "GoShimmer",
     "socketIOPath": "/socket.io-client/dist/socket.io.js",
