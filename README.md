@@ -30,7 +30,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
 Tested on the following operating systems:
 
 * CentOS 7.x, CentOS 8.x
-* Ubuntu 19/20.04LTS
+* Ubuntu 18/19/20.04LTS
 * Debian 9.5 and 10
 * Raspbian 9.9 and 10 (Tested with Raspberry Pi 4 - 4GB RAM)
 
