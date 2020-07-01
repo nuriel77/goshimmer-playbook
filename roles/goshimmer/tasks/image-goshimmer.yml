@@ -16,12 +16,14 @@
   when: remove_goshimmer_image|default(False)|bool
 
 - name: download goshimmer from dockerhub (for arch amd64 only)
-  when: "server_arch == 'amd64'"
+  when:
+    - "server_arch == 'amd64'"
+    - not build_image|default(False)|bool
   docker_image:
     name: "{{ goshimmer_image }}:{{ goshimmer_tag }}"
     source: pull
-
-
+  register: image_built
+  ignore_errors: yes
 
 - name: build goshimmer image
   when: >
@@ -44,7 +46,7 @@
           {%- else -%}
           docker/Dockerfile.{{ server_arch }}
           {%- endif -%}
-          
+
     - name: build goshimmer image, this can take a moment...
       docker_image:
         build:
