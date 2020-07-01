@@ -47,7 +47,7 @@
         mode: 0755
         owner: root
         group: root
-   
+
     - name: download nbctl
       get_url:
         url: https://raw.githubusercontent.com/nuriel77/iri-playbook/feat/docker/roles/iri/files/nbctl
@@ -61,24 +61,6 @@
         mode: 0755
       ignore_errors: yes
 
-    - name: download iritop
-      get_url:
-        url: https://raw.githubusercontent.com/nuriel77/iri-playbook/feat/docker/roles/iri/files/iritop.py
-        dest: /usr/bin/iritop
-        mode: 0755
-
-    - name: download iritop requirements
-      get_url:
-        url: https://raw.githubusercontent.com/maeck70/iritop/master/requirements.txt
-        dest: /tmp/iritop-requirements.txt
-        force: yes
-      ignore_errors: yes
-
-    - name: install iritop requirements
-      pip:
-        requirements: /tmp/iritop-requirements.txt
-      ignore_errors: yes
-
     - name: link python3 to python
       file:
         src: /usr/bin/python3
@@ -88,13 +70,13 @@
       when:
         - ansible_distribution == "CentOS"
         - ansible_distribution_major_version == '8'
-    
+
     - name: ensure ~/.gosc exists
       copy:
         dest: "{{ ansible_env.HOME }}/.gosc"
         content: ""
         force: no
-        
+
   tags:
     - scripts
 
@@ -106,6 +88,7 @@
     state: present
     reload: yes
 
+# TODO: deprecate/remove
 #- name: clone goshimmer repository
 #  git:
 #    repo: '{{ goshimmer_git_url }}'
