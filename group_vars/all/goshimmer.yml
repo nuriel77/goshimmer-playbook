@@ -64,7 +64,7 @@ goshimmer_autopeering_entrynodes:
 # Analysis
 # TODO: server_bind_address change to proxy method
 goshimmer_analysis_server_bind_address: "0.0.0.0:16178"
-
+goshimmer_analysis_client_bind_address: "ressims.iota.cafe:21888"
 goshimmer_analysis_dashboard_internal_port: "8888"
 goshimmer_analysis_dashboard_proxy_port: "{{ goshimmer_ports.analysis_dashboard.port }}"
 goshimmer_analysis_dashboard_internal_address: 127.0.0.1
