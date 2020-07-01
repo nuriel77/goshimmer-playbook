@@ -631,9 +631,9 @@ function run_playbook(){
     [[ $SSH_PORT -ne 22 ]] && echo "ssh_port: \"${SSH_PORT}\"" > "${GOSHIMMER}/group_vars/all/z-ssh-port.yml"
 
     # Run the playbook
-    echo "*** Running playbook command: ansible-playbook -i inventory -v site.yml -e "memory_autoset=true" $INSTALL_OPTIONS" | tee -a "$LOGFILE"
+    echo "*** Running playbook command: ansible-playbook -i inventory -v site.yml $INSTALL_OPTIONS" | tee -a "$LOGFILE"
     set +e
-    unbuffer ansible-playbook -i inventory -v site.yml -e "memory_autoset=true" $INSTALL_OPTIONS | tee -a "$LOGFILE"
+    unbuffer ansible-playbook -i inventory -v site.yml $INSTALL_OPTIONS | tee -a "$LOGFILE"
     RC=$?
     if [ $RC -ne 0 ]; then
         echo "ERROR! The playbook exited with failure(s). A log has been save here '$LOGFILE'"
