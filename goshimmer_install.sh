@@ -434,7 +434,10 @@ Only ASCII characters are allowed:
     esac
 
     echo "fullnode_user: '${ADMIN_USER}'" >> "$INSTALLER_OVERRIDE_FILE"
-
+    if [[ "$PLAYBOOK_LIGHT" = true ]] || [[ "$OS" =~ ^Raspbian ]]
+    then
+        echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
+    fi
 }
 
 # Installation selection menu
@@ -554,7 +557,7 @@ function set_primary_ip()
 }
 
 function display_requirements_url() {
-    echo "Only Debian, Ubuntu 20.04LTS, Ubuntu 19.x, Raspbian, CentOS 7 and 8 are supported."
+    echo "Only Debian, Ubuntu 20, 19 and 18 (LTS), Raspbian, CentOS 7 and 8 are supported."
 }
 
 function check_arch() {
@@ -684,15 +687,16 @@ EOF
         ADMIN_USER=$(grep "^fullnode_user:" "$INSTALLER_OVERRIDE_FILE" | awk {'print $2'})
     fi
 
-    if ! grep -q "^disable_monitoring: true" "$INSTALLER_OVERRIDE_FILE"; then
-        MONITORING_MSG=" and Grafana"
-        MONITORING_URL=" and https://${PRIMARY_IP}:5555"
-    fi
+    # TODO: see when grafana can be added
+    #if ! grep -q "^disable_monitoring: true" "$INSTALLER_OVERRIDE_FILE"; then
+    #    MONITORING_MSG=" and Grafana"
+    #    MONITORING_URL=" and https://${PRIMARY_IP}:5555"
+    #fi
 
     OUTPUT=$(cat <<EOF
 * A log of this installation has been saved to: $LOGFILE
 
-* You should be able to connect to GoShimmer Dashboard${MONITORING_MS}:
+* You should be able to connect to GoShimmer Dashboard${MONITORING_MSG}:
 
 https://${PRIMARY_IP}:8081${MONITORING_URL}
 
@@ -820,7 +824,7 @@ then
     # Get the administrators username
     set_admin_username
 
-    # web access (ipm, haproxy, grafana, etc)
+    # web access
     get_admin_password
 fi
 
