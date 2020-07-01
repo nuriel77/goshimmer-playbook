@@ -16,20 +16,22 @@
 
     - name: install local dependencies
       tags:
+        - local_deps
         - always
-        - check_version
       apt:
         name: "{{ packages }}"
         state: present
         update_cache: yes
       vars:
         packages: "{{ deb_packages }}"
-      when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+      when:
+        - ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+        - ansible_distribution_major_version != '20'
 
     - name: install local dependencies
       tags:
+        - local_deps
         - always
-        - check_version
       package:
         name: "{{ packages }}"
       vars:
@@ -37,12 +39,12 @@
       when: ansible_distribution == 'CentOS'
 
     - name: install gilt
-      tags:
-        - always
-        - check_version
       pip:
         name: python-gilt
         state: present
+      tags:
+        - local_deps
+        - always
 
     - name: run gilt overlay
       command: "gilt --config {{ gilt_config | default('gilt.yml') }} overlay"
@@ -79,9 +81,8 @@
       loop_control:
         loop_var: roleinputvar
   vars:
-    fullnode_user_password: "{{ admin_user_password }}"
-    fullnode_user: "{{ admin_user }}"
     fullnode_roles:
       - docker
       - goshimmer
       - nginx
+      - cleanup
