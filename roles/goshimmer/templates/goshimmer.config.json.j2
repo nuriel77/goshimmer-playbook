@@ -1,13 +1,13 @@
 {
   "analysis": {
     "client": {
-      "serverAddress": "{{ goshimmer_analysis_client_address | default('ressims.iota.cafe:188') }}"
+      "serverAddress": "{{ goshimmer_analysis_client_address | default('node1.goshimmer.dev:188') }}"
     },
     "server": {
-      "port": 0
+      "bindAddress": "{{ goshimmer_analysis_server_bind_address | default('0.0.0.0:16178') }}"
     },
-    "httpServer": {
-      "bindAddress": "{{ goshimmer_analysis_bind_address | default('0.0.0.0:80') }}"
+    "webInterface": {
+      "bindAddress": "{{ goshimmer_analysis_webInterface_bind_address | default('0.0.0.0:80') }}"
     }
   },
   "autopeering": {
@@ -15,7 +15,7 @@
     "port": {{ goshimmer_autopeering_port | default('14626') }}
   },
   "dashboard": {
-    "bindAddress": "{{ goshimmer_dashboard_internal_address | default('0.0.0.0') }}:{{ goshimmer_dashboard_internal_port | default('18081') }}",
+    "bindAddress": "{{ goshimmer_dashboard_internal_address | default('0.0.0.0') }}:{{ goshimmer_dashboard_internal_port | default('8081') }}",
     "dev": {{ goshimmer_dashboard_dev_enabled | default('false') | lower | string }},
     "basic_auth": {
       "enabled": {{ goshimmer_dashboard_basic_auth | default('false') | lower | string }},
@@ -26,11 +26,17 @@
   "database": {
     "directory": "mainnetdb"
   },
+  "drng": {
+    "instanceId": 1,
+    "threshold": 3,
+    "distributedPubKey": "",
+    "committeeMembers": []
+  },
   "gossip": {
     "port": {{ goshimmer_gossip_port | default('14666') }}
   },
   "graph": {
-    "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('18082') }}",
+    "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('8082') }}",
     "domain": "{{ goshimmer_domain_address | default('') }}",
     "networkName": "GoShimmer",
     "socketIOPath": "/socket.io-client/dist/socket.io.js",
@@ -44,10 +50,10 @@
     "outputPaths": [
       "stdout"
     ],
+    "disableEvents": {{ goshimmer_logger_disable_events | default('true') | lower | string }},
     "remotelog": {
-      "serverAddress": "{{ goshimmer_logger_remote_log_server | default('remotelog.goshimmer.iota.cafe:5213') }}"
-    },
-    "disableEvents": {{ goshimmer_logger_disable_events | default('true') | lower | string }}
+      "serverAddress": "remotelog.goshimmer.iota.cafe:5213"
+    }
   },
   "network": {
     "bindAddress": "{{ goshimmer_network_bind_address | default('0.0.0.0') }}",
@@ -63,6 +69,6 @@
       "privateKey": "{{ goshimmer_webapi_auth_private_key | default('') }}",
       "username": "{{ fullnode_user }}"
     },
-    "bindAddress": "{{ goshimmer_webapi_internal_address | default('0.0.0.0') }}:{{ goshimmer_webapi_internal_port | default('18080') }}"
+    "bindAddress": "{{ goshimmer_webapi_internal_address | default('0.0.0.0') }}:{{ goshimmer_webapi_internal_port | default('8080') }}"
   }
 }

@@ -141,11 +141,11 @@ function verify_playbook() {
 
 ### GoShimmer ###
 function get_latest_goshimmer_commit {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/antonionardella/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
 }
 
 function get_latest_goshimmer_release {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f https://api.github.com/repos/iotaledger/goshimmer/releases/latest  | jq -r .tag_name
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f https://api.github.com/repos/antonionardella/goshimmer/releases/latest  | jq -r .tag_name
 }
 
 function upgrade_goshimmer() {
@@ -202,7 +202,7 @@ function upgrade_goshimmer() {
     echo "Upgrading  Docker image.... (GoShimmer will automatically restart if image gets updated)"
     cd "$GOSHIMMER_PLAYBOOK_DIR" && ansible-playbook -i inventory \
                                 -v site.yml \
-                                --tags=goshimmer_role
+                                --tags=build_goshimmer_image
 
     if [[ $? -ne 0 ]]; then
          whiptail --title "Error!" \
