@@ -20,8 +20,8 @@
     "dev": {{ goshimmer_dashboard_dev_enabled }},
     "basic_auth": {
       "enabled": {{ goshimmer_dashboard_basic_auth | lower | string }},
-      "password": "{{ fullnode_user_password }}",
-      "username": "{{ fullnode_user }}"
+      "password": "{% if goshimmer_dashboard_basic_auth | bool %}{{ fullnode_user_password }}{% endif %}",
+      "username": "{% if goshimmer_dashboard_basic_auth | bool %}{{ fullnode_user }}{% endif %}"
     }
   },
   "database": {
@@ -89,8 +89,8 @@
   "webapi": {
     "auth": {
       "password": "{{ fullnode_user_password }}",
-      "privateKey": "{{ goshimmer_webapi_auth_private_key | default('') }}",
-      "username": "{{ fullnode_user }}"
+      "username": "{{ fullnode_user }}",
+      "privateKey": "{{ goshimmer_webapi_auth_private_key | default('') }}"
     },
     "bindAddress": "{{ goshimmer_webapi_internal_address }}:{{ goshimmer_webapi_internal_port }}"
   },
