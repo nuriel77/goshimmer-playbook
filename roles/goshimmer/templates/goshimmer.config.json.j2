@@ -1,30 +1,32 @@
 {
   "analysis": {
     "client": {
-      "serverAddress": "{{ goshimmer_analysis_client_address | default('node1.goshimmer.dev:188') }}"
+      "serverAddress": "{{ goshimmer_analysis_client_address }}"
     },
     "server": {
-      "bindAddress": "{{ goshimmer_analysis_server_bind_address | default('0.0.0.0:16178') }}"
+      "bindAddress": "{{ goshimmer_analysis_server_bind_address }}"
     },
-    "webInterface": {
-      "bindAddress": "{{ goshimmer_analysis_webInterface_bind_address | default('0.0.0.0:80') }}"
+    "dashboard": {
+      "bindAddress": "{{ goshimmer_analysis_dashboard_internal_address }}:{{ goshimmer_analysis_dashboard_internal_port }}",
+      "dev": {{ goshimmer_analysis_dashboard_dev_enabled | lower | string }}
     }
   },
   "autopeering": {
     "entryNodes": {{ goshimmer_autopeering_entrynodes | to_nice_json(indent=6) }},
-    "port": {{ goshimmer_autopeering_port | default('14626') }}
+    "port": {{ goshimmer_autopeering_port }}
   },
   "dashboard": {
-    "bindAddress": "{{ goshimmer_dashboard_internal_address | default('0.0.0.0') }}:{{ goshimmer_dashboard_internal_port | default('8081') }}",
-    "dev": {{ goshimmer_dashboard_dev_enabled | default('false') | lower | string }},
+    "bindAddress": "{{ goshimmer_dashboard_internal_address }}:{{ goshimmer_dashboard_internal_port }}",
+    "dev": {{ goshimmer_dashboard_dev_enabled }},
     "basic_auth": {
-      "enabled": {{ goshimmer_dashboard_basic_auth | default('false') | lower | string }},
+      "enabled": {{ goshimmer_dashboard_basic_auth | lower | string }},
       "password": "{{ fullnode_user_password }}",
       "username": "{{ fullnode_user }}"
     }
   },
   "database": {
-    "directory": "mainnetdb"
+    "directory": "mainnetdb",
+    "inMemory": {{ goshimmer_database_in_memory | lower | string }}
   },
   "drng": {
     "instanceId": 1,
@@ -32,36 +34,57 @@
     "distributedPubKey": "",
     "committeeMembers": []
   },
+  "fpc": {
+    "bindAddress": "{{ goshimmer_fpc_bind_address }}:{{ goshimmer_fpc_port }}"
+  },
   "gossip": {
-    "port": {{ goshimmer_gossip_port | default('14666') }}
+    "port": {{ goshimmer_gossip_port }},
+    "tipsBroadcaster": {
+      "interval": "{{ goshimmer_gossip_tipbroadcaster_interval }}"
+    }
   },
   "graph": {
-    "bindAddress": "{{ goshimmer_graph_internal_address | default('0.0.0.0') }}:{{ goshimmer_graph_internal_port | default('8082') }}",
+    "bindAddress": "{{ goshimmer_graph_internal_address }}:{{ goshimmer_graph_internal_port }}",
     "domain": "{{ goshimmer_domain_address | default('') }}",
     "networkName": "GoShimmer",
     "socketIOPath": "/socket.io-client/dist/socket.io.js",
     "webrootPath": "/IOTAtangle/webroot"
   },
   "logger": {
-    "level": "{{ goshimmer_logger_level | default('info') }}",
+    "level": "{{ goshimmer_logger_level }}",
     "disableCaller": false,
     "disableStacktrace": false,
     "encoding": "console",
     "outputPaths": [
       "stdout"
     ],
-    "disableEvents": {{ goshimmer_logger_disable_events | default('true') | lower | string }},
+    "disableEvents": {{ goshimmer_logger_disable_events | lower | string }},
     "remotelog": {
-      "serverAddress": "remotelog.goshimmer.iota.cafe:5213"
+      "serverAddress": "{{ goshimmer_logger_remote_log_server_address }}"
     }
   },
+  "metrics": {
+    "local": {{ goshimmer_metrics_local_enabled | lower | string }},
+    "global": {{ goshimmer_metrics_global_enabled | lower | string }}
+  },
   "network": {
-    "bindAddress": "{{ goshimmer_network_bind_address | default('0.0.0.0') }}",
+    "bindAddress": "{{ goshimmer_network_bind_address }}",
     "externalAddress": "auto"
   },
   "node": {
     "disableplugins": {{ goshimmer_disable_plugins | to_nice_json(indent=6) }},
     "enableplugins": {{ goshimmer_enable_plugins | to_nice_json(indent=6) }}
+  },
+  "pow": {
+    "difficulty": {{ goshimmer_pow_difficulty }},
+    "numThreads": {{ goshimmer_pow_num_threads }},
+    "timeout": "{{ goshimmer_pow_timeout }}"
+  },
+  "profiling": {
+    "bindAddress": "{{ goshimmer_profiling_bind_address }}"
+  },
+  "prometheus": {
+    "bindAddress": "{{ goshimmer_prometheus_exporter_internal_address }}:{{ goshimmer_prometheus_exporter_port }}"
   },
   "webapi": {
     "auth": {
@@ -69,6 +92,9 @@
       "privateKey": "{{ goshimmer_webapi_auth_private_key | default('') }}",
       "username": "{{ fullnode_user }}"
     },
-    "bindAddress": "{{ goshimmer_webapi_internal_address | default('0.0.0.0') }}:{{ goshimmer_webapi_internal_port | default('8080') }}"
+    "bindAddress": "{{ goshimmer_webapi_internal_address }}:{{ goshimmer_webapi_internal_port }}"
+  },
+  "networkdelay": {
+    "originPublicKey": "{{ goshimmer_networkdelay_origin_public_key }}"
   }
 }
