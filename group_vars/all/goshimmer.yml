@@ -81,7 +81,7 @@ goshimmer_gossip_tipbroadcaster_interval: 10s
 # Dashboard
 goshimmer_dashboard_external_address: 0.0.0.0
 goshimmer_dashboard_internal_address: 127.0.0.1
-goshimmer_dashboard_internal_port: "8081"
+goshimmer_dashboard_internal_port: "8011"
 goshimmer_dashboard_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
 goshimmer_dashboard_dev_enabled: "false"
 goshimmer_dashboard_basic_auth: "false"
@@ -97,7 +97,7 @@ goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
 
 # logger
 goshimmer_logger_level: info
-goshimmer_logger_disable_events: "true"
+goshimmer_logger_disable_events: "false"
 goshimmer_logger_remote_log_server_address: "ressims.iota.cafe:5213"
 
 # metrics
