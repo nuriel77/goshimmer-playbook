@@ -92,7 +92,7 @@ goshimmer_database_in_memory: "false"
 # Webapi
 goshimmer_webapi_external_address: 127.0.0.1
 goshimmer_webapi_internal_address: 127.0.0.1
-goshimmer_webapi_internal_port: "8080"
+goshimmer_webapi_internal_port: "8012"
 goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
 
 # logger
