@@ -6,4 +6,5 @@ custom_updates/*.completed
 gilt.dev.yml
 roles/docker
 roles/nginx
+roles/monitoring
 .project
