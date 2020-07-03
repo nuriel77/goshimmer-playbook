@@ -465,6 +465,7 @@ Note that defaults have been set according to your system's configuration.
 Select/unselect options using space and click Enter to proceed.
         " 24 78 2 \
         "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
+        "DISABLE_MONITORING"       "Disable node monitoring${DISABLE_MONITORING_MSG}" "$DISABLE_MONITORING_DEFAULT" \
         "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
         3>&1 1>&2 2>&3)
 
@@ -475,10 +476,7 @@ Select/unselect options using space and click Enter to proceed.
 #        "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
 #        "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
 #        "ENABLE_HAPROXY"           "Enable HAProxy (recommended)" ON \
-#        "DISABLE_MONITORING"       "Disable node monitoring${DISABLE_MONITORING_MSG}" "$DISABLE_MONITORING_DEFAULT" \
 #        3>&1 1>&2 2>&3)
-
-
 
     RC=$?
     if [[ $RC -ne 0 ]]; then
@@ -499,10 +497,10 @@ Select/unselect options using space and click Enter to proceed.
             '"SKIP_FIREWALL_CONFIG"')
                 echo "configure_firewall: false" >>"$INSTALLER_OVERRIDE_FILE"
                 ;;
-#            '"DISABLE_MONITORING"')
-#                SKIP_TAGS+=",monitoring_role"
-#                echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
-#                ;;
+            '"DISABLE_MONITORING"')
+                SKIP_TAGS+=",monitoring_role"
+                echo "disable_monitoring: true" >>"$INSTALLER_OVERRIDE_FILE"
+                ;;
 #            '"ENABLE_HAPROXY"')
 #                echo "lb_bind_addresses: ['0.0.0.0']" >>"$INSTALLER_OVERRIDE_FILE"
 #                ;;
@@ -687,11 +685,10 @@ EOF
         ADMIN_USER=$(grep "^fullnode_user:" "$INSTALLER_OVERRIDE_FILE" | awk {'print $2'})
     fi
 
-    # TODO: see when grafana can be added
-    #if ! grep -q "^disable_monitoring: true" "$INSTALLER_OVERRIDE_FILE"; then
-    #    MONITORING_MSG=" and Grafana"
-    #    MONITORING_URL=" and https://${PRIMARY_IP}:5555"
-    #fi
+    if ! grep -q "^disable_monitoring: true" "$INSTALLER_OVERRIDE_FILE"; then
+        MONITORING_MSG=" and Grafana"
+        MONITORING_URL=" and https://${PRIMARY_IP}:5555"
+    fi
 
     OUTPUT=$(cat <<EOF
 * A log of this installation has been saved to: $LOGFILE
