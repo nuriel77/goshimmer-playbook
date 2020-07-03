@@ -463,7 +463,7 @@ Please choose additional installation options.
 Note that defaults have been set according to your system's configuration.
 
 Select/unselect options using space and click Enter to proceed.
-        " 24 78 2 \
+        " 24 78 3 \
         "INSTALL_NGINX"            "Install nginx webserver (recommended)" ON \
         "DISABLE_MONITORING"       "Disable node monitoring${DISABLE_MONITORING_MSG}" "$DISABLE_MONITORING_DEFAULT" \
         "SKIP_FIREWALL_CONFIG"     "Skip configuring firewall" OFF \
