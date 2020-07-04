@@ -42,13 +42,20 @@
       register: goshimmer_image_stat
       failed_when: "goshimmer_image_stat.rc > 1"
 
+    # TODO once goshimmer add this to the repo
+    - name: copy arm64 file if needed
+      copy:
+        path: files/Dockerfile.arm64
+        dest: "{{ goshimmer_git_dest }}/Dockerfile.arm64"
+      when: ansible_architecture in ["armv8l", "aarch64"]
+
     - name: set dockerfile
       set_fact:
         goshimmer_dockerfile: >-
           {%- if server_arch == 'amd64' -%}
-          docker/Dockerfile
+          Dockerfile
           {%- else -%}
-          docker/Dockerfile.{{ server_arch }}
+          Dockerfile.{{ server_arch }}
           {%- endif -%}
 
     - name: build goshimmer image, this can take a moment...
@@ -75,3 +82,10 @@
             goshimmer_image_stat.rc == 1 and
             (images_from_master is not defined or
             images_from_master|bool == False)
+
+    # TODO remove when goshimmer add this file to their repo
+    - name: delete arm64 file if needed
+      file:
+        state: absent
+        path: "{{ goshimmer_git_dest }}/Dockerfile.arm64"
+      when: ansible_architecture in ["armv8l", "aarch64"]
