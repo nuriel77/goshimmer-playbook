@@ -185,7 +185,8 @@ function init_centos_7(){
       expect-devel\
       cracklib\
       newt\
-      python-pip
+      python3\
+      python-pip3
     if [ -e /usr/bin/pip ]; then
         /usr/bin/pip install jmespath
     fi
