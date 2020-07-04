@@ -13,8 +13,9 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.2.5
+VERSION_TEMP=0.2.6
 __VERSION__=${VERSION_TEMP}
+SEMVER_REGEX="^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
 
 : "${GOSHIMMER_BRANCH:=master}"
 : "${GOSC_BRANCH:=master}"
@@ -103,12 +104,40 @@ function set_dist() {
     fi
 }
 
+function validate_version {
+    local version=$1
+    if [[ "$version" =~ $SEMVER_REGEX ]]
+    then
+        local major=${BASH_REMATCH[1]}
+        local minor=${BASH_REMATCH[2]}
+        local patch=${BASH_REMATCH[3]}
+        local prere=${BASH_REMATCH[4]}
+        local build=${BASH_REMATCH[5]}
+        if [[ ! -z "$prere" ]] || [[ ! -z "$build" ]]
+        then
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
 function compare_versions() {
     local FIRST_VERSION=$(echo "$1" | tr -d 'v')
     local EVAL_STR=$2
     local SECOND_VERSION=$(echo "$3" | tr -d 'v')
 
+    for VER in "$FIRST_VERSION" "$SECOND_VERSION"
+    do
+        if ! validate_version "$VER"
+        then
+            >&2 echo "Warning: the version '$VER' is not a valid release version. Cannot check version.".
+            return 1
+        fi
+    done
+
     local GET_BOOL=$(python -c "from distutils.version import StrictVersion; print(StrictVersion('$FIRST_VERSION') $EVAL_STR StrictVersion('$SECOND_VERSION'))")
+
     if [[ "$GET_BOOL" == "True" ]]
     then
         return 0
@@ -141,11 +170,11 @@ function verify_playbook() {
 
 ### GoShimmer ###
 function get_latest_goshimmer_commit {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/antonionardella/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
 }
 
 function get_latest_goshimmer_release {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f https://api.github.com/repos/antonionardella/goshimmer/releases/latest  | jq -r .tag_name
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/releases/latest"  | jq -r .tag_name
 }
 
 function upgrade_goshimmer() {
@@ -249,7 +278,6 @@ function check_new_gosc() {
     if [[ $? -ne 0 ]] || [[ "$GOSC_VERSION" == "" ]]; then
         return 1
     fi
-
     if compare_versions $CURR_VERSION '>=' $GOSC_VERSION; then
         return 1
     else
