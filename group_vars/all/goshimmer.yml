@@ -123,14 +123,4 @@ goshimmer_profiling_bind_address: 127.0.0.1:6061
 # networkdelay
 goshimmer_networkdelay_origin_public_key: "9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd"
 
-# Tangle Visualiser/Graph config
-goshimmer_graph_external_address: 0.0.0.0
-goshimmer_graph_internal_address: 127.0.0.1
-goshimmer_graph_internal_port: "8082"
-goshimmer_graph_proxy_port: "{{ goshimmer_ports.graph.port }}"
-tanglevisualiser_git_url: "https://github.com/glumb/IOTAtangle.git"
-socketio_git_url: "https://github.com/socketio/socket.io-client.git"
-tanglevisualiser_path: "{{ goshimmer_home_path }}/tanglevisualiser"
-tanglevisualiser_version: master
-socketio_path: "{{ goshimmer_home_path }}/socket.io-client"
-goshimmer_mqtt_ws_path: '/ws'
+goshimmer_ws_path: '/ws'

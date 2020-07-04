@@ -43,13 +43,6 @@
       "interval": "{{ goshimmer_gossip_tipbroadcaster_interval }}"
     }
   },
-  "graph": {
-    "bindAddress": "{{ goshimmer_graph_internal_address }}:{{ goshimmer_graph_internal_port }}",
-    "domain": "{{ goshimmer_domain_address | default('') }}",
-    "networkName": "GoShimmer",
-    "socketIOPath": "/socket.io-client/dist/socket.io.js",
-    "webrootPath": "/IOTAtangle/webroot"
-  },
   "logger": {
     "level": "{{ goshimmer_logger_level }}",
     "disableCaller": false,
