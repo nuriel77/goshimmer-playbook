@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.3.0
+VERSION_TEMP=0.3.1
 __VERSION__=${VERSION_TEMP}
 SEMVER_REGEX="^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
 
@@ -730,6 +730,23 @@ function cleanup_docker_images() {
     fi
 }
 
+### Delete DB ###
+function delete_db() {
+    if ! (whiptail --title "Delete DB" \
+                   --yesno "This option will stop Goshimmer, delete the database and start it up again\n\nWould you like to proceed?\n" \
+                   --defaultno \
+          12 $WIDTH) then
+        return
+    fi
+    echo "Stopping Goshimmer..."
+    /usr/bin/systemctl stop goshimmer
+    rm -rf /var/lib/goshimmer/mainnetdb/*
+    echo "DB deleted"
+    echo "Starting Goshimmer..."
+    /usr/bin/systemctl start goshimmer
+    pause "Done. Press ENTER to return to menu."
+}
+
 ### Configure files ###
 function configure_files_menu() {
     whiptail --title "GOSC v${__VERSION__} - Configure Files" \
@@ -882,7 +899,7 @@ function main_menu() {
     whiptail --title "GOSC v${__VERSION__} - GoShimmer Configuration Menu" \
              --menu "$MENU" \
              --cancel-button "Exit" \
-             18 $WIDTH 8 \
+             19 $WIDTH 9 \
     "a)" "Update GoShimmer Software" \
     "b)" "Goshimmer Plugins" \
     "c)" "Manage Services" \
@@ -890,7 +907,8 @@ function main_menu() {
     "e)" "View Per Processes Memory Usage" \
     "f)" "Rerun Playbook Installation" \
     "g)" "Clean Unused Docker Images" \
-    "h)" "Update GOSC and node scripts" \
+    "h)" "Delete the Database" \
+    "i)" "Update GOSC and node scripts" \
     3>&1 1>&2 2>&3
 }
 
@@ -939,6 +957,11 @@ function run_main_menu() {
             ;;
 
         "h)")
+            delete_db
+            run_main_menu
+            ;;
+
+        "i)")
             update_gosc
             run_main_menu
             ;;
