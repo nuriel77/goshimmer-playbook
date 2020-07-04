@@ -38,7 +38,7 @@ Architectures (x86_64, arm/aarch 64 bit)
 
 ## Recommendations
 
-* RAM: At least 1GB RAM, as less than this can result in out-of-memory failures.
+* RAM: At least 2GB RAM, as less than this can result in out-of-memory failures.
 * x2 CPUs are recommended
 
 ## Installation
@@ -148,21 +148,11 @@ sudo gosc
 ### Goshimmer DB
 The database is located in `/var/lib/goshimmer/mainnetdb`
 
-
 ### Goshimmer Dashboard
 Goshimmer dashboard is accessible by default via your public IP and port 8081. e.g:
 
 ```
 https://mydomain.io:8081
-```
-
-You can login using the username and password you've selected during the installation.
-
-### Tangle Visualiser
-If you've enabled the graph plugin (e.g. via `gosc`) you can point your browser to your node's public IP (or domain-name) and port 8082, e.g.:
-
-```
-https://mydomain.io:8082
 ```
 
 You can login using the username and password you've selected during the installation.
