@@ -12,6 +12,8 @@
         tag: "{{ goshimmer_tag }}"
         state: absent
         force_absent: yes
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
 
   when: remove_goshimmer_image|default(False)|bool
 
@@ -24,6 +26,8 @@
     source: pull
   register: image_built
   ignore_errors: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
 - name: build goshimmer image
   when: >
@@ -65,6 +69,8 @@
       until: build_image_status is succeeded
       retries: 3
       delay: 2
+      vars:
+        ansible_python_interpreter: /usr/bin/python3
       when: >
             goshimmer_image_stat.rc == 1 and
             (images_from_master is not defined or
