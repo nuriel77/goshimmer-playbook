@@ -52,11 +52,15 @@ goshimmer_ports:
 
 # Plugins
 goshimmer_enable_plugins:
-  - spammer
-  - remotelog
   - networkdelay
   - prometheus
-goshimmer_disable_plugins: []
+  - valuetransfers
+  - spammer
+goshimmer_disable_plugins:
+  - portcheck
+  - remotelog
+  - profiling
+  - faucet
 
 goshimmer_autopeering_entrynodes:
   - "2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626"
