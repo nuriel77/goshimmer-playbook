@@ -9,8 +9,6 @@
     executable: /usr/bin/pip3
     name:
      - docker
-  when:
-    - ansible_distribution == "CentOS"
   tags: always
 
 - name: "Fix for No module named ssl_match_hostname"
