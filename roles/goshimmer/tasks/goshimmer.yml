@@ -48,12 +48,6 @@
         owner: root
         group: root
 
-    - name: download nbctl
-      get_url:
-        url: https://raw.githubusercontent.com/nuriel77/iri-playbook/feat/docker/roles/iri/files/nbctl
-        dest: /usr/bin/nbctl
-        mode: 0755
-
     - name: download ps_mem
       get_url:
         url: https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py
