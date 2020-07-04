@@ -13,8 +13,9 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.2.5
+VERSION_TEMP=0.3.0
 __VERSION__=${VERSION_TEMP}
+SEMVER_REGEX="^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
 
 : "${GOSHIMMER_BRANCH:=master}"
 : "${GOSC_BRANCH:=master}"
@@ -103,12 +104,40 @@ function set_dist() {
     fi
 }
 
+function validate_version {
+    local version=$1
+    if [[ "$version" =~ $SEMVER_REGEX ]]
+    then
+        local major=${BASH_REMATCH[1]}
+        local minor=${BASH_REMATCH[2]}
+        local patch=${BASH_REMATCH[3]}
+        local prere=${BASH_REMATCH[4]}
+        local build=${BASH_REMATCH[5]}
+        if [[ ! -z "$prere" ]] || [[ ! -z "$build" ]]
+        then
+            return 1
+        fi
+    else
+        return 1
+    fi
+}
+
 function compare_versions() {
     local FIRST_VERSION=$(echo "$1" | tr -d 'v')
     local EVAL_STR=$2
     local SECOND_VERSION=$(echo "$3" | tr -d 'v')
 
+    for VER in "$FIRST_VERSION" "$SECOND_VERSION"
+    do
+        if ! validate_version "$VER"
+        then
+            >&2 echo "Warning: the version '$VER' is not a valid release version. Cannot check version.".
+            return 1
+        fi
+    done
+
     local GET_BOOL=$(python -c "from distutils.version import StrictVersion; print(StrictVersion('$FIRST_VERSION') $EVAL_STR StrictVersion('$SECOND_VERSION'))")
+
     if [[ "$GET_BOOL" == "True" ]]
     then
         return 0
@@ -141,11 +170,11 @@ function verify_playbook() {
 
 ### GoShimmer ###
 function get_latest_goshimmer_commit {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/antonionardella/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/commits/$GOSHIMMER_BRANCH" | jq -r .sha | head -c 7
 }
 
 function get_latest_goshimmer_release {
-    curl -H 'Cache-Control: no-cache' -s -m 5 -f https://api.github.com/repos/antonionardella/goshimmer/releases/latest  | jq -r .tag_name
+    curl -H 'Cache-Control: no-cache' -s -m 5 -f "https://api.github.com/repos/iotaledger/goshimmer/releases/latest"  | jq -r .tag_name
 }
 
 function upgrade_goshimmer() {
@@ -249,7 +278,6 @@ function check_new_gosc() {
     if [[ $? -ne 0 ]] || [[ "$GOSC_VERSION" == "" ]]; then
         return 1
     fi
-
     if compare_versions $CURR_VERSION '>=' $GOSC_VERSION; then
         return 1
     else
@@ -735,45 +763,38 @@ function goshimmer_plugins() {
 
     # By default list all the existing plugins as disabled
     export ENABLE_PLUGINS=""
-    export DISABLE_PLUGINS="spammer,graph,remotelog"
+    export DISABLE_PLUGINS="spammer,remotelog,networkdelay,prometheus,valuetransfers,faucet,portcheck,profiling"
+    declare -A PLUGINS_STATE
 
-    CONFIG_FILE="/var/lib/goshimmer/config.json"
+    CONFIG_FILE="$(grep -m 1 ^goshimmer_home_path $GOSHIMMER_PLAYBOOK_DIR/group_vars/all/goshimmer.yml | awk {'print $2'})/config.json"
 
     # Save current config state
-    ORIGINAL_NODE_OBJ=$(jq -r '.node | "\(.enableplugins) \(.disableplugins)"' < "$CONFIG_FILE")
+    ORIGINAL_NODE_OBJ=$(jq -r '.node | "\(.enablePlugins) \(.disablePlugins)"' < "$CONFIG_FILE")
 
     IFS=', ' read -r -a DISABLE_PLUGINS_ARRAY <<< "$DISABLE_PLUGINS"
-
-    # Get current states (TODO: use associative array and loop)
-    if jq -e -r '.node.enableplugins | index("spammer")' < "$CONFIG_FILE" >/dev/null
-    then
-        PLUGIN_SPAMMER_STATE="ON"
-    else
-        PLUGIN_SPAMMER_STATE="OFF"
-    fi
-
-    if jq -e -r '.node.enableplugins | index("graph")' < "$CONFIG_FILE" >/dev/null
-    then
-        PLUGIN_GRAPH_STATE="ON"
-    else
-        PLUGIN_GRAPH_STATE="OFF"
-    fi
-
-    if jq -e -r '.node.enableplugins | index("remotelog")' < "$CONFIG_FILE" >/dev/null
-    then
-        PLUGIN_REMOTELOG_STATE="ON"
-    else
-        PLUGIN_REMOTELOG_STATE="OFF"
-    fi
+    for PLUGIN in "${DISABLE_PLUGINS_ARRAY[@]}"
+    do
+        if jq -e -r '.node.enablePlugins | index("'${PLUGIN}'")' < "$CONFIG_FILE" >/dev/null
+        then
+            PLUGINS_STATE[${PLUGIN}]="ON"
+        else
+            PLUGINS_STATE[${PLUGIN}]="OFF"
+        fi
+    done
 
     RESULTS=$(whiptail --title "GOSC v${__VERSION__} - Plugins" \
         --checklist \
         --cancel-button "Exit" \
         "\nPlease choose plugins to enable or disable.\n\
-Select/unselect options using space and\nclick Enter to proceed.\n" 15 50 "${#DISABLE_PLUGINS_ARRAY[@]}" \
-        "spammer"           "...         Spammer" "$PLUGIN_SPAMMER_STATE" \
-        "graph"             "...         Tangle Visualiser" "$PLUGIN_GRAPH_STATE" \
-        "remotelog"         "...         Remote Logging" "$PLUGIN_REMOTELOG_STATE" \
+Select/unselect options using space and\nclick Enter to proceed.\n" 17 60 "${#DISABLE_PLUGINS_ARRAY[@]}" \
+        "spammer"           "...         Spammer" "${PLUGINS_STATE[spammer]}" \
+        "remotelog"         "...         Remote Logging" "${PLUGINS_STATE[remotelog]}" \
+        "networkdelay"      "...         Network Delay" "${PLUGINS_STATE[networkdelay]}" \
+        "prometheus"        "...         Prometheus" "${PLUGINS_STATE[prometheus]}" \
+        "valuetransfers"    "...         Value Transfers" "${PLUGINS_STATE[valuetransfers]}" \
+        "faucet"            "...         Faucet" "${PLUGINS_STATE[faucet]}" \
+        "portcheck"         "...         Port Checker" "${PLUGINS_STATE[portcheck]}" \
+        "profiling"         "...         Node Profiling" "${PLUGINS_STATE[profiling]}" \
         3>&1 1>&2 2>&3)
 
     RC=$?
@@ -782,22 +803,8 @@ Select/unselect options using space and\nclick Enter to proceed.\n" 15 50 "${#DI
     read -a RESULTS_ARRAY <<< "$RESULTS"
     for CHOICE in "${RESULTS_ARRAY[@]}"
     do
-        case $CHOICE in
-            '"spammer"')
-                ENABLE_PLUGINS+=",spammer"
-                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/spammer/}")
-                ;;
-            '"graph"')
-                ENABLE_PLUGINS+=",graph"
-                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/graph/}")
-                ;;
-            '"remotelog"')
-                ENABLE_PLUGINS+=",remotelog"
-                DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/remotelog/}")
-                ;;
-            *)
-                ;;
-        esac
+        ENABLE_PLUGINS+=",${CHOICE//\"}"
+        DISABLE_PLUGINS_ARRAY=("${DISABLE_PLUGINS_ARRAY[@]/${CHOICE//\"}/}")
     done
 
     DISABLE_PLUGINS=$(printf "%s,"  "${DISABLE_PLUGINS_ARRAY[@]}")
@@ -806,28 +813,30 @@ import json, sys, os
 obj = json.load(sys.stdin)
 enable_plugins = os.environ["ENABLE_PLUGINS"]
 disable_plugins = os.environ["DISABLE_PLUGINS"]
-obj["node"]["enableplugins"] = [p for p in enable_plugins.split(",") if p != ""]
-obj["node"]["disableplugins"] = [p for p in disable_plugins.split(",") if p != ""]
+obj["node"]["enablePlugins"] = [p for p in enable_plugins.split(",") if p != ""]
+obj["node"]["disablePlugins"] = [p for p in disable_plugins.split(",") if p != ""]
 print(json.dumps(obj))
 ')
 
-    NEW_NODE_OBJ=$(jq -r '.node | "\(.enableplugins) \(.disableplugins)"' <<<"$JSON_OUTPUT")
+    NEW_NODE_OBJ=$(jq -r '.node | "\(.enablePlugins) \(.disablePlugins)"' <<<"$JSON_OUTPUT")
     [[ "$ORIGINAL_NODE_OBJ" == "$NEW_NODE_OBJ" ]] && return
+
+    # Produce new config
+    jq . <<< "$JSON_OUTPUT" > "$CONFIG_FILE"
 
     if (whiptail --title "Restart Goshimmer" \
              --yesno "You've made changes to the plugins. A restart of Goshimmer is needed to load the new configuration.\n\nRestart now?" \
              --defaultno \
              10 $WIDTH) then
-        jq . <<< "$JSON_OUTPUT" > "$CONFIG_FILE"
 
         # Modify events for remotelog
         if [[ "$ENABLE_PLUGINS" =~ remotelog ]]
         then
-            jq '.logger.disableEvents = false' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
+            jq '.logger.disableEvents = false' < "$CONFIG_FILE" > "/tmp/config.json.$$.tmp"
         else
-            jq '.logger.disableEvents = true' < /var/lib/goshimmer/config.json > "/tmp/config.json.$$.tmp"
+            jq '.logger.disableEvents = true' < "$CONFIG_FILE" > "/tmp/config.json.$$.tmp"
         fi
-        file_update "/var/lib/goshimmer/config.json" "/tmp/config.json.$$.tmp"
+        file_update "$CONFIG_FILE" "/tmp/config.json.$$.tmp"
 
         echo "Restarting goshimmer, please wait ..."
         /bin/systemctl restart goshimmer

@@ -72,8 +72,8 @@
     "externalAddress": "auto"
   },
   "node": {
-    "disableplugins": {{ goshimmer_disable_plugins | to_nice_json(indent=6) }},
-    "enableplugins": {{ goshimmer_enable_plugins | to_nice_json(indent=6) }}
+    "disablePlugins": {{ goshimmer_disable_plugins | to_nice_json(indent=6) }},
+    "enablePlugins": {{ goshimmer_enable_plugins | to_nice_json(indent=6) }}
   },
   "pow": {
     "difficulty": {{ goshimmer_pow_difficulty }},
