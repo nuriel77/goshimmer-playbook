@@ -45,7 +45,7 @@
     # TODO once goshimmer add this to the repo
     - name: copy arm64 file if needed
       copy:
-        path: files/Dockerfile.arm64
+        src: files/Dockerfile.arm64
         dest: "{{ goshimmer_git_dest }}/Dockerfile.arm64"
       when: ansible_architecture in ["armv8l", "aarch64"]
 
