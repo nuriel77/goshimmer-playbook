@@ -20,6 +20,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [GoShimmer Dashboard](#goshimmer-dashboard)
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
+   * [Ports](#ports)
    * [Appendix](#appendix)
      * [Install Alongside IRI-Playbook](#install-alongside-iri-playbook)
    * [Donations](#donations)
@@ -191,6 +192,29 @@ cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=n
 ```
 
 For the browser use https and port 8080. You will also have to login.
+
+# Ports
+
+Here's a list of ports configured by the playbook by default. External communication for dashboard, webapi grafana etc. goes via nginx that serves as a reverse proxy. Other ports (fpc, gossip and autopeering) are exposed directly on the host.
+
+NAME               | PORT INTERNAL | PORT EXTERNAL | PROTOCOL | DESCRIPTION
+-------------------|---------------|---------------|----------|--------------------------------
+Autopeering        | 14626         | 14626         | UDP      | Autopeering
+Gossip             | 14666         | 14666         | TCP      | Gossip
+FPC                | 10895         | 10895         | TCP      | FPC
+Dashboard          | 8011          | 8081          | TCP      | Main dashboard
+WebAPI             | 8012          | 8080          | TCP      | WebApi
+Grafana            | 3000          | 5555          | TCP      | Grafana monitoring
+Prometheus         | 9090          | 8999          | TCP      | Prometheus metrics
+Alertmanager       | 9093          | 9993          | TCP      | Alertmanager for prometheus
+
+All the external ports have been made accessible in the firewall. There is no need to configure the firewall on the node.
+
+### Forward Ports
+
+If you are running the node in an internal network/lan you have to forward at least the following ports from the router to the node:
+
+10895/tcp, 14666/tcp, 14626/udp
 
 # Appendix
 
