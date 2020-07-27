@@ -8,25 +8,29 @@
     },
     "dashboard": {
       "bindAddress": "{{ goshimmer_analysis_dashboard_internal_address }}:{{ goshimmer_analysis_dashboard_internal_port }}",
-      "dev": {{ goshimmer_analysis_dashboard_dev_enabled | lower | string }}
+      "dev": {{ goshimmer_analysis_dashboard_dev_enabled | bool | lower | string }}
     }
   },
   "autopeering": {
     "entryNodes": {{ goshimmer_autopeering_entrynodes | to_nice_json(indent=6) }},
     "port": {{ goshimmer_autopeering_port }}
   },
+  "syncbeaconfollower": {
+    "followNodes": {{ goshimmer_syncbeaconfollower_follownodes | to_nice_json(indent=6) }},
+    "syncPercentage": {{ goshimmer_syncbeaconfollower_syncpercentage }}
+  },
   "dashboard": {
     "bindAddress": "{{ goshimmer_dashboard_internal_address }}:{{ goshimmer_dashboard_internal_port }}",
     "dev": {{ goshimmer_dashboard_dev_enabled }},
     "basic_auth": {
-      "enabled": {{ goshimmer_dashboard_basic_auth | lower | string }},
+      "enabled": {{ goshimmer_dashboard_basic_auth | bool | lower | string }},
       "password": "{% if goshimmer_dashboard_basic_auth | bool %}{{ fullnode_user_password }}{% endif %}",
       "username": "{% if goshimmer_dashboard_basic_auth | bool %}{{ fullnode_user }}{% endif %}"
     }
   },
   "database": {
     "directory": "mainnetdb",
-    "inMemory": {{ goshimmer_database_in_memory | lower | string }}
+    "inMemory": {{ goshimmer_database_in_memory | bool | lower | string }}
   },
   "drng": {
     "instanceId": 1,
@@ -39,6 +43,7 @@
   },
   "gossip": {
     "port": {{ goshimmer_gossip_port }},
+    "ageThreshold": "{{ goshimmer_gossip_age_threshold }}",
     "tipsBroadcaster": {
       "interval": "{{ goshimmer_gossip_tipbroadcaster_interval }}"
     }
@@ -51,14 +56,14 @@
     "outputPaths": [
       "stdout"
     ],
-    "disableEvents": {{ goshimmer_logger_disable_events | lower | string }},
+    "disableEvents": {{ goshimmer_logger_disable_events | bool | lower | string }},
     "remotelog": {
       "serverAddress": "{{ goshimmer_logger_remote_log_server_address }}"
     }
   },
   "metrics": {
-    "local": {{ goshimmer_metrics_local_enabled | lower | string }},
-    "global": {{ goshimmer_metrics_global_enabled | lower | string }}
+    "local": {{ goshimmer_metrics_local_enabled | bool | lower | string }},
+    "global": {{ goshimmer_metrics_global_enabled | bool | lower | string }}
   },
   "network": {
     "bindAddress": "{{ goshimmer_network_bind_address }}",

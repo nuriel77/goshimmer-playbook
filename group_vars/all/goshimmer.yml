@@ -65,6 +65,12 @@ goshimmer_disable_plugins:
 goshimmer_autopeering_entrynodes:
   - "2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626"
 
+# syncbeaconfollower
+goshimmer_syncbeaconfollower_follownodes:
+  - "Gm7W191NDnqyF7KJycZqK7V6ENLwqxTwoKQN4SmpkB24"
+  - "9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd"
+goshimmer_syncbeaconfollower_syncpercentage: 0.5
+
 # Analysis
 # TODO: server_bind_address change to proxy method
 goshimmer_analysis_server_bind_address: "0.0.0.0:16178"
@@ -75,11 +81,13 @@ goshimmer_analysis_dashboard_internal_address: 127.0.0.1
 goshimmer_analysis_dashboard_external_address: 0.0.0.0
 goshimmer_analysis_dashboard_dev_enabled: "false"
 
+# FPC and gossip
 goshimmer_autopeering_port: "{{ goshimmer_ports.autopeering_tcp.port }}"
 goshimmer_gossip_port: "{{ goshimmer_ports.gossip.port }}"
 goshimmer_network_bind_address: 0.0.0.0
 goshimmer_fpc_port: "{{ goshimmer_ports.fpc.port }}"
 goshimmer_fpc_bind_address: 0.0.0.0
+goshimmer_gossip_age_threshold: 5s
 goshimmer_gossip_tipbroadcaster_interval: 10s
 
 # Dashboard
