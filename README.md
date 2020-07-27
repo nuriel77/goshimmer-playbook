@@ -166,17 +166,17 @@ If you've enabled the spammer plugin (e.g. via `gosc`) you can start or stop spa
 
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
-curl "http://localhost:18080/spammer?cmd=start"
+curl "http://localhost:8012/spammer?cmd=start"
 ```
 
 You can add the parameter "tps=<number>" to specify how many TPS to spam with, for example:
 ```sh
-curl "http://localhost:18080/spammer?cmd=start&tps=100"
+curl "http://localhost:8012/spammer?cmd=start&tps=100"
 ```
 
 To stop:
 ```sh
-curl "http://localhost:18080/spammer?cmd=stop"
+curl "http://localhost:8012/spammer?cmd=stop"
 ```
 
 Note that for security reasons the spammer is not made available on the browser by default.
