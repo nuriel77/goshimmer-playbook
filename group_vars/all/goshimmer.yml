@@ -53,6 +53,20 @@ goshimmer_ports:
 goshimmer_ws_path: '/ws'
 
 #
+# plugis (will get overwritten in z-plugins.yaml
+# when changes applied in gosc)
+goshimmer_disable_plugins:
+- portcheck
+- remotelog
+- profiling
+- faucet
+goshimmer_enable_plugins:
+- networkdelay
+- prometheus
+- valuetransfers
+- spammer
+
+#
 # webapi
 goshimmer_webapi_external_address: 127.0.0.1
 goshimmer_webapi_internal_address: 127.0.0.1

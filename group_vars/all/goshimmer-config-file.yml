@@ -56,16 +56,8 @@ goshimmer_config:
     bindAddress: 0.0.0.0
     externalAddress: auto
   node:
-    disablePlugins:
-    - portcheck
-    - remotelog
-    - profiling
-    - faucet
-    enablePlugins:
-    - networkdelay
-    - prometheus
-    - valuetransfers
-    - spammer
+    disablePlugins: "{{ goshimmer_disable_plugins }}"
+    enablePlugins: "{{ goshimmer_enable_plugins }}"
   pow:
     difficulty: 22
     numThreads: 1
