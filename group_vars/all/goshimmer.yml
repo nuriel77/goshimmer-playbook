@@ -50,85 +50,37 @@ goshimmer_ports:
     proto: tcp
     allow: yes
 
-# Plugins
-goshimmer_enable_plugins:
-  - networkdelay
-  - prometheus
-  - valuetransfers
-  - spammer
+goshimmer_ws_path: '/ws'
+
+#
+# plugis (will get overwritten in z-plugins.yaml
+# when changes applied in gosc)
 goshimmer_disable_plugins:
-  - portcheck
-  - remotelog
-  - profiling
-  - faucet
+- portcheck
+- remotelog
+- profiling
+- faucet
+goshimmer_enable_plugins:
+- networkdelay
+- prometheus
+- valuetransfers
+- spammer
 
-goshimmer_autopeering_entrynodes:
-  - "2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626"
-
-# syncbeaconfollower
-goshimmer_syncbeaconfollower_follownodes:
-  - "Gm7W191NDnqyF7KJycZqK7V6ENLwqxTwoKQN4SmpkB24"
-  - "9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd"
-goshimmer_syncbeaconfollower_syncpercentage: 0.5
-
-# Analysis
-# TODO: server_bind_address change to proxy method
-goshimmer_analysis_server_bind_address: "0.0.0.0:16178"
-goshimmer_analysis_client_bind_address: "ressims.iota.cafe:21888"
-goshimmer_analysis_dashboard_internal_port: "8888"
-goshimmer_analysis_dashboard_proxy_port: "{{ goshimmer_ports.analysis_dashboard.port }}"
-goshimmer_analysis_dashboard_internal_address: 127.0.0.1
-goshimmer_analysis_dashboard_external_address: 0.0.0.0
-goshimmer_analysis_dashboard_dev_enabled: "false"
-
-# FPC and gossip
-goshimmer_autopeering_port: "{{ goshimmer_ports.autopeering_tcp.port }}"
-goshimmer_gossip_port: "{{ goshimmer_ports.gossip.port }}"
-goshimmer_network_bind_address: 0.0.0.0
-goshimmer_fpc_port: "{{ goshimmer_ports.fpc.port }}"
-goshimmer_fpc_bind_address: 0.0.0.0
-goshimmer_gossip_age_threshold: 5s
-goshimmer_gossip_tipbroadcaster_interval: 10s
-
-# Dashboard
-goshimmer_dashboard_external_address: 0.0.0.0
-goshimmer_dashboard_internal_address: 127.0.0.1
-goshimmer_dashboard_internal_port: "8011"
-goshimmer_dashboard_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
-goshimmer_dashboard_dev_enabled: "false"
-goshimmer_dashboard_basic_auth: "false"
-
-# Database
-goshimmer_database_in_memory: "false"
-
-# Webapi
+#
+# webapi
 goshimmer_webapi_external_address: 127.0.0.1
 goshimmer_webapi_internal_address: 127.0.0.1
 goshimmer_webapi_internal_port: "8012"
 goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
 
-# logger
-goshimmer_logger_level: info
-goshimmer_logger_disable_events: "false"
-goshimmer_logger_remote_log_server_address: "ressims.iota.cafe:5213"
+#
+# dashabord
+goshimmer_dashboard_external_address: 0.0.0.0
+goshimmer_dashboard_internal_address: 127.0.0.1
+goshimmer_dashboard_internal_port: "8011"
+goshimmer_dashboard_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
 
-# metrics
-goshimmer_metrics_local_enabled: "true"
-goshimmer_metrics_global_enabled: "false"
-
-# pow
-goshimmer_pow_difficulty: 22
-goshimmer_pow_num_threads: 1
-goshimmer_pow_timeout: 1m
-
+#
 # prometheus
-goshimmer_prometheus_exporter_port: "9312"
 goshimmer_prometheus_exporter_internal_address: 127.0.0.1
-
-# profiling
-goshimmer_profiling_bind_address: 127.0.0.1:6061
-
-# networkdelay
-goshimmer_networkdelay_origin_public_key: "9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd"
-
-goshimmer_ws_path: '/ws'
+goshimmer_prometheus_exporter_port: "9312"

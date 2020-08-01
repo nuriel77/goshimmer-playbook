@@ -6,6 +6,9 @@
     enabled: yes
   register: goshimmer_started
 
+- name: jq format config
+  shell: 'UUID=$(uuidgen); jq . < "{{ goshimmer_home_path }}/config.json" > "/tmp/ansible.format.${UUID}" && mv -- "/tmp/ansible.format.${UUID}" "{{ goshimmer_home_path }}/config.json" && chown {{ goshimmer_user }}:{{ goshimmer_group }} "{{ goshimmer_home_path }}/config.json" && chmod 600 "{{ goshimmer_home_path }}/config.json"'
+
 - name: restart goshimmer
   systemd:
     name: goshimmer.service
