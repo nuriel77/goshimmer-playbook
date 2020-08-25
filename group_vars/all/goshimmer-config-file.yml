@@ -1,0 +1,76 @@
+---
+goshimmer_config:
+  analysis:
+    client:
+      serverAddress: ressims.iota.cafe:21888
+    server:
+      bindAddress: 0.0.0.0:16178
+    dashboard:
+      bindAddress: 127.0.0.1:8888
+      dev: false
+  autopeering:
+    entryNodes:
+    - 2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626
+    port: "{{ goshimmer_ports.autopeering_tcp.port | int }}"
+  syncbeaconfollower:
+    followNodes:
+    - Gm7W191NDnqyF7KJycZqK7V6ENLwqxTwoKQN4SmpkB24
+    - 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd
+    syncPercentage: 0.5
+  dashboard:
+    bindAddress: "{{ goshimmer_dashboard_internal_address }}:{{ goshimmer_dashboard_internal_port }}"
+    dev: false
+    basic_auth:
+      enabled: false
+      password: ''
+      username: ''
+  database:
+    directory: mainnetdb
+    inMemory: false
+  drng:
+    instanceId: 1
+    threshold: 3
+    distributedPubKey: ''
+    committeeMembers: []
+  fpc:
+    bindAddress: "0.0.0.0:{{ goshimmer_ports.fpc.port }}"
+  gossip:
+    port: "{{ goshimmer_ports.gossip.port | int }}"
+    ageThreshold: 5s
+    tipsBroadcaster:
+      interval: 10s
+  logger:
+    level: info
+    disableCaller: false
+    disableStacktrace: false
+    encoding: console
+    outputPaths:
+    - stdout
+    disableEvents: false
+    remotelog:
+      serverAddress: ressims.iota.cafe:5213
+  metrics:
+    local: true
+    global: false
+  network:
+    bindAddress: 0.0.0.0
+    externalAddress: auto
+  node:
+    disablePlugins: "{{ goshimmer_disable_plugins }}"
+    enablePlugins: "{{ goshimmer_enable_plugins }}"
+  pow:
+    difficulty: 22
+    numThreads: 1
+    timeout: 1m
+  profiling:
+    bindAddress: 127.0.0.1:6061
+  prometheus:
+    bindAddress: "{{ goshimmer_prometheus_exporter_internal_address }}:{{ goshimmer_prometheus_exporter_port }}"
+  webapi:
+    auth:
+      password: ''
+      username: ''
+      privateKey: ''
+    bindAddress: 127.0.0.1:8012
+  networkdelay:
+    originPublicKey: 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd

@@ -154,8 +154,10 @@
     owner: "{{ goshimmer_user }}"
     group: "{{ goshimmer_group }}"
     force: "{{ overwrite | default('no') }}"
+    validate: jq -e '' %s
     backup: yes
   notify:
+    - jq format config
     - restart goshimmer
   tags:
     - goshimmer_config_file

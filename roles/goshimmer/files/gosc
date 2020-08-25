@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.3.1
+VERSION_TEMP=0.3.2
 __VERSION__=${VERSION_TEMP}
 SEMVER_REGEX="^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
 
@@ -22,6 +22,7 @@ SEMVER_REGEX="^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z
 CUR_DIR="$(pwd)"
 GOSHIMMER_PLAYBOOK_DIR="/opt/goshimmer-playbook"
 GOSHIMMER_GIT_URL="https://github.com/nuriel77/goshimmer-playbook.git"
+PLUGINS_FILE="${GOSHIMMER_PLAYBOOK_DIR}/group_vars/all/z-plugins.yml"
 PID_FILE="/var/run/gosc.pid"
 WIDTH=78
 
@@ -837,6 +838,18 @@ print(json.dumps(obj))
 
     NEW_NODE_OBJ=$(jq -r '.node | "\(.enablePlugins) \(.disablePlugins)"' <<<"$JSON_OUTPUT")
     [[ "$ORIGINAL_NODE_OBJ" == "$NEW_NODE_OBJ" ]] && return
+
+    # Make consistent in yaml variables file
+    YAML_OUTPUT=$(python -c '
+import yaml, os
+obj = {"goshimmer_disable_plugins":{}, "goshimmer_enable_plugins":{}}
+enable_plugins = os.environ["ENABLE_PLUGINS"]
+disable_plugins = os.environ["DISABLE_PLUGINS"]
+obj["goshimmer_enable_plugins"] = [p for p in enable_plugins.split(",") if p != ""]
+obj["goshimmer_disable_plugins"] = [p for p in disable_plugins.split(",") if p != ""]
+print(yaml.dump(obj))
+')
+    echo "$YAML_OUTPUT" >"$PLUGINS_FILE"
 
     # Produce new config
     jq . <<< "$JSON_OUTPUT" > "$CONFIG_FILE"

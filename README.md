@@ -20,6 +20,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [GoShimmer Dashboard](#goshimmer-dashboard)
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
+   * [Ports](#ports)
    * [Appendix](#appendix)
      * [Install Alongside IRI-Playbook](#install-alongside-iri-playbook)
    * [Donations](#donations)
@@ -165,17 +166,17 @@ If you've enabled the spammer plugin (e.g. via `gosc`) you can start or stop spa
 
 No need to open ports, forward ports etc, no need for browser. You can run on the commandline:
 ```sh
-curl "http://localhost:18080/spammer?cmd=start"
+curl "http://localhost:8012/spammer?cmd=start"
 ```
 
 You can add the parameter "tps=<number>" to specify how many TPS to spam with, for example:
 ```sh
-curl "http://localhost:18080/spammer?cmd=start&tps=100"
+curl "http://localhost:8012/spammer?cmd=start&tps=100"
 ```
 
 To stop:
 ```sh
-curl "http://localhost:18080/spammer?cmd=stop"
+curl "http://localhost:8012/spammer?cmd=stop"
 ```
 
 Note that for security reasons the spammer is not made available on the browser by default.
@@ -191,6 +192,29 @@ cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=n
 ```
 
 For the browser use https and port 8080. You will also have to login.
+
+# Ports
+
+Here's a list of ports configured by the playbook by default. External communication for dashboard, webapi grafana etc. goes via nginx that serves as a reverse proxy. Other ports (fpc, gossip and autopeering) are exposed directly on the host.
+
+NAME               | PORT INTERNAL | PORT EXTERNAL | PROTOCOL | DESCRIPTION
+-------------------|---------------|---------------|----------|--------------------------------
+Autopeering        | 14626         | 14626         | UDP      | Autopeering
+Gossip             | 14666         | 14666         | TCP      | Gossip
+FPC                | 10895         | 10895         | TCP      | FPC
+Dashboard          | 8011          | 8081          | TCP      | Main dashboard
+WebAPI             | 8012          | 8080          | TCP      | WebApi
+Grafana            | 3000          | 5555          | TCP      | Grafana monitoring
+Prometheus         | 9090          | 8999          | TCP      | Prometheus metrics
+Alertmanager       | 9093          | 9993          | TCP      | Alertmanager for prometheus
+
+All the external ports have been made accessible in the firewall. There is no need to configure the firewall on the node.
+
+### Forward Ports
+
+If you are running the node in an internal network/lan you have to forward at least the following ports from the router to the node:
+
+10895/tcp, 14666/tcp, 14626/udp
 
 # Appendix
 
