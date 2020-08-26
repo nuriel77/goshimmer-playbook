@@ -1,76 +1,86 @@
----
-goshimmer_config:
-  analysis:
-    client:
-      serverAddress: ressims.iota.cafe:21888
-    server:
-      bindAddress: 0.0.0.0:16178
-    dashboard:
-      bindAddress: 127.0.0.1:8888
-      dev: false
-  autopeering:
-    entryNodes:
-    - 2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626
-    port: "{{ goshimmer_ports.autopeering_tcp.port | int }}"
-  syncbeaconfollower:
-    followNodes:
-    - Gm7W191NDnqyF7KJycZqK7V6ENLwqxTwoKQN4SmpkB24
-    - 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd
-    syncPercentage: 0.5
-  dashboard:
-    bindAddress: "{{ goshimmer_dashboard_internal_address }}:{{ goshimmer_dashboard_internal_port }}"
-    dev: false
-    basic_auth:
-      enabled: false
-      password: ''
-      username: ''
-  database:
-    directory: mainnetdb
-    inMemory: false
-  drng:
-    instanceId: 1
-    threshold: 3
-    distributedPubKey: ''
-    committeeMembers: []
-  fpc:
-    bindAddress: "0.0.0.0:{{ goshimmer_ports.fpc.port }}"
-  gossip:
-    port: "{{ goshimmer_ports.gossip.port | int }}"
-    ageThreshold: 5s
-    tipsBroadcaster:
-      interval: 10s
-  logger:
-    level: info
-    disableCaller: false
-    disableStacktrace: false
-    encoding: console
-    outputPaths:
-    - stdout
-    disableEvents: false
-    remotelog:
-      serverAddress: ressims.iota.cafe:5213
-  metrics:
-    local: true
-    global: false
-  network:
-    bindAddress: 0.0.0.0
-    externalAddress: auto
-  node:
-    disablePlugins: "{{ goshimmer_disable_plugins }}"
-    enablePlugins: "{{ goshimmer_enable_plugins }}"
-  pow:
-    difficulty: 22
-    numThreads: 1
-    timeout: 1m
-  profiling:
-    bindAddress: 127.0.0.1:6061
-  prometheus:
-    bindAddress: "{{ goshimmer_prometheus_exporter_internal_address }}:{{ goshimmer_prometheus_exporter_port }}"
-  webapi:
-    auth:
-      password: ''
-      username: ''
-      privateKey: ''
-    bindAddress: 127.0.0.1:8012
-  networkdelay:
-    originPublicKey: 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd
+#
+# Goshimmer main config variables (config.json)
+
+# analysis
+goshimmer_config_analysis_client_serverAddress: ressims.iota.cafe:21888
+goshimmer_config_analysis_server_bindAddress: 0.0.0.0:16178
+goshimmer_config_analysis_dashboard_bindAddress: 127.0.0.1:8888
+goshimmer_config_analysis_dashboard_dev: false
+
+# autopeering
+goshimmer_config_autopeering_entryNodes:
+  - 2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626
+goshimmer_config_autopeering_port: "{{ goshimmer_ports.autopeering_tcp.port | int }}"
+
+# syncbeaconfollower
+goshimmer_config_syncbeaconfollower_followNodes:
+  - Gm7W191NDnqyF7KJycZqK7V6ENLwqxTwoKQN4SmpkB24
+  - 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd
+goshimmer_config_syncbeaconfollower_syncPercentage: 0.5
+
+# dashboard
+goshimmer_config_dashboard_bindAddress: "{{ goshimmer_dashboard_internal_address }}:{{ goshimmer_dashboard_internal_port }}"
+goshimmer_config_dashboard_dev: false
+goshimmer_config_dashboard_basic_auth_enabled: false
+goshimmer_config_dashboard_basic_auth_password: ''
+goshimmer_config_dashboard_basic_auth_username: ''
+
+# database
+goshimmer_config_database_directory: mainnetdb
+goshimmer_config_database_inMemory: false
+
+# drng
+goshimmer_config_drng_instanceId: 1
+goshimmer_config_drng_threshold: 3
+goshimmer_config_drng_distributedPubKey: ''
+goshimmer_config_drng_committeeMembers: []
+
+# fpc
+goshimmer_config_fpc_bindAddress: "0.0.0.0:{{ goshimmer_ports.fpc.port }}"
+
+# gossip
+goshimmer_config_gossip_port: "{{ goshimmer_ports.gossip.port | int }}"
+goshimmer_config_gossip_ageThreshold: 5s
+goshimmer_config_gossip_tipsBroadcaster_interval: 10s
+
+# logger
+goshimmer_config_logger_level: info
+goshimmer_config_logger_disableCaller: false
+goshimmer_config_logger_disableStacktrace: false
+goshimmer_config_logger_encoding: console
+goshimmer_config_logger_outputPaths:
+  - stdout
+goshimmer_config_logger_disableEvents: false
+goshimmer_config_logger_remotelog_serverAddress: ressims.iota.cafe:5213
+
+# metrics
+goshimmer_config_metrics_local: true
+goshimmer_config_metrics_global: false
+
+# network
+goshimmer_config_network_bindAddress: 0.0.0.0
+goshimmer_config_network_externalAddress: auto
+
+# node
+goshimmer_config_node_disablePlugins: "{{ goshimmer_disable_plugins }}"
+goshimmer_config_node_enablePlugins: "{{ goshimmer_enable_plugins }}"
+
+# pow
+goshimmer_config_pow_difficulty: 22
+goshimmer_config_pow_numThreads: 1
+goshimmer_config_pow_timeout: 1m
+
+# profiling
+goshimmer_config_profiling_bindAddress: 127.0.0.1:6061
+
+# prometheus
+goshimmer_config_prometheus_bindAddress: "{{ goshimmer_prometheus_exporter_internal_address }}:{{ goshimmer_prometheus_exporter_port }}"
+
+# webapi
+goshimmer_config_webapi_auth_password: ''
+goshimmer_config_webapi_auth_username: ''
+goshimmer_config_webapi_auth_privateKey: ''
+goshimmer_config_webapi_bindAddress: 127.0.0.1:8012
+
+# networkdelay
+goshimmer_config_networkdelay_originPublicKey: 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd
