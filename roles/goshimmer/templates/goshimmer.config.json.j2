@@ -33,10 +33,24 @@
     "inMemory": {{ goshimmer_config_database_inMemory | bool | lower | string }}
   },
   "drng": {
-    "instanceId": {{ goshimmer_config_drng_instanceId | int }},
-    "threshold": {{ goshimmer_config_drng_threshold | int }},
-    "distributedPubKey": "{{ goshimmer_config_drng_distributedPubKey }}",
-    "committeeMembers": {{ goshimmer_config_drng_committeeMembers | to_nice_json(indent=6) }}
+    "pollen": {
+      "instanceId": {{ goshimmer_config_drng_pollen_instanceId | int }},
+      "threshold": {{ goshimmer_config_drng_pollen_threshold | int }},
+      "distributedPubKey": "{{ goshimmer_config_drng_pollen_distributedPubKey }}",
+      "committeeMembers": {{ goshimmer_config_drng_pollen_committeeMembers | to_nice_json(indent=6) }}
+    },
+    "xteam": {
+      "instanceId": {{ goshimmer_config_drng_xteam_instanceId | int }},
+      "threshold": {{ goshimmer_config_drng_xteam_threshold | int }},
+      "distributedPubKey": "{{ goshimmer_config_drng_xteam_distributedPubKey }}",
+      "committeeMembers": {{ goshimmer_config_drng_xteam_committeeMembers | to_nice_json(indent=6) }}
+    },
+    "custom": {
+      "instanceId": {{ goshimmer_config_drng_custom_instanceId | int }},
+      "threshold": {{ goshimmer_config_drng_custom_threshold | int }},
+      "distributedPubKey": "{{ goshimmer_config_drng_custom_distributedPubKey }}",
+      "committeeMembers": {{ goshimmer_config_drng_custom_committeeMembers | to_nice_json(indent=6) }}
+    }
   },
   "fpc": {
     "bindAddress": "{{ goshimmer_config_fpc_bindAddress }}"
