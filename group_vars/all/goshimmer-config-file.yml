@@ -10,7 +10,7 @@ goshimmer_config_analysis_dashboard_dev: false
 # autopeering
 goshimmer_config_autopeering_entryNodes:
   - 2PV5487xMw5rasGBXXWeqSi4hLz7r19YBt8Y1TGAsQbj@ressims.iota.cafe:15626
-  - 5EDH4uY78EA6wrBkHHAVBWBMDt7EcksRq6pjzipoW15B@entrynode.alphanet.einfachiota.de:14656
+  - 5EDH4uY78EA6wrBkHHAVBWBMDt7EcksRq6pjzipoW15B@entryshimmer.tanglebay.com:14646
 goshimmer_config_autopeering_port: "{{ goshimmer_ports.autopeering_tcp.port | int }}"
 
 # syncbeaconfollower
