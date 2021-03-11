@@ -77,6 +77,12 @@
     "local": {{ goshimmer_config_metrics_local | bool | lower | string }},
     "global": {{ goshimmer_config_metrics_global | bool | lower | string }}
   },
+  "mana": {
+    "allowedAccessFilterEnabled": {{ goshimmer_config_mana_allowedAccessFilterEnabled | bool | lower | string }},
+    "allowedAccessPledge": {{ goshimmer_config_mana_allowedAccessPledge | to_nice_json(indent=6) }},
+    "allowedConsensusFilterEnabled": {{ goshimmer_config_mana_allowedConsensusFilterEnabled | bool | lower | string }},
+    "allowedConsensusPledge": {{ goshimmer_config_mana_allowedConsensusPledge | to_nice_json(indent=6) }}
+  },
   "network": {
     "bindAddress": "{{ goshimmer_config_network_bindAddress }}",
     "externalAddress": "{{ goshimmer_config_network_externalAddress }}"

@@ -78,6 +78,12 @@ goshimmer_config_logger_remotelog_serverAddress: ressims.iota.cafe:5213
 goshimmer_config_metrics_local: true
 goshimmer_config_metrics_global: false
 
+# mana
+goshimmer_config_mana_allowedAccessFilterEnabled: false
+goshimmer_config_mana_allowedAccessPledge: []
+goshimmer_config_mana_allowedConsensusFilterEnabled: false
+goshimmer_config_mana_allowedConsensusPledge: []
+
 # network
 goshimmer_config_network_bindAddress: 0.0.0.0
 goshimmer_config_network_externalAddress: auto
