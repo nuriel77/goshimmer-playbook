@@ -68,7 +68,7 @@ goshimmer_enable_plugins:
 
 #
 # webapi
-goshimmer_webapi_external_address: 127.0.0.1
+goshimmer_webapi_external_address: 0.0.0.0
 goshimmer_webapi_internal_address: 127.0.0.1
 goshimmer_webapi_internal_port: "8012"
 goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
