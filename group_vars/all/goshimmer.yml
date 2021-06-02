@@ -63,8 +63,8 @@ goshimmer_disable_plugins:
 goshimmer_enable_plugins:
 - networkdelay
 - prometheus
-- valuetransfers
 - spammer
+- manualpeering
 
 #
 # webapi

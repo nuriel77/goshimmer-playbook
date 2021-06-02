@@ -850,7 +850,7 @@ function goshimmer_plugins() {
 
     # By default list all the existing plugins as disabled
     export ENABLE_PLUGINS=""
-    export DISABLE_PLUGINS="spammer,remotelog,networkdelay,prometheus,valuetransfers,faucet,portcheck,profiling"
+    export DISABLE_PLUGINS="spammer,remotelog,networkdelay,prometheus,manualpeering,faucet,portcheck,profiling"
     declare -A PLUGINS_STATE
 
     CONFIG_FILE="$(grep -m 1 ^goshimmer_home_path $GOSHIMMER_PLAYBOOK_DIR/group_vars/all/goshimmer.yml | awk {'print $2'})/config.json"
@@ -878,7 +878,7 @@ Select/unselect options using space and\nclick Enter to proceed.\n" 17 60 "${#DI
         "remotelog"         "...         Remote Logging" "${PLUGINS_STATE[remotelog]}" \
         "networkdelay"      "...         Network Delay" "${PLUGINS_STATE[networkdelay]}" \
         "prometheus"        "...         Prometheus" "${PLUGINS_STATE[prometheus]}" \
-        "valuetransfers"    "...         Value Transfers" "${PLUGINS_STATE[valuetransfers]}" \
+        "manualpeering"     "...         Manual Peering" "${PLUGINS_STATE[manualpeering]}" \
         "faucet"            "...         Faucet" "${PLUGINS_STATE[faucet]}" \
         "portcheck"         "...         Port Checker" "${PLUGINS_STATE[portcheck]}" \
         "profiling"         "...         Node Profiling" "${PLUGINS_STATE[profiling]}" \
