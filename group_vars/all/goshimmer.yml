@@ -45,10 +45,6 @@ goshimmer_ports:
     port: 443
     proto: tcp
     allow: yes
-  webapi:
-    port: 8080
-    proto: tcp
-    allow: yes
   graph:
     port: 8082
     proto: tcp
@@ -75,7 +71,7 @@ goshimmer_enable_plugins:
 goshimmer_webapi_external_address: 0.0.0.0
 goshimmer_webapi_internal_address: 127.0.0.1
 goshimmer_webapi_internal_port: "8012"
-goshimmer_webapi_proxy_port: "{{ goshimmer_ports.webapi.port }}"
+goshimmer_webapi_proxy_port: "{{ goshimmer_ports.dashboard.port }}"
 
 #
 # dashabord

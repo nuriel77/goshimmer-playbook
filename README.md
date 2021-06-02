@@ -21,8 +21,6 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
    * [Ports](#ports)
-   * [Appendix](#appendix)
-     * [Install Alongside IRI-Playbook](#install-alongside-iri-playbook)
    * [Donations](#donations)
 <!--te-->
 
@@ -161,6 +159,8 @@ You can login using the username and password you've selected during the install
 #### Certificate Security Warning
 *NOTE* You can safely ignore the browser's warning about the certificate, as a self-signed one has been generated during the installation.
 
+If you'd like to add a valid HTTPS/TLS certificate use `gosc` to request a certificate for your node. You must have a DNS A record pointing to your node's IP.
+
 ### Spam Test
 If you've enabled the spammer plugin (e.g. via `gosc`) you can start or stop spamming from the commandline.
 
@@ -197,16 +197,16 @@ For the browser use https and port 8080. You will also have to login.
 
 Here's a list of ports configured by the playbook by default. External communication for dashboard, webapi grafana etc. goes via nginx that serves as a reverse proxy. Other ports (fpc, gossip and autopeering) are exposed directly on the host.
 
-NAME               | PORT INTERNAL | PORT EXTERNAL | PROTOCOL | DESCRIPTION
--------------------|---------------|---------------|----------|--------------------------------
-Autopeering        | 14626         | 14626         | UDP      | Autopeering
-Gossip             | 14666         | 14666         | TCP      | Gossip
-FPC                | 10895         | 10895         | TCP      | FPC
-Dashboard          | 8011          | 8081          | TCP      | Main dashboard
-WebAPI             | 8012          | 8080          | TCP      | WebApi
-Grafana            | 3000          | 5555          | TCP      | Grafana monitoring
-Prometheus         | 9090          | 8999          | TCP      | Prometheus metrics
-Alertmanager       | 9093          | 9993          | TCP      | Alertmanager for prometheus
+NAME               | PORT INTERNAL | PORT EXTERNAL | PROTOCOL | PATH          | DESCRIPTION
+-------------------|---------------|---------------|----------|---------------|--------------------------
+Autopeering        | 14626         | 14626         | UDP      | n/a           | Autopeering
+Gossip             | 14666         | 14666         | TCP      | n/a           | Gossip
+FPC                | 10895         | 10895         | TCP      | n/a           | FPC
+WebAPI             | 8012          | 443           | TCP      | /api          | Web API
+Dashboard          | 8011          | 443           | TCP      | /dashboard    | Main dashboard
+Grafana            | 3000          | 443           | TCP      | /grafana      | Grafana monitoring
+Prometheus         | 9090          | 443           | TCP      | /prometheus   | Prometheus metrics
+Alertmanager       | 9093          | 443           | TCP      | /alertmanager | Alertmanager for prometheus
 
 All the external ports have been made accessible in the firewall. There is no need to configure the firewall on the node.
 
@@ -214,19 +214,8 @@ All the external ports have been made accessible in the firewall. There is no ne
 
 If you are running the node in an internal network/lan you have to forward at least the following ports from the router to the node:
 
-10895/tcp, 14666/tcp, 14626/udp
+80/tcp, 443/tcp, 10895/tcp, 14666/tcp, 14626/udp
 
-# Appendix
-
-## Install Alongside IRI-Playbook
-
-It is possible to run this installation on an IRI-playbook node. You must have enough RAM and CPU power to accommodate both.
-
-A few notes:
-
-* This has only been tested in the case where you already have a Dockerized IRI-playbook node and run this installer afterwards.
-* GoShimmer-playbook re-uses IRI's HTTPS configuration (SSL certificate)
-* You will also be able to access the web services using the user you have configured for IRI
 
 # Donations
 
