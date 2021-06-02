@@ -13,12 +13,6 @@ goshimmer_config_autopeering_entryNodes:
   - 5EDH4uY78EA6wrBkHHAVBWBMDt7EcksRq6pjzipoW15B@entryshimmer.tanglebay.com:14646
 goshimmer_config_autopeering_port: "{{ goshimmer_ports.autopeering_tcp.port | int }}"
 
-# syncbeaconfollower
-goshimmer_config_syncbeaconfollower_followNodes:
-  - Gm7W191NDnqyF7KJycZqK7V6ENLwqxTwoKQN4SmpkB24
-  - 9DB3j9cWYSuEEtkvanrzqkzCQMdH1FGv3TawJdVbDxkd
-goshimmer_config_syncbeaconfollower_syncPercentage: 0.5
-
 # dashboard
 goshimmer_config_dashboard_bindAddress: "{{ goshimmer_dashboard_internal_address }}:{{ goshimmer_dashboard_internal_port }}"
 goshimmer_config_dashboard_dev: false

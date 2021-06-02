@@ -15,10 +15,6 @@
     "entryNodes": {{ goshimmer_config_autopeering_entryNodes | to_nice_json(indent=6) }},
     "port": {{ goshimmer_config_autopeering_port | int }}
   },
-  "syncbeaconfollower": {
-    "followNodes": {{ goshimmer_config_syncbeaconfollower_followNodes | to_nice_json(indent=6) }},
-    "syncPercentage": {{ goshimmer_config_syncbeaconfollower_syncPercentage | float }}
-  },
   "dashboard": {
     "bindAddress": "{{ goshimmer_config_dashboard_bindAddress }}",
     "dev": {{ goshimmer_config_dashboard_dev | bool | lower | string }},
