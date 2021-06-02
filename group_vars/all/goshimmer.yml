@@ -38,11 +38,11 @@ goshimmer_ports:
     proto: tcp
     allow: yes
   dashboard:
-    port: 8081
+    port: 443
     proto: tcp
     allow: yes
   webapi:
-    port: 8080
+    port: 443
     proto: tcp
     allow: yes
   graph:
