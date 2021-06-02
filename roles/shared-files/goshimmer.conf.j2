@@ -53,9 +53,9 @@ server {
         proxy_store off;
     }
 
-    location /api {
-        limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('75') }};
-        proxy_pass http://goshimmer_webapi;
+    location /api/ {
+        limit_req zone=goshimmer burst=250;
+        proxy_pass http://goshimmer_webapi/;
         default_type application/json;
         auth_basic off;
     }
