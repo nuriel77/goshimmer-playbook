@@ -42,7 +42,7 @@ goshimmer_ports:
     proto: tcp
     allow: yes
   webapi:
-    port: 443
+    port: 8080
     proto: tcp
     allow: yes
   graph:
