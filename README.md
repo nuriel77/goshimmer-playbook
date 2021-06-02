@@ -151,7 +151,7 @@ The database is located in `/var/lib/goshimmer/mainnetdb`
 Goshimmer dashboard is accessible by default via your public IP and port 8081. e.g:
 
 ```
-https://mydomain.io:8081
+https://mydomain.io
 ```
 
 You can login using the username and password you've selected during the installation.
