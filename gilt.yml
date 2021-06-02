@@ -1,11 +1,13 @@
 - git: https://github.com/nuriel77/ansible-docker.git
-  version: master
+  version: main
   dst: roles/docker/
 
 - git: https://github.com/nuriel77/ansible-nginx.git
-  version: master
+  # TODO: REPLACE WITH main:
+  version: add/certbot
   dst: roles/nginx/
 
 - git: https://github.com/nuriel77/ansible-monitoring.git
-  version: master
+  # TODO: REPLACE WITH main:
+  version: grafana/subpath
   dst: roles/monitoring/

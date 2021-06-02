@@ -312,7 +312,7 @@ function inform_reboot() {
 
 To proceed with the installation, please re-run:
 
-bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
+bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/main/goshimmer_install.sh)
 
 (make sure to run it as user root)
 
@@ -330,7 +330,7 @@ and allow the node installer to proceed with the installation.
 
 
 >>> To reboot run: 'reboot', and when back online:
-bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/master/goshimmer_install.sh)
+bash <(curl -s https://raw.githubusercontent.com/nuriel77/goshimmer-playbook/main/goshimmer_install.sh)
 
 !! Remember to re-run this script as root !!
 

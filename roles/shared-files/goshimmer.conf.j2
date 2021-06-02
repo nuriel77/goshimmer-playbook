@@ -40,15 +40,10 @@ upstream goshimmer_dashboard {
 }
 
 server {
-    limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('20') }};
-    listen {{ goshimmer_dashboard_external_address }}:{{ goshimmer_dashboard_proxy_port }} default_server ssl http2;
+    listen {{ goshimmer_dashboard_external_address }}:{{ goshimmer_dashboard_proxy_port }} default_server ssl http2 deferred;
+    listen [::]:{{ goshimmer_dashboard_proxy_port }} ssl http2 deferred;
     server_name _;
     server_tokens off;
-
-    # Redirect same port from http to https
-    # This directive is only used when using any
-    # port other than 80
-    error_page 497 https://$host:$server_port$request_uri;
 
     # Here you would include the SSL directives
     # or include a file containing the SSL directives
@@ -61,12 +56,70 @@ server {
     location {{ goshimmer_ws_path }} {
         proxy_pass http://goshimmer_dashboard/ws;
         proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_read_timeout 86400;
     }
 
     location / {
+        limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('75') }};
         proxy_pass http://goshimmer_dashboard;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_pass_request_headers on;
+        proxy_set_header Connection "keep-alive";
+        proxy_store off;
+    }
+
+    # grafana
+    location /grafana/ {
+        limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('75') }};
+        proxy_pass http://127.0.0.1:{{ grafana_port }}/;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Host $host;
+        proxy_http_version 1.1;
+        proxy_pass_request_headers on;
+        proxy_set_header Connection "keep-alive";
+        proxy_store off;
+        proxy_cache_bypass $http_upgrade;
+        auth_basic off;
+    }
+
+    # prometheus
+    location /prometheus/ {
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('75') }};
+        proxy_pass http://127.0.0.1:{{ prom_port }};
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_pass_request_headers on;
+        proxy_set_header Connection "keep-alive";
+        proxy_store off;
+    }
+
+    # alertmanager
+    location /alertmanager/ {
+        auth_basic "Restricted";
+        auth_basic_user_file /etc/nginx/.htpasswd;
+        limit_req zone=goshimmer burst={{ vhost_nginx_burst_limit | default('75') }};
+        proxy_pass http://127.0.0.1:{{ alertmanager_port }}/;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Forwarded-Server $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_http_version 1.1;
+        proxy_pass_request_headers on;
+        proxy_set_header Connection "keep-alive";
+        proxy_store off;
     }
 }

@@ -13,7 +13,7 @@ fi
 clear
 
 : "${EDITOR:=nano}"
-VERSION_TEMP=0.3.2
+VERSION_TEMP=0.4.0
 __VERSION__=${VERSION_TEMP}
 SEMVER_REGEX="^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(\\-[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?(\\+[0-9A-Za-z-]+(\\.[0-9A-Za-z-]+)*)?$"
 
@@ -771,6 +771,75 @@ function file_update {
     fi
 }
 
+function enable_https() {
+    local SSL_EMAIL
+    local SSL_DOMAIN
+
+    if ! (whiptail --title "Enable HTTPS" \
+                 --yesno "This option will request a certificate for this node via certbot/letsencrypt using nginx.\nA domain name must be configured pointing to this node's IP address.\n\nDo you want to proceed?" \
+                 --defaultno \
+                 14 $WIDTH) then
+        return 1
+    fi
+
+    SSL_EMAIL=$(whiptail --inputbox "Enter your email address to register your TLS certificate with:" 8 $WIDTH --title "Enter Email" 3>&1 1>&2 2>&3)
+    if [[ $? -ne 0 ]]; then
+        return
+    fi
+
+    SSL_DOMAIN=$(whiptail --inputbox "Enter the domain name to register the TLS certificate with:" 8 $WIDTH --title "Enter FQDN" 3>&1 1>&2 2>&3)
+    if [[ $? -ne 0 ]]; then
+        return
+    fi
+
+    verify_playbook
+    if [[ $? -ne 0 ]]; then
+         whiptail --title "Error!" \
+                  --msgbox "ERROR: Cannot enable HTTPS." \
+                  8 $WIDTH
+         return 1
+    fi
+
+    if ! (whiptail --title "Verify Details" \
+          --yesno "You've entered email '${SSL_EMAIL}' and the domain '${SSL_DOMAIN}'\n\nIs this correct?" \
+          --defaultno \
+          12 $WIDTH) then
+        return
+    fi
+
+    # Run the script to request a certificate
+    /usr/local/bin/certbot-nginx.sh "${SSL_EMAIL}" "${SSL_DOMAIN}"
+    if [[ $? -ne 0 ]]; then
+        pause "SSL Certificate request failed. See output above for more details."
+        clear
+        return 1
+    fi
+
+    # Subsequent requests to create new certificates (for example, original
+    # directory was wiped) certbot will start appending an index for path name
+    # We need to make sure we find a directory.
+    FULL_PATH=$(find /etc/letsencrypt/live -type d -name "${SSL_DOMAIN}*" -print -quit)
+
+    # Will configure nginx to use the let's encrypt certificates
+    if [ -f "${FULL_PATH}/cert.pem" ]; then
+        if ! grep -q "^ssl_cert_file: ${FULL_PATH}/fullchain.pem" /opt/goshimmer-playbook/group_vars/all/z-ssl-override.yml >/dev/null 2>&1; then
+            cat <<EOF >> /opt/goshimmer-playbook/group_vars/all/z-ssl-override.yml
+ssl_cert_file: ${FULL_PATH}/cert.pem
+ssl_key_file: ${FULL_PATH}/privkey.pem
+ssl_bundle_cert: ${FULL_PATH}/fullchain.pem
+create_selfsigned_cert: False
+letsencrypt: True
+EOF
+        fi
+        # We don't enable nginx with this common certificate in multi node setup!
+        cd /opt/goshimmer-playbook && ansible-playbook -i inventory -v site.yml --tags=configure_nginx_ssl
+    fi
+
+    pause "Done. Check above output to see the status of the request."
+    clear
+}
+
+
 ### Goshimmer Plugins ###
 function goshimmer_plugins() {
     local RESULTS=
@@ -922,6 +991,7 @@ function main_menu() {
     "g)" "Clean Unused Docker Images" \
     "h)" "Delete the Database" \
     "i)" "Update GOSC and node scripts" \
+    "j)" "Enable HTTPS/Certificate" \
     3>&1 1>&2 2>&3
 }
 
@@ -976,6 +1046,11 @@ function run_main_menu() {
 
         "i)")
             update_gosc
+            run_main_menu
+            ;;
+
+        "j)")
+            enable_https
             run_main_menu
             ;;
 
