@@ -17,6 +17,10 @@ goshimmer_nofile_limit: 8192
 
 # Ports
 goshimmer_ports:
+  http:
+    port: 80
+    proto: tcp
+    allow: yes
   autopeering_tcp:
     port: 14626
     proto: tcp
