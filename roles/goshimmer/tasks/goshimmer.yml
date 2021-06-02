@@ -48,6 +48,14 @@
         owner: root
         group: root
 
+    - name: copy run-playbook
+      copy:
+        src: files/run-playbook
+        dest: /usr/bin/run-playbook
+        mode: 0755
+        owner: root
+        group: root
+
     - name: download ps_mem
       get_url:
         url: https://raw.githubusercontent.com/pixelb/ps_mem/master/ps_mem.py
