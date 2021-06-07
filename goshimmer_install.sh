@@ -689,7 +689,7 @@ EOF
 
     if ! grep -q "^disable_monitoring: true" "$INSTALLER_OVERRIDE_FILE"; then
         MONITORING_MSG=" and Grafana"
-        MONITORING_URL=" and https://${PRIMARY_IP}:5555"
+        MONITORING_URL=" and https://${PRIMARY_IP}/grafana"
     fi
 
     OUTPUT=$(cat <<EOF
@@ -697,7 +697,7 @@ EOF
 
 * You should be able to connect to GoShimmer Dashboard${MONITORING_MSG}:
 
-https://${PRIMARY_IP}:8081${MONITORING_URL}
+https://${PRIMARY_IP}${MONITORING_URL}
 
 * Note that your IP might be different as this one has been auto-detected in best-effort.
 
