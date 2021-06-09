@@ -20,9 +20,10 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [GoShimmer Dashboard](#goshimmer-dashboard)
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
-   * [Ports](#ports)
+   * [Ports and URLs](#ports-and-urls)
      * [Forward Ports](#forward-ports)
      * [Expose WebApi Connection On HTTP](#expose-webapi-connection-on-http)
+   * [Connect to Wallet](#connect-to-wallet)
    * [Donations](#donations)
 <!--te-->
 
@@ -195,7 +196,7 @@ cd /opt/goshimmer-playbook && ansible-playbook -i inventory site.yml -v --tags=n
 
 For the browser use https and port 8080. You will also have to login.
 
-# Ports
+# Ports and URLs
 
 Here's a list of ports configured by the playbook by default. External communication for dashboard, webapi grafana etc. goes via nginx that serves as a reverse proxy. Other ports (fpc, gossip and autopeering) are exposed directly on the host.
 
@@ -233,6 +234,16 @@ Then run:
 run-playbook --tags=goshimmer_config_file -e overwrite=yes && ufw allow 8012
 ```
 
+The node will be accessible via IP or DNS name, e.g.: `http://my-node-ip:8012`
+
+
+# Connect to Wallet
+
+The wallet connects to the `/api/` path. For example `https://my-node.io/api/`.
+
+Note that by default the `goshimmer-playbook` forces HTTPS connections to the node. The wallet requires a valid HTTPS certificate when HTTPS is used. You can request a certificate for your node via `gosc`. You'll need a DNS pointing to your node's IP.
+
+Alternatively, you can follow [Expose WebApi Connection On HTTP](#expose-webapi-connection-on-http) while goshimmer is still not on mainnet.
 
 # Donations
 
