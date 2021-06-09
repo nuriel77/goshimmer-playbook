@@ -24,6 +24,11 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [Forward Ports](#forward-ports)
      * [Expose WebApi Connection On HTTP](#expose-webapi-connection-on-http)
    * [Connect to Wallet](#connect-to-wallet)
+   * [Troubleshooting](#troubleshooting)
+     * [502 Bad Gateway](#502-bad-gateway)
+     * [Connection not Private](#connection-not-private)
+     * [Logs](#logs)
+     * [Rerun Playbook](#rerun-playbook)
    * [Donations](#donations)
 <!--te-->
 
@@ -205,7 +210,7 @@ NAME               | PORT INTERNAL | PORT EXTERNAL | PROTOCOL | PATH          | 
 Autopeering        | 14626         | 14626         | UDP      | n/a           | Autopeering
 Gossip             | 14666         | 14666         | TCP      | n/a           | Gossip
 FPC                | 10895         | 10895         | TCP      | n/a           | FPC
-WebAPI             | 8012          | 443           | TCP      | /api          | Web API
+WebAPI             | 8012          | 443           | TCP      | /api          | Web API (e.g. for Wallet)
 Dashboard          | 8011          | 443           | TCP      | /dashboard    | Main dashboard
 Grafana            | 3000          | 443           | TCP      | /grafana      | Grafana monitoring
 Prometheus         | 9090          | 443           | TCP      | /prometheus   | Prometheus metrics
@@ -244,6 +249,56 @@ The wallet connects to the `/api/` path. For example `https://my-node.io/api/`.
 Note that by default the `goshimmer-playbook` forces HTTPS connections to the node. The wallet requires a valid HTTPS certificate when HTTPS is used. You can request a certificate for your node via `gosc`. You'll need a DNS pointing to your node's IP.
 
 Alternatively, you can follow [Expose WebApi Connection On HTTP](#expose-webapi-connection-on-http) while goshimmer is still not on mainnet.
+
+
+## Troubleshooting
+
+If something isn't working as expected, try to gather as much data as possible, as this can help someone who is able to help you finding out the cause of the issue.
+
+If anything is wrong related to Goshimmer, first thing to look at are Goshimmer's logs. See how to get logs in [Control GoShimmer](#control-goshimmer) chapter.
+
+To check if Goshimmers's API port is listening you can use the command to see if any output (use 8011 or 8012 as port number):
+```sh
+sudo lsof -Pni:8011
+```
+Note that after restarting Goshimmer it might take some time to see the port available.
+
+
+### 502 Bad Gateway
+
+If you receive this error when trying to browse to the dashboard then:
+
+* nginx (the webserver/proxy) is working properly
+* the back-end to which it is trying to connect isn't working properly (goshimmer).
+
+Nginx takes requests from the web and forwards those internally. For example, `https://my-site.io` tells nginx to connect to Goshimmers's dashboard. If Goshimmer is inactive (crashed? starting up?) then nginx would not be able to forward your requests to it. Make sure that Goshimmer is working properly, e.g. checking logs: see [Control GoShimmer](#control-goshimmer). Note that when checking the logs, start from the bottom of the logs and scroll up to the line where you see the error began.
+
+
+### Connection not Private
+
+You will probably get this message when trying to connect to the dashboard using your IP address.
+
+Other messages might claim certificate is invalid for the domain.
+
+You can safely proceed (most browsers allow to bypass the warning). If you have a DNS pointing to your node's IP address you can use `gosc` to request a HTTPS certificate. That will allow to connect from browsers or the wallet safely to your node.
+
+### Logs
+In the following link you can read more about how to collect logs from your system. Although this documentation is for IRI, the commands are similar (just replace iri with hornet if needed):
+
+https://iri-playbook.readthedocs.io/en/master/troubleshooting.html#troubleshooting
+
+
+### Rerun Playbook
+
+You can rerun the playbook to fix most issues. Use the tool `gosc`, there's an option to rerun the playbook.
+
+If `gosc` isn't working, try the following command:
+
+```sh
+cd /opt/goshimmer-playbook && git pull && ansible-playbook -v site.yml -i inventory -e overwrite=yes
+```
+This command will reset all configuration files and restart any required services.
+
 
 # Donations
 
