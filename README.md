@@ -222,7 +222,7 @@ If you are running the node in an internal network/lan you have to forward at le
 
 ## Expose WebApi Connection On HTTP
 
-Run the following command if you want to connect to your node's API without having to go through HTTPS (this is a discouraged practice when goshimmer goes live).
+Run the following commands if you want to connect to your node's API without having to go through HTTPS (this is a discouraged practice when goshimmer goes live).
 
 ```sh
 grep -q "^goshimmer_webapi_internal_address: 0.0.0.0" /opt/goshimmer-playbook/group_vars/all/z-append.yml || echo "goshimmer_webapi_internal_address: 0.0.0.0" >> /opt/goshimmer-playbook/group_vars/all/z-append.yml
