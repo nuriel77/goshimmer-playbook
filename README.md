@@ -21,6 +21,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
    * [Ports](#ports)
+     * [Expose WebApi Connection On HTTP](#expose-webapi-connection-on-http)
    * [Donations](#donations)
 <!--te-->
 
@@ -209,6 +210,19 @@ Prometheus         | 9090          | 443           | TCP      | /prometheus   | 
 Alertmanager       | 9093          | 443           | TCP      | /alertmanager | Alertmanager for prometheus
 
 All the external ports have been made accessible in the firewall. There is no need to configure the firewall on the node.
+
+## Expose WebApi Connection On HTTP
+
+Run the following command if you want to connect to your node's API without having to go through HTTPS (this is a discouraged practice when goshimmer goes live).
+
+```sh
+grep -q "^goshimmer_webapi_internal_address: 0.0.0.0" /opt/goshimmer-playbook/group_vars/all/z-append.yml || echo "goshimmer_webapi_internal_address: 0.0.0.0" >> /opt/goshimmer-playbook/group_vars/all/z-append.yml
+```
+
+Then run:
+```sh
+run-playbook --tags=goshimmer_config_file -e overwrite=yes && ufw allow 8012
+```
 
 ### Forward Ports
 
