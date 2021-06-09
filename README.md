@@ -21,6 +21,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
      * [Spam Test](#spam-test)
      * [See the statusscreen](#see-the-statusscreen)
    * [Ports](#ports)
+     * [Forward Ports](#forward-ports)
      * [Expose WebApi Connection On HTTP](#expose-webapi-connection-on-http)
    * [Donations](#donations)
 <!--te-->
@@ -211,6 +212,14 @@ Alertmanager       | 9093          | 443           | TCP      | /alertmanager | 
 
 All the external ports have been made accessible in the firewall. There is no need to configure the firewall on the node.
 
+
+## Forward Ports
+
+If you are running the node in an internal network/lan you have to forward at least the following ports from the router to the node:
+
+80/tcp, 443/tcp, 10895/tcp, 14666/tcp, 14626/udp
+
+
 ## Expose WebApi Connection On HTTP
 
 Run the following command if you want to connect to your node's API without having to go through HTTPS (this is a discouraged practice when goshimmer goes live).
@@ -223,12 +232,6 @@ Then run:
 ```sh
 run-playbook --tags=goshimmer_config_file -e overwrite=yes && ufw allow 8012
 ```
-
-### Forward Ports
-
-If you are running the node in an internal network/lan you have to forward at least the following ports from the router to the node:
-
-80/tcp, 443/tcp, 10895/tcp, 14666/tcp, 14626/udp
 
 
 # Donations
