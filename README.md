@@ -16,6 +16,7 @@ This repository installs a fully operational [IOTA GOSHIMMER](https://github.com
    * [Configuration](#configuration)
    * [Control GoShimmer](#control-goshimmer)
      * [GoShimmer Controller](#goshimmer-controller)
+     * [Update Goshimmer](#update-goshimmer)
      * [GoShimmer DB](#goshimmer-db)
      * [GoShimmer Dashboard](#goshimmer-dashboard)
      * [Spam Test](#spam-test)
@@ -151,6 +152,12 @@ Run:
 ```sh
 sudo gosc
 ```
+
+### Update Goshimmer
+
+Once a new version of Goshimmer is released you should get a notification about it when running `gosc`.
+
+Please note that since Goshimmer is still in development phase, you'll most likely have to first stop Goshimmer, delete the existing database and only then proceed to upgrade. Before upgrading via `gosc` please run `sudo systemctl stop goshimmer && sudo rm -rf /var/lib/goshimmer/mainnetdb/*` (will take a moment to execute).
 
 ### Goshimmer DB
 The database is located in `/var/lib/goshimmer/mainnetdb`
